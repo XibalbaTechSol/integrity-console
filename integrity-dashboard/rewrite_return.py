@@ -1,143 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ethers } from 'ethers';
-import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  ChevronRight,
-  Copy,
-  KeyRound,
-  LockKeyhole,
-  RefreshCw,
-  ShieldCheck,
-  WalletCards,
-} from 'lucide-react';
+import re
 
-import { XNSSearchService } from '../components/ui/XNSSearchService';
-import { RegisterAgentModal } from '../components/ui/RegisterAgentModal';
-import { ClaimAgentModal } from '../components/ui/ClaimAgentModal';
-import { SubTabs } from '../components/ui/SubTabs';
-import { useDashboard } from '../context/DashboardContext';
-import { oracle, type AisResponse, type AgentResponse, type AuditLogEntryDto, type Erc8004BindingDto, type MarketSummaryDto, type ProvenanceEntryDto, type WalletResponse } from '../services/oracle';
-import { graphMemory, type MerkleRoot, type StoreStatus } from '../services/graphMemory';
-import { readAgentBalances, type OnChainBalance } from '../integrity/wallet/chainClient';
-import { ALLOW_UNSCOPED_AGENT_DIRECTORY } from '../config';
-import { NAVIGATION_ITEMS } from '../navigation';
-import './ProtocolDashboardPage.css';
+with open("src/pages/ProtocolDashboardPage.tsx", "r") as f:
+    code = f.read()
 
-type Tab = 'overview' | 'identity' | 'records' | 'proofs' | 'wallets' | 'transactions' | 'contracts' | 'security' | 'activity';
+# We will cut everything from "return <div className="protocol-app-inner"" to the end of the file
+# and replace it with a clean formatted block.
 
-const short = (value?: string | null, start = 10, end = 8) => {
-  if (!value) return 'Unavailable';
-  if (value.length <= start + end + 1) return value;
-  return `${value.slice(0, start)}…${value.slice(-end)}`;
-};
+match = re.search(r'return <div className="protocol-app-inner".*', code, flags=re.DOTALL)
+if not match:
+    print("Could not find return statement")
+    exit(1)
 
-const copyText = async (value?: string | null) => {
-  if (!value) return;
-  try {
-    await navigator.clipboard?.writeText(value);
-  } catch {
-    // Clipboard access is optional in embedded/automated browsers; never turn a
-    // copy affordance into an uncaught application error.
-  }
-};
-
-const formatItk = (value?: string | null) => {
-  if (!value) return null;
-  try { return ethers.formatEther(value); } catch { return value; }
-};
-
-function State({ ok, children }: { ok: boolean | null; children: string }) {
-  return <span className={`protocol-state ${ok === true ? 'good' : ok === false ? 'bad' : 'muted'}`}><i />{children}</span>;
-}
-
-function EvidenceValue({ label, value }: { label: string; value?: string | null }) {
-  return <div className="evidence-value"><span>{label}</span><code>{short(value, 12, 10)}</code><button aria-label={`Copy ${label}`} onClick={() => void copyText(value)}><Copy size={13} /></button></div>;
-}
-
-function AgentCard({ agent, selected, onSelect }: { agent: ReturnType<typeof useDashboard>['agents'][number]; selected: boolean; onSelect: () => void }) {
-  return <button className={`agent-list-row ${selected ? 'selected' : ''}`} onClick={onSelect}>
-    <span className="agent-avatar">{(agent.alias || agent.name || 'A').slice(0, 2).toUpperCase()}</span>
-    <span className="agent-list-copy"><strong>{agent.alias || agent.name || short(agent.id, 12, 8)}</strong><small>{short(agent.id, 15, 9)}{agent.profile_id ? ` · ${agent.profile_id} · ${agent.writable === false || agent.store_access === 'read_only' ? 'read only' : 'writable'}` : ''}</small></span>
-    <span className="agent-list-score">{agent.current_ais == null ? '—' : agent.current_ais.toFixed(1)}<small>AIS</small></span>
-    <ChevronRight size={15} />
-  </button>;
-}
-
-export default function ProtocolDashboardPage() {
-  const location = useLocation();
-  const { agents, agentsLoading, selectedAgent, setSelectedAgent, connectWallet, walletAddress } = useDashboard();
-  const [ais, setAis] = useState<AisResponse | null>(null);
-  const [detail, setDetail] = useState<AgentResponse | null>(null);
-  const [wallet, setWallet] = useState<WalletResponse | null>(null);
-  const [ethBalance, setEthBalance] = useState<string | null>(null);
-  const [onChainBalance, setOnChainBalance] = useState<OnChainBalance | null>(null);
-  const [erc8004, setErc8004] = useState<Erc8004BindingDto | null>(null);
-  const [provenance, setProvenance] = useState<ProvenanceEntryDto[]>([]);
-  const [auditLog, setAuditLog] = useState<AuditLogEntryDto[]>([]);
-  const [contracts, setContracts] = useState<MarketSummaryDto[]>([]);
-  const [cortex, setCortex] = useState<StoreStatus | null>(null);
-  const [merkle, setMerkle] = useState<MerkleRoot | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-
-  const [refreshNonce, setRefreshNonce] = useState(0);
-  const [routeTab, setRouteTab] = useState('overview');
-  const tab = routeTab === 'identity' ? 'identity' : ['records', 'proofs', 'activity'].includes(routeTab) ? 'evidence' : ['transactions', 'security'].includes(routeTab) ? 'wallets' : routeTab as 'overview' | 'wallets' | 'contracts';
-
-  const tabTitles: Record<Tab, string> = { overview: 'Protocol overview', identity: 'Agent identity', records: 'Integrity records', proofs: 'Proofs & verification', wallets: 'Wallet', transactions: 'Transactions', contracts: 'Contracts', security: 'Security & keys', activity: 'Activity log' };
-
-  useEffect(() => {
-    if (!selectedAgent) return;
-    let active = true;
-    setEthBalance(null);
-    setOnChainBalance(null);
-    setErc8004(null);
-    setProvenance([]);
-    setAuditLog([]);
-    setLoading(true);
-    Promise.allSettled([
-      oracle.getAis(selectedAgent.id),
-      oracle.getAgent(selectedAgent.id),
-      oracle.getWallet(selectedAgent.id),
-      oracle.getAgentContracts(selectedAgent.id),
-      oracle.getErc8004(selectedAgent.id),
-      oracle.getProvenance(selectedAgent.id),
-      oracle.getAuditLog(selectedAgent.id, 20),
-      graphMemory.status(),
-      graphMemory.sessions(1, selectedAgent.id, selectedAgent.store_id),
-    ]).then(([aisResult, detailResult, walletResult, contractResult, ercResult, provenanceResult, auditResult, cortexResult, sessionsResult]) => {
-      if (!active) return;
-      if (aisResult.status === 'fulfilled') setAis(aisResult.value);
-      if (detailResult.status === 'fulfilled') {
-        setDetail(detailResult.value);
-        const sovereignAgent = detailResult.value.primitives?.sovereign_agent;
-        if (sovereignAgent && ethers.isAddress(sovereignAgent)) {
-          readAgentBalances(sovereignAgent)
-            .then(balance => { if (!active) return; setOnChainBalance(balance); setEthBalance(balance.eth); })
-            .catch(() => active && setEthBalance(null));
-        }
-      }
-      if (walletResult.status === 'fulfilled') setWallet(walletResult.value);
-      if (contractResult.status === 'fulfilled') setContracts(contractResult.value);
-      if (ercResult.status === 'fulfilled') setErc8004(ercResult.value);
-      if (provenanceResult.status === 'fulfilled') setProvenance(provenanceResult.value);
-      if (auditResult.status === 'fulfilled') setAuditLog(auditResult.value);
-      if (cortexResult.status === 'fulfilled') setCortex(cortexResult.value);
-      if (sessionsResult.status === 'fulfilled' && sessionsResult.value[0]) {
-        graphMemory.sessionMerkleRoot(sessionsResult.value[0].external_session_id).then(root => active && setMerkle(root)).catch(() => undefined);
-      }
-    }).finally(() => active && setLoading(false));
-    return () => { active = false; };
-  }, [selectedAgent, refreshNonce]);
-
-  const primitiveRows = useMemo(() => detail?.primitives ? Object.entries(detail.primitives) : [], [detail]);
-  const nav = NAVIGATION_ITEMS;
-
-  return (
+clean_return = """return (
     <div className="protocol-app-inner" style={{ display: 'contents' }}>
       <section className="protocol-health">
         <div><span>Network health</span><strong><i />{detail ? 'Connected' : 'Awaiting Oracle'}</strong></div>
@@ -147,16 +21,16 @@ export default function ProtocolDashboardPage() {
       </section>
 
       <div className="protocol-content">
-        <SubTabs
+        <SubTabs 
           tabs={[
             { id: 'overview', label: 'Overview' },
             { id: 'identity', label: 'Identity & Trust' },
             { id: 'contracts', label: 'Contracts' },
             { id: 'wallets', label: 'Wallets' },
             { id: 'evidence', label: 'Evidence' }
-          ]}
-          activeTab={tab}
-          setActiveTab={(id) => setRouteTab(id)}
+          ]} 
+          activeTab={tab} 
+          setActiveTab={(id) => setRouteTab(id)} 
         />
 
         {(tab === 'overview' || tab === 'identity') && (
@@ -182,7 +56,7 @@ export default function ProtocolDashboardPage() {
                   </div>
                 </div>
               </div>
-
+              
               <div className="protocol-panel agent-list-panel">
                 <div className="panel-heading">
                   <div>
@@ -193,7 +67,7 @@ export default function ProtocolDashboardPage() {
                 </div>
                 <div className="agent-list">
                   {agents.length ? agents.map(agent => (
-                    <AgentCard key={agent.namespace_key || agent.id} agent={agent} selected={(agent.namespace_key || agent.id) === (selectedAgent?.namespace_key || selectedAgent?.id)} onSelect={() => setSelectedAgent(agent)} />
+                    <AgentCard key={agent.id} agent={agent} selected={agent.id === selectedAgent?.id} onSelect={() => setSelectedAgent(agent)} />
                   )) : (
                     <div className="empty-state">No permitted agents are available for this authenticated session.</div>
                   )}
@@ -213,7 +87,7 @@ export default function ProtocolDashboardPage() {
                   <XNSSearchService />
                 </div>
               </div>
-
+              
               <div className="protocol-panel">
                 <div className="panel-heading">
                   <div>
@@ -229,6 +103,18 @@ export default function ProtocolDashboardPage() {
                     <button className="primary-button" onClick={() => setIsRegisterModalOpen(true)} style={{ flex: 1 }}>Register New Identity</button>
                     <button className="secondary-button" onClick={() => setIsClaimModalOpen(true)} style={{ flex: 1 }}>Claim Existing Identity</button>
                   </div>
+                </div>
+              </div>
+              
+              <div className="protocol-panel">
+                <div className="panel-heading">
+                  <div>
+                    <span className="panel-label">Register</span>
+                    <h2>Register an XNS Handle</h2>
+                  </div>
+                </div>
+                <div style={{ padding: '20px' }}>
+                  {selectedAgent ? <XNSRegisterForm /> : <div className="empty-state">Select an agent to register a handle.</div>}
                 </div>
               </div>
             </section>
@@ -264,7 +150,7 @@ export default function ProtocolDashboardPage() {
               </div>
               {onChainBalance && <div className="source-line">On-chain read · Base Sepolia · block {onChainBalance.blockNumber} · {onChainBalance.itkSymbol} {onChainBalance.itk}</div>}
             </div>
-
+            
             <div className="protocol-panel transaction-panel">
               <div className="panel-heading">
                 <div><span className="panel-label">Wallet activity</span><h2>Transactions</h2></div>
@@ -287,7 +173,7 @@ export default function ProtocolDashboardPage() {
               <div><span className="panel-label">Proof surface</span><h2>Evidence chain</h2></div>
               <a href="#evidence">Inspect all <ChevronRight size={14} /></a>
             </div>
-            <div className="evidence-chain" role="region" aria-label="Evidence chain" tabIndex={0}>
+            <div className="evidence-chain">
               <div className="evidence-node"><span>01</span><strong>BCC intent</strong><small>{auditLog.length ? `${auditLog.length} audit records` : 'Unavailable'}</small></div>
               <div className="evidence-line" />
               <div className="evidence-node"><span>02</span><strong>Hash</strong><small>{provenance.length ? `${provenance.length} anchored leaves` : 'Unavailable'}</small></div>
@@ -313,7 +199,7 @@ export default function ProtocolDashboardPage() {
               <div><span className="panel-label">Agent-controlled surface</span><h2>Deployed contracts</h2></div>
               <span className="panel-count">{contracts.length + primitiveRows.length}</span>
             </div>
-            <div className="contracts-table-wrap" role="region" aria-label="Contract records" tabIndex={0}>
+            <div className="contracts-table-wrap">
               <table>
                 <thead><tr><th>Address</th><th>Contract / primitive</th><th>Role</th><th>Authoritative controller</th><th>State</th></tr></thead>
                 <tbody>
@@ -353,3 +239,10 @@ export default function ProtocolDashboardPage() {
     </div>
   );
 }
+"""
+
+code = code[:match.start()] + clean_return
+with open("src/pages/ProtocolDashboardPage.tsx", "w") as f:
+    f.write(code)
+
+print("Rewritten cleanly!")
