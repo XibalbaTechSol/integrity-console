@@ -1,0 +1,42 @@
+[project]
+name = "integrity-demo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.116.0",
+    "fire>=0.7.1",
+    "integrity-sdk",
+    "openai>=1.45.0",
+    "psycopg[binary]>=3.2.0",
+    "pydantic>=2.9.2",
+    "python-dotenv>=1.0.1",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+integrity-demo = "integrity_demo.main:main"
+integrity-heartbeat = "integrity_demo.heartbeat:main"
+integrity-seed-audit = "integrity_demo.seed_audit:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/integrity_demo"]
+
+[tool.uv.sources]
+# The SDK lives in integrity-core. Pinned to its main branch until the integrity-sdk-v0.1.0 tag
+# exists (integrity-core docs/EXECUTION_PLAN.md A2), then pinned to that tag.
+integrity-sdk = { git = "https://github.com/XibalbaTechSol/integrity-core", subdirectory = "integrity-sdk", branch = "main" }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
