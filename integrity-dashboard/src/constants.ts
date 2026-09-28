@@ -18,12 +18,9 @@ export const AGENT_PRIMITIVES_FACTORY_ADDRESS = S.AgentPrimitivesFactory;
 // DomainJoinNotApproved() if canJoin(domainId, controller) is false here. See
 // RegisterAgentModal.tsx's preflight check, which reads this before any gas is spent.
 export const DOMAIN_REGISTRY_ADDRESS = S.DomainRegistry;
-export const MARKET_FACTORY_ADDRESS = S.MarketFactory;
-export const A2A_CAPITAL_POOL_ADDRESS = S.A2ACapitalPool;
 export const SMART_BAA_FACTORY_ADDRESS = S.SmartBAAFactory;
 export const COVERED_ENTITY_REGISTRY_ADDRESS = S.CoveredEntityRegistry;
 export const XNS_ADDRESS = (S as Record<string, string>).XibalbaNameService;
-export const GOVERNANCE_ADDRESS = (S as Record<string, string>).IntegrityGovernance;
 // undefined until DeployEHRGate.s.sol runs against Base Sepolia (only ever run
 // locally so far — see PRODUCTION_GAPS.md). Consumers must check for this before use.
 export const EHR_GATE_ADDRESS = (S as Record<string, string>).EHRGate;

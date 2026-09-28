@@ -21,7 +21,7 @@ import { bccMiddleware } from '../services/bccMiddleware';
 import { oracle, type BaaDto, type AuditLogEntryDto } from '../services/oracle';
 import { ITK_TOKEN_ADDRESS, ARBITRATOR_ADDRESS, EHR_GATE_ADDRESS, RPC_URL, XIBALBA_TEST_AGENT_ID } from '../constants';
 import { SMART_BAA_ABI, EHR_GATE_ABI } from '../chain/shield';
-import { ERC20_ABI, executeAsAgent } from '../chain/markets';
+import { ERC20_ABI, SLASHER_READ_ABI, executeAsAgent } from '../chain/agent';
 import { usePinnedAgent } from '../hooks/usePinnedAgent';
 import { BaaAuthoringPanel } from '../components/health/BaaAuthoringPanel';
 
@@ -82,16 +82,15 @@ interface ConsentGate {
 }
 
 // Real quarantine semantics, mirroring bcc_middleware/app/quarantine.py exactly:
-// an agent is quarantined iff Slasher.lockedStakeOf(agent) > 0 — i.e. StakeDto's
-// locked_stake, which the oracle already exposes per-agent. No separate contract or
-// endpoint needed; quarantine clears itself the moment governance resolves the
+// an agent is quarantined iff Slasher.lockedStakeOf(sovereignAgent) > 0 on the agent's own
+// Slasher clone, read directly on-chain (the oracle's /stake route was cut in integrity-core's
+// execution plan A1). Quarantine clears itself the moment the arbitrator resolves the
 // dispute (bcc_middleware never builds a manual "restore" step, so this UI doesn't
 // fake one either — see Slasher.sol's resolveDispute).
 interface QuarantinedAgent {
   agentId: string;
   agentDid: string;
   lockedStake: string;
-  openDisputes: number;
 }
 
 
@@ -112,6 +111,9 @@ export default function HealthPage() {
   const [arbitratorQueueLoading, setArbitratorQueueLoading] = useState(false);
   const [quarantinedAgents, setQuarantinedAgents] = useState<QuarantinedAgent[]>([]);
   const [quarantineLoading, setQuarantineLoading] = useState(true);
+  // Agents whose Slasher could not be read (no primitives on record, RPC failure). Shown
+  // rather than dropped: bcc_middleware treats "cannot verify" exactly like quarantined.
+  const [quarantineUnverified, setQuarantineUnverified] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyBaa, setBusyBaa] = useState<string | null>(null);
 
@@ -187,32 +189,37 @@ export default function HealthPage() {
     fetchHealthData();
   }, [fetchHealthData]);
 
-  // Real quarantine scan: fan out oracle.getStake() across the whole registered fleet
-  // (same O(N) client-side pattern DashboardContext already uses for protocol-wide
-  // stake aggregation) and flag any agent with locked_stake > 0 — the exact
-  // `Slasher.lockedStakeOf(agent) > 0` check bcc_middleware's quarantine.py already
-  // enforces at the request-gating layer. This just surfaces that same real state.
+  // Real quarantine scan: for every registered agent, resolve its PrimitiveSet through the
+  // oracle (which re-verifies it against XibalbaAgentRegistry) and read
+  // `Slasher.lockedStakeOf(sovereignAgent)` on-chain, the exact check bcc_middleware's
+  // quarantine.py enforces at the request-gating layer. This just surfaces that same state.
   const refreshQuarantine = useCallback(async () => {
     if (agentsLoading) return;
     setQuarantineLoading(true);
     try {
+      const provider = new ethers.JsonRpcProvider(RPC_URL);
       const results = await Promise.all(
         (agents as any[]).map(async (a) => {
           try {
-            const stake = await oracle.getStake(a.eth_address);
-            return { a, stake };
+            const detail = await oracle.getAgent(a.id);
+            const slasher = detail.primitives?.slasher;
+            const sovereignAgent = detail.primitives?.sovereign_agent;
+            if (!slasher || !sovereignAgent) return { a, locked: null };
+            const contract = new ethers.Contract(slasher, SLASHER_READ_ABI, provider);
+            const locked: bigint = await contract.lockedStakeOf(sovereignAgent);
+            return { a, sovereignAgent, locked };
           } catch {
-            return null;
+            return { a, locked: null };
           }
         })
       );
+      setQuarantineUnverified(results.filter(r => r.locked === null).length);
       const quarantined = results
-        .filter((r): r is { a: any; stake: any } => !!r && Number(r.stake.locked_stake) > 0)
-        .map(({ a, stake }) => ({
+        .filter((r): r is { a: any; sovereignAgent: string; locked: bigint } => r.locked !== null && r.locked > 0n)
+        .map(({ a, sovereignAgent, locked }) => ({
           agentId: a.id,
-          agentDid: a.eth_address,
-          lockedStake: stake.locked_stake,
-          openDisputes: stake.open_disputes,
+          agentDid: sovereignAgent,
+          lockedStake: locked.toString(),
         }));
       setQuarantinedAgents(quarantined);
     } finally {
@@ -293,7 +300,7 @@ export default function HealthPage() {
 
   // The agent (business associate) activates a Proposed BAA by posting its required
   // collateral — pulled from its SovereignAgent, so we top the SA up + approve, then
-  // sign, all routed through SovereignAgent.execute (mirrors StakingPanel's pattern).
+  // sign, all routed through SovereignAgent.execute.
   const handleSignBAA = async (baaAddr: string) => {
     if (!saAddr) { addToast('error', 'Agent SovereignAgent not resolved.'); return; }
     if (!walletAddress) { addToast('error', 'Connect the agent controller wallet.'); return; }
@@ -923,27 +930,31 @@ export default function HealthPage() {
                     Real quarantine state: an agent is quarantined the moment its Slasher clone shows locked stake (an unresolved dispute), the exact same <code>lockedStakeOf(agent) &gt; 0</code> check <code>bcc_middleware</code>'s pre-execution gate enforces on every request. There's no separate "restore" action to build — quarantine clears itself the instant the arbitrator resolves the dispute via <code>SmartBAA.arbitrate</code> (Smart BAAs tab) or the dispute is otherwise released on-chain.
                   </p>
 
+                  {!quarantineLoading && quarantineUnverified > 0 && (
+                    <p className="text-muted" style={{ fontSize: '0.8rem', color: 'var(--warning)' }}>
+                      {quarantineUnverified} agent{quarantineUnverified === 1 ? '' : 's'} could not be checked (no Slasher on record or the RPC read failed). The pre-execution gate treats these as quarantined.
+                    </p>
+                  )}
+
                   <div className="table-container" tabIndex={0}>
                     <table className="table">
                       <thead>
                         <tr>
                           <th>Agent</th>
                           <th>Locked Stake</th>
-                          <th>Open Disputes</th>
                           <th>Status</th>
                         </tr>
                       </thead>
                       <tbody>
                         {quarantineLoading ? (
-                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>Scanning fleet stake state…</td></tr>
+                          <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>Scanning fleet stake state…</td></tr>
                         ) : quarantinedAgents.length === 0 ? (
-                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--success)' }}>No agents currently quarantined.</td></tr>
+                          <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--success)' }}>No agents currently quarantined.</td></tr>
                         ) : (
                           quarantinedAgents.map(qa => (
                             <tr key={qa.agentId}>
                               <td className="mono" title={qa.agentDid}>{qa.agentDid.substring(0, 24)}...</td>
                               <td className="mono" style={{ color: 'var(--danger)' }}>{(Number(qa.lockedStake) / 1e18).toLocaleString()} ITK</td>
-                              <td>{qa.openDisputes}</td>
                               <td>
                                 <span style={{
                                   fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px',

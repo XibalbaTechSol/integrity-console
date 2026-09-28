@@ -23,7 +23,7 @@ export function AgentRiskContext({ purpose }: { purpose: 'funds' | 'security' })
       <div><span>Grounding</span><strong>{ais?.components.grounding.toFixed(0) ?? '—'}</strong></div>
       <div><span>Compliance</span><strong>{ais?.components.compliance.toFixed(0) ?? '—'}</strong></div>
       <div><span>ZK proof</span><strong className={ais?.zk_proof_verified ? 'good' : undefined}>{ais?.zk_proof_verified ? 'Verified' : 'None'}</strong></div>
-      <div className="risk-context-note"><TriangleAlert size={13} /><span>{purpose === 'funds' ? 'Credit, markets, staking, and allowances remain subject to live AIS and contract policy.' : 'Use this live intelligence alongside Shield and Kernel evidence; AIS does not automatically authorize an action.'}</span></div>
+      <div className="risk-context-note"><TriangleAlert size={13} /><span>{purpose === 'funds' ? 'Allowances and transfers remain subject to live AIS and contract policy.' : 'Use this live intelligence alongside Shield and Kernel evidence; AIS does not automatically authorize an action.'}</span></div>
     </section>
   );
 }

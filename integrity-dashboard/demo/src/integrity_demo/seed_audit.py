@@ -391,48 +391,6 @@ def seed_leaderboard(cur, agents: list[Agent], chain_id: int = CHAIN_ID) -> None
     )
 
 
-def seed_markets(cur, agents: list[Agent]) -> None:
-    """markets_cache: agent-owned prediction markets (read by GET /v1/markets). A pure cache
-    table, so seeding it directly is the intended fill path; index_sync is marked fresh so the
-    list endpoint serves these without a chain re-enumeration."""
-    now_s = int(datetime.now(timezone.utc).timestamp())
-    questions = [
-        ("Will BTC close above $120k by Friday?", 2, False),
-        ("Which model wins the Q3 grounding benchmark?", 4, False),
-        ("Will the Fed cut rates at the next meeting?", 2, True),
-        ("Will this agent's AIS stay above 800 for 30 days?", 2, False),
-        ("Top-performing vertical this quarter?", 3, True),
-        ("Will BidderX default on its capital allocation?", 2, False),
-    ]
-    n = 0
-    for i, (q, outcomes, resolved) in enumerate(questions):
-        creator = agents[i % len(agents)]
-        addr = "0x" + hashlib.sha256(f"market-{i}-{creator.did}".encode()).hexdigest()[:40]
-        total = random.randint(500, 25000) * 10**18
-        splits = [random.random() for _ in range(outcomes)]
-        ssum = sum(splits) or 1.0
-        outcome_staked = [str(int(total * s / ssum)) for s in splits]
-        cur.execute(
-            """INSERT INTO markets_cache (address, creator_address, question, outcome_count,
-                min_ais_to_enter, resolve_deadline, resolved, winning_outcome, total_staked,
-                outcome_staked, refreshed_at)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s, now())
-               ON CONFLICT (address) DO UPDATE SET total_staked = EXCLUDED.total_staked,
-                 resolved = EXCLUDED.resolved, outcome_staked = EXCLUDED.outcome_staked""",
-            (addr, creator.primitives["sovereign_agent"].lower(), q, outcomes,
-             str(random.choice([0, 300, 500, 700]) * 10**0),
-             now_s + (random.randint(-5, 20) * 86400), resolved,
-             random.randint(0, outcomes - 1) if resolved else 0, str(total),
-             json.dumps(outcome_staked)),
-        )
-        n += 1
-    cur.execute(
-        """INSERT INTO markets_index_sync (id, market_count, synced_at) VALUES (TRUE, %s, now())
-           ON CONFLICT (id) DO UPDATE SET market_count = EXCLUDED.market_count, synced_at = now()""",
-        (n,),
-    )
-
-
 def main() -> None:
     random.seed(20260725)  # deterministic, reproducible seed set
     db_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
@@ -458,13 +416,12 @@ def main() -> None:
                 seed_judge(cur, a, events)
                 print(f"   ✓ {a.name}: {len(events)} telemetry events + traces/audit/anchors/judge")
             seed_leaderboard(cur, loaded)
-            seed_markets(cur, loaded)
         conn.commit()
 
     # Summary counts.
     with psycopg.connect(db_url) as conn, conn.cursor() as cur:
         for tbl in ("agents", "telemetry_events", "otel_spans", "audit_log", "anchor_events",
-                    "judge_evaluations", "leaderboard_cache", "markets_cache"):
+                    "judge_evaluations", "leaderboard_cache"):
             cur.execute(f"SELECT count(*) FROM {tbl}")
             print(f"   {tbl:20s} {cur.fetchone()[0]}")
     print("── done. Point the dashboard's oracle at this DB to audit historical + live data. ──")
