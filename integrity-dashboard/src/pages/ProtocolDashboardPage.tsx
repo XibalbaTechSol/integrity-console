@@ -18,7 +18,7 @@ import { RegisterAgentModal } from '../components/ui/RegisterAgentModal';
 import { ClaimAgentModal } from '../components/ui/ClaimAgentModal';
 import { SubTabs } from '../components/ui/SubTabs';
 import { useDashboard } from '../context/DashboardContext';
-import { oracle, type AisResponse, type AgentResponse, type AuditLogEntryDto, type Erc8004BindingDto, type MarketSummaryDto, type ProvenanceEntryDto, type WalletResponse } from '../services/oracle';
+import { oracle, type AisResponse, type AgentResponse, type AuditLogEntryDto, type Erc8004BindingDto, type ProvenanceEntryDto, type WalletResponse } from '../services/oracle';
 import { graphMemory, type MerkleRoot, type StoreStatus } from '../services/graphMemory';
 import { readAgentBalances, type OnChainBalance } from '../integrity/wallet/chainClient';
 import { ALLOW_UNSCOPED_AGENT_DIRECTORY } from '../config';
@@ -76,7 +76,6 @@ export default function ProtocolDashboardPage() {
   const [erc8004, setErc8004] = useState<Erc8004BindingDto | null>(null);
   const [provenance, setProvenance] = useState<ProvenanceEntryDto[]>([]);
   const [auditLog, setAuditLog] = useState<AuditLogEntryDto[]>([]);
-  const [contracts, setContracts] = useState<MarketSummaryDto[]>([]);
   const [cortex, setCortex] = useState<StoreStatus | null>(null);
   const [merkle, setMerkle] = useState<MerkleRoot | null>(null);
   const [loading, setLoading] = useState(false);
@@ -103,13 +102,12 @@ export default function ProtocolDashboardPage() {
       oracle.getAis(selectedAgent.id),
       oracle.getAgent(selectedAgent.id),
       oracle.getWallet(selectedAgent.id),
-      oracle.getAgentContracts(selectedAgent.id),
       oracle.getErc8004(selectedAgent.id),
       oracle.getProvenance(selectedAgent.id),
       oracle.getAuditLog(selectedAgent.id, 20),
       graphMemory.status(),
       graphMemory.sessions(1, selectedAgent.id, selectedAgent.store_id),
-    ]).then(([aisResult, detailResult, walletResult, contractResult, ercResult, provenanceResult, auditResult, cortexResult, sessionsResult]) => {
+    ]).then(([aisResult, detailResult, walletResult, ercResult, provenanceResult, auditResult, cortexResult, sessionsResult]) => {
       if (!active) return;
       if (aisResult.status === 'fulfilled') setAis(aisResult.value);
       if (detailResult.status === 'fulfilled') {
@@ -122,7 +120,6 @@ export default function ProtocolDashboardPage() {
         }
       }
       if (walletResult.status === 'fulfilled') setWallet(walletResult.value);
-      if (contractResult.status === 'fulfilled') setContracts(contractResult.value);
       if (ercResult.status === 'fulfilled') setErc8004(ercResult.value);
       if (provenanceResult.status === 'fulfilled') setProvenance(provenanceResult.value);
       if (auditResult.status === 'fulfilled') setAuditLog(auditResult.value);
@@ -311,7 +308,7 @@ export default function ProtocolDashboardPage() {
           <section className="protocol-panel contracts-panel">
             <div className="panel-heading">
               <div><span className="panel-label">Agent-controlled surface</span><h2>Deployed contracts</h2></div>
-              <span className="panel-count">{contracts.length + primitiveRows.length}</span>
+              <span className="panel-count">{primitiveRows.length}</span>
             </div>
             <div className="contracts-table-wrap" role="region" aria-label="Contract records" tabIndex={0}>
               <table>
@@ -326,18 +323,9 @@ export default function ProtocolDashboardPage() {
                       <td><State ok={Boolean(address && !/^0x0+$/i.test(String(address)))}>{address && !/^0x0+$/i.test(String(address)) ? 'Resolved' : 'Missing'}</State></td>
                     </tr>
                   ))}
-                  {contracts.map(contract => (
-                    <tr key={contract.address}>
-                      <td><code>{short(contract.address, 11, 8)}</code></td>
-                      <td><strong>IntegrityMarket</strong><small>{short(contract.question, 42, 0)}</small></td>
-                      <td>Creator projection</td>
-                      <td>{short(contract.creator, 8, 6)}</td>
-                      <td><State ok={!contract.resolved}>{contract.resolved ? 'Resolved' : 'Active'}</State></td>
-                    </tr>
-                  ))}
                 </tbody>
               </table>
-              {!primitiveRows.length && !contracts.length && <div className="empty-state">No owned or controlled contracts were verified for this identity.</div>}
+              {!primitiveRows.length && <div className="empty-state">No owned or controlled contracts were verified for this identity.</div>}
             </div>
           </section>
         )}

@@ -101,15 +101,6 @@ export interface ComplianceResponse {
     covered_entity: string | null;
 }
 
-export interface WalletPositionDto {
-    market_address: string;
-    question: string;
-    outcome_index: number;
-    amount: string;
-    market_resolved: boolean;
-    won: boolean | null;
-}
-
 export interface TransactionDto {
     id: string;
     type: string;
@@ -132,34 +123,8 @@ export interface WalletResponse {
     agent_id: string;
     sovereign_agent: string;
     itk_balance: string;
-    open_positions: WalletPositionDto[];
     transaction_history: TransactionDto[] | null;
     allowances: AllowanceDto[] | null;
-}
-
-export interface MarketSummaryDto {
-    address: string;
-    creator: string;
-    question: string;
-    outcome_count: number;
-    min_ais_to_enter: string;
-    resolve_deadline: string;
-    resolved: boolean;
-    winning_outcome: number | null;
-    total_staked: string;
-    outcome_staked: string[];
-}
-
-export interface PositionDto {
-    amount: string;
-    outcome_index: number;
-    bcc_commitment_hash: string;
-    claimed: boolean;
-}
-
-export interface MarketDetailDto extends MarketSummaryDto {
-    your_position: PositionDto | null;
-    positions_note: string;
 }
 
 export interface LeaderboardEntryDto {
@@ -278,22 +243,6 @@ export interface TraceTreeResponse {
     roots: SpanTreeNode[];
 }
 
-export interface StakeDto {
-    agent_id: string;
-    total_stake: string;
-    locked_stake: string;
-    available_stake: string;
-    open_disputes: number;
-}
-
-export interface StatsDto {
-    market_count: number;
-    total_marketplace_volume: string;
-    escrowed_credit: string;
-    released_credit: string;
-    allocation_count: number;
-}
-
 // backend::handlers::BaaDto — one SmartBAA agreement's live on-chain state.
 export interface BaaDto {
     address: string;
@@ -312,21 +261,6 @@ export interface BenchmarkDto {
     stability_metric: number; // 0-1
     grounding_metric: number; // 0-1
     sample_count: number;
-}
-
-// IntegrityGovernance proposal — backend::handlers::get_governance_proposals.
-export interface ProposalDto {
-    id: number;
-    proposer: string;
-    target: string;
-    value: string;
-    start_time: number;
-    end_time: number;
-    eta: number;
-    for_votes: string;
-    against_votes: string;
-    state: 'Active' | 'Defeated' | 'Succeeded' | 'Queued' | 'Executed' | 'Expired' | 'Canceled' | 'Unknown';
-    description: string;
 }
 
 // XNS (XibalbaNameService) resolution — backend::handlers::{get_xns_resolve,get_agent_handle}.
@@ -361,16 +295,6 @@ export interface XnsHandleDto {
     agent_id: string;
     handle: string;
     claimed_at: string;
-}
-
-export interface CreditDto {
-    agent_id: string;
-    total_allocated: string;
-    escrowed: string;
-    released: string;
-    clawed_back: string;
-    breached: string;
-    allocation_count: number;
 }
 
 export interface ProvenanceEntryDto {
@@ -600,17 +524,11 @@ export const oracle = {
             `/v1/agent/${encodeURIComponent(id)}/compliance${coveredEntity ? `?covered_entity=${coveredEntity}` : ''}`,
         ),
     getWallet: (id: string) => get<WalletResponse>(`/v1/agent/${encodeURIComponent(id)}/wallet`),
-    listMarkets: () => get<MarketSummaryDto[]>('/v1/markets'),
-    // Real "contracts an agent owns": the IntegrityMarket clones it deployed via
-    // MarketFactory, read live on-chain (backend::handlers::get_agent_contracts).
-    getAgentContracts: (id: string) => get<MarketSummaryDto[]>(`/v1/agent/${encodeURIComponent(id)}/contracts`),
     // Real SmartBAA agreements where this agent is the business associate, enumerated
     // from SmartBAAFactory.BAACreated logs (backend::handlers::get_agent_baas).
     getAgentBaas: (id: string) => get<BaaDto[]>(`/v1/agent/${encodeURIComponent(id)}/baas`),
     // Real signed W3C AgentIntegrityCredential (backend::handlers::get_agent_vc).
     getAgentVc: (id: string) => get<Record<string, unknown>>(`/v1/agent/${encodeURIComponent(id)}/vc`),
-    getMarket: (address: string, agent?: string) =>
-        get<MarketDetailDto>(`/v1/markets/${address}${agent ? `?agent=${agent}` : ''}`),
     getLeaderboard: () => get<LeaderboardEntryDto[]>('/v1/leaderboard'),
     getTelemetry: (id: string) => get<TelemetryEventDetailDto[]>(`/v1/agent/${encodeURIComponent(id)}/telemetry`),
     getTraces: (id: string) => get<AgentJudgeEvaluationDto[]>(`/v1/agent/${encodeURIComponent(id)}/traces`),
@@ -667,21 +585,6 @@ export const oracle = {
     getProvenance: (id: string) =>
         get<ProvenanceEntryDto[]>(`/v1/agent/${encodeURIComponent(id)}/provenance`),
 
-    // Real on-chain stake accounting from the agent's Slasher clone
-    // (backend::handlers::get_stake). Values are decimal-string wei of $ITK.
-    getStake: (id: string) =>
-        get<StakeDto>(`/v1/agent/${encodeURIComponent(id)}/stake`),
-
-    // Real capital position aggregated from the A2ACapitalPool
-    // (backend::handlers::get_credit). Amounts are decimal-string wei of $ITK.
-    getCredit: (id: string) =>
-        get<CreditDto>(`/v1/agent/${encodeURIComponent(id)}/credit`),
-
-    // Protocol-wide singleton aggregates (backend::handlers::get_stats): marketplace
-    // volume + A2ACapitalPool totals. The minimal supplement to the fields the
-    // dashboard already derives from its per-agent loop — `tvl` is composed
-    // client-side (stake + escrowed + market volume) for a single source of truth.
-    getStats: () => get<StatsDto>('/v1/stats'),
     // Network-wide model/provider stability benchmarks (backend::handlers::get_benchmarks).
     getBenchmarks: () => get<BenchmarkDto[]>('/v1/benchmarks'),
 
@@ -704,11 +607,6 @@ export const oracle = {
     // different one (backend::handlers::xns_claim).
     xnsClaim: (agentId: string, handle: string) =>
         post<XnsHandleDto>('/v1/xns/claim', { agent_id: agentId, handle }),
-
-    // Live IntegrityGovernance proposals, newest first (backend::handlers::
-    // get_governance_proposals). Returns 400 (MissingSingleton) until the Governance contract is deployed —
-    // callers degrade to the honest "not deployed yet" state rather than an empty live list.
-    getGovernanceProposals: () => get<ProposalDto[]>('/v1/governance/proposals'),
 
     // EventSource doesn't take fetch-style options, so callers construct their own
     // `new EventSource(oracle.streamUrl(id))` — see hooks/useOracleStream.ts.

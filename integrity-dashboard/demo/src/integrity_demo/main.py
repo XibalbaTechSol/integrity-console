@@ -14,11 +14,8 @@ from integrity_sdk import chain
 from integrity_sdk.registration import register_agent, RegistrationError
 from integrity_sdk.did import load_or_create_did
 from integrity_sdk.wallet import generate_or_load_evm_wallet
-from integrity_sdk.markets import allocate_capital
-from integrity_sdk.chain import load_deployments
 from integrity_sdk.client import IntegrityClient
 
-from integrity_demo.agent_loop import IntegrityAgent
 from integrity_demo import userapi_bridge
 
 logging.basicConfig(level=logging.INFO)
@@ -191,10 +188,13 @@ def _run_scenario() -> dict:
         with _tracer_for(agent_did).start_as_current_span("register_agent"):
             try:
                 # skip_oracle_registration if no oracle running locally
+                # A compliance vertical needs the full PrimitiveSet: core registration
+                # has no compliance capability, and register_agent rejects the pair.
                 reg = register_agent(
                     agent_id=a["id"],
                     compliance_vertical=a["vertical"],
-                    skip_oracle_registration=False
+                    skip_oracle_registration=False,
+                    full_registration=True,
                 )
                 evm_wallet = generate_or_load_evm_wallet(a["id"])
 
@@ -221,98 +221,10 @@ def _run_scenario() -> dict:
             except Exception as e:
                 logger.error(f"Failed to register {a['id']}: {e}")
 
-    tool_call_error = None
-    if "capital_allocation_agent" in agent_data:
-        allocator = agent_data["capital_allocation_agent"]
-        target = agent_data.get("trading_agent")
-
-        if target:
-            allocator_did = allocator["registration"].did
-            allocator_tracer = _tracer_for(allocator_did)
-
-            def tool_allocate_capital(target_address: str, amount_wei: str):
-                with allocator_tracer.start_as_current_span("agent_tool_allocate_capital") as span:
-                    span.set_attribute("agent.id", allocator_did)
-                    span.set_attribute("target.address", target_address)
-                    try:
-                        deployments = load_deployments(os.getenv("DEPLOYMENTS_FILE", "../../deployments.local.json"))
-                        from integrity_sdk.bcc import NonceStore
-                        from integrity_sdk.did import agent_dir
-                        nonce_store = NonceStore(agent_dir("capital_allocation_agent") / "nonce")
-                        next_nonce = nonce_store.next()
-                        
-                        alloc_id, token = allocate_capital(
-                            allocator_agent_id=allocator["registration"].did,
-                            keypair=allocator["keypair"],
-                            evm_account=allocator["evm_wallet"],
-                            allocator_sovereign_agent_address=allocator["registration"].sovereign_agent,
-                            capital_pool_address=deployments["singletons"]["A2ACapitalPool"],
-                            itk_address=deployments["singletons"]["IntegrityToken"],
-                            target_agent_address=target_address,
-                            amount_wei=int(amount_wei),
-                            min_ais_to_maintain=50,
-                            nonce=next_nonce,
-                            bcc_middleware_url="http://localhost:8000"
-                        )
-                        span.set_attribute("allocation.id", alloc_id)
-                        return {"status": "success", "allocation_id": alloc_id, "token": token}
-                    except Exception as e:
-                        logger.exception("Capital allocation tool execution failed")
-                        span.record_exception(e)
-                        return {"status": "error", "message": str(e)}
-
-            tools = [{
-                "type": "function",
-                "function": {
-                    "name": "allocate_capital",
-                    "description": "Allocate ITK capital to another trusted agent on-chain.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "target_address": {"type": "string", "description": "The target agent's SovereignAgent contract address"},
-                            "amount_wei": {"type": "string", "description": "Amount in WEI to allocate"}
-                        },
-                        "required": ["target_address", "amount_wei"]
-                    }
-                }
-            }]
-            tool_map = {"allocate_capital": tool_allocate_capital}
-
-            logger.info("Running Xibalba Agent Loop for Capital Allocator...")
-            agent = IntegrityAgent(
-                system_prompt="You are a capital allocator agent. Your task is to allocate 1000000000000000000 WEI (1 ITK) to the trading agent.",
-                tools=tools,
-                tool_map=tool_map
-            )
-
-            # Real, previously-unguarded LLM call -- found by actually
-            # running this: any failure here (bad/missing API key, rate
-            # limit, network outage) used to crash the entire process with
-            # a raw traceback, unlike the registration loop above (which
-            # already degrades one agent at a time). Now degrades the same
-            # way: log it, record it in the summary main() reports via
-            # userapi_bridge, and let the run finish with whatever DID
-            # register successfully rather than losing that too.
-            try:
-                with allocator_tracer.start_as_current_span("agent_conversation") as span:
-                    span.set_attribute("agent.id", allocator_did)
-                    target_addr = target["registration"].sovereign_agent
-                    response = agent.run_conversation(f"Please allocate capital to the trading agent. Their address is: {target_addr}")
-                    logger.info(f"Agent Final Response: {response}")
-                    # Real telemetry_events row carrying the real LLM output --
-                    # unlike the neutral registration-only entry above, this one
-                    # lets derive.py compute a genuine (not neutral-default)
-                    # entropy/grounding signal from real text, since
-                    # `agent.run_conversation`'s actual final response is
-                    # available here.
-                    _submit_telemetry(
-                        allocator_did,
-                        allocator["keypair"],
-                        {"event": "agent_conversation", "text_output": response},
-                    )
-            except Exception as e:
-                logger.error(f"Capital allocator's agent conversation failed: {e}")
-                tool_call_error = str(e)
+    # The capital-allocation conversation that used to run here (an LLM agent calling
+    # A2ACapitalPool through integrity_sdk.markets) was dropped when integrity-core cut the
+    # markets contracts and SDK module (docs/EXECUTION_PLAN.md A1). Every persona still
+    # registers and submits a signed telemetry event above.
 
     summary = {
         "agents_attempted": len(agents),
@@ -321,8 +233,6 @@ def _run_scenario() -> dict:
             agent_id: data["registration"].sovereign_agent for agent_id, data in agent_data.items()
         },
     }
-    if tool_call_error:
-        summary["tool_call_error"] = tool_call_error
     return summary
 
 

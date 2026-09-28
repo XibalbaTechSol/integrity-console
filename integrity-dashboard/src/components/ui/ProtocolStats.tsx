@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { ShieldCheck, Activity, BarChart3, Database, Layers } from 'lucide-react';
+import { ShieldCheck, Activity, BarChart3, Database } from 'lucide-react';
 import { useIsMobile } from '../../utils/useIsMobile';
 import { useDashboard } from '../../context/DashboardContext';
 
@@ -15,31 +15,22 @@ export const ProtocolStats: React.FC = () => {
         totalNodes: stats?.active_nodes ?? 0,
         networkIntegrity: stats ? Math.min((stats.aggregate_ais || 0) / 1000, 1) : 0,
         aggregateAis: stats?.aggregate_ais ?? 0,
-        protocolStakedItk: stats?.protocol_staked_itk ?? 0,
     };
 
     return (
         <div style={{ marginBottom: 'var(--space-8)' }}>
             {/* .dash-grid-4 was referenced here but never defined anywhere in the codebase
                 (confirmed: no CSS file, no Tailwind config, defines it) -- the class was a
-                no-op, so these 4 cards silently stacked full-width instead of forming a
-                4-up grid. Inline grid instead of relying on an undefined utility class. */}
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: 'var(--space-4)' }}>
+                no-op, so these cards silently stacked full-width instead of forming a grid.
+                Inline grid instead of relying on an undefined utility class. The staked-ITK card
+                was removed with the oracle's stake route (staking is deferred). */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 'var(--space-4)' }}>
                 <StatCard
                     label="Network AIS"
                     value={s.aggregateAis.toFixed(1)}
                     icon={BarChart3}
                     color="var(--theme-accent)"
                     subLabel="AGGREGATE, LIVE AGENTS"
-                    loading={loading}
-                    isMobile={isMobile}
-                />
-                <StatCard 
-                    label="Staked ITK" 
-                    value={`${(s.protocolStakedItk / 1000).toFixed(1)}k`} 
-                    icon={Layers} 
-                    color="white" 
-                    subLabel="ON-CHAIN RESERVE"
                     loading={loading}
                     isMobile={isMobile}
                 />

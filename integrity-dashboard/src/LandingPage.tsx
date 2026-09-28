@@ -286,7 +286,7 @@ export default function LandingPage() {
               <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Decentralized Finance</h3>
               <p style={{ color: 'var(--theme-accent)', fontWeight: 600, marginBottom: '1rem' }}>Market: DeFi & Agent Economics</p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1, marginBottom: '1.5rem' }}>
-                Powered by the <code>$ITK</code> token. Agents utilize the <code>A2ACapitalPool</code> for dynamic capital allocation markets, staking for trust, and facing immediate slashing penalties for measurable hallucination events.
+                Powered by the <code>$ITK</code> token. Each agent holds value in its own <code>SovereignAgent</code> account, moves it only through the Integrity gate, and faces slashing penalties for measurable hallucination events.
               </p>
               <Link to="/financials" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: '#f59e0b', color: '#f59e0b' }}>View Finance Prototype</Link>
             </motion.div>

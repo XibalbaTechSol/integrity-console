@@ -6,7 +6,7 @@ import { Shield, Save, Loader2 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { oracle } from '../../services/oracle';
 import { RPC_URL } from '../../constants';
-import { AGENT_PROFILE_ABI, executeAsAgent } from '../../chain/markets';
+import { AGENT_PROFILE_ABI, executeAsAgent } from '../../chain/agent';
 
 // Real AgentProfile wiring (no mock api.updateAgentMetadata). AgentProfile only affords
 // setProfile(primaryDomain, profileURI) — there is no on-chain field for arbitrary privacy

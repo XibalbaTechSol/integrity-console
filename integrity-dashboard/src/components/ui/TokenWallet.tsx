@@ -1,64 +1,19 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ethers } from 'ethers';
 import QRCode from 'qrcode';
 
 import {
     Coins, ArrowDownLeft, Loader2,
-    Copy, ShieldCheck, Landmark, X, ArrowUpRight, ArrowDownRight, Fingerprint, Flame
+    Copy, X, ArrowUpRight, ArrowDownRight, Fingerprint, Flame
 } from 'lucide-react';
 import { ITK_TOKEN_ADDRESS, RPC_URL } from '../../constants';
-import { ERC20_ABI, executeAsAgent } from '../../chain/markets';
+import { ERC20_ABI, executeAsAgent } from '../../chain/agent';
 
 import { useDashboard } from '../../context/DashboardContext';
-import { oracle, TransactionDto, CreditDto } from '../../services/oracle';
+import { oracle, TransactionDto } from '../../services/oracle';
 import { userapi, getToken } from '../../services/userapi';
 
-function CreditSummary({ agentId }: { agentId?: string }) {
-    const [credit, setCredit] = useState<CreditDto | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        if (!agentId) { setLoading(false); return; }
-        let active = true;
-        oracle.getCredit(agentId)
-            .then(c => { if (active) setCredit(c); })
-            .catch(() => { if (active) setCredit(null); })
-            .finally(() => { if (active) setLoading(false); });
-        return () => { active = false; };
-    }, [agentId]);
-
-    return (
-        <div style={{ textAlign: 'center' }}>
-            <Landmark size={48} style={{ color: 'var(--theme-accent)', marginBottom: 'var(--space-6)' }} />
-            <h3 style={{ marginTop: 0, marginBottom: 'var(--space-4)', fontSize: '1.5rem', fontWeight: 800, fontFamily: 'Playfair Display, serif' }}>Capital Allocation</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 'var(--space-8)' }}>
-                Real A2ACapitalPool credit position for this agent — allocation-based, not an interest-bearing loan.
-            </p>
-            {loading ? (
-                <div className="skeleton" style={{ height: '80px', borderRadius: 'var(--r-md)' }} />
-            ) : !credit ? (
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No credit allocations for this agent yet.</div>
-            ) : (
-                <div style={{ background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: 'var(--space-6)', textAlign: 'left' }}>
-                    {[
-                        ['Total Allocated', credit.total_allocated],
-                        ['Escrowed', credit.escrowed],
-                        ['Released', credit.released],
-                        ['Clawed Back', credit.clawed_back],
-                        ['Breached', credit.breached],
-                    ].map(([label, value]) => (
-                        <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)' }}>{(label as string).toUpperCase()}</span>
-                            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'white' }}>{Number(ethers.formatEther(value)).toLocaleString()} ITK</span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-}
 
 interface Transaction {
     hash: string;
@@ -236,7 +191,7 @@ export const TokenWallet = () => {
             // w.itk_balance is a raw wei string straight off the chain (U256::to_string()).
             setBalance(ethers.formatEther(w.itk_balance));
             // Native ETH the SovereignAgent holds for its own gas -- oracle.getWallet doesn't
-            // report this, so read it directly the same way LicencePage reads a contract's
+            // report this, so read it directly, reading the contract's
             // native balance.
             const provider = new ethers.JsonRpcProvider(RPC_URL);
             const eth = await provider.getBalance(w.sovereign_agent);
@@ -285,8 +240,8 @@ export const TokenWallet = () => {
     // browser wallet's own EOA balance -- so a plain `itk.transfer` signed by the browser
     // wallet would silently move ZERO of what's displayed here (it'd try to spend the EOA's
     // own, almost certainly empty, ITK balance instead). Every agent-owned asset in this
-    // protocol moves through SovereignAgent.execute (see chain/markets.ts's executeAsAgent,
-    // the same pattern HealthPage/LicencePage use) -- so this must too. The connected wallet
+    // protocol moves through SovereignAgent.execute (see chain/agent.ts's executeAsAgent,
+    // the same pattern HealthPage uses) -- so this must too. The connected wallet
     // must be this agent's registered controller, or SovereignAgent.execute reverts with
     // NotController; there's no client-side way to pre-check that (the oracle only returns
     // an agent's controller once, at registration time), so a revert here surfaces as a real,
@@ -394,12 +349,10 @@ export const TokenWallet = () => {
                 </div>
 
                 {/* Primary Actions HUD */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-4)', marginTop: 'var(--space-12)', maxWidth: '400px', margin: 'var(--space-12) auto 0' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--space-4)', marginTop: 'var(--space-12)', maxWidth: '200px', margin: 'var(--space-12) auto 0' }}>
                     {[
                         { id: 'send', label: 'Send', icon: ArrowUpRight },
                         { id: 'receive', label: 'Receive', icon: ArrowDownLeft },
-                        { id: 'loan', label: 'Loan', icon: Landmark },
-                        { id: 'stake', label: 'Stake', icon: ShieldCheck },
                     ].map(btn => (
                         <button 
                             key={btn.id}
@@ -593,20 +546,7 @@ export const TokenWallet = () => {
                                 </div>
                             )}
 
-                            {activeModal === 'loan' && (
-                                <CreditSummary agentId={selectedAgent?.eth_address} />
-                            )}
 
-                            {activeModal === 'stake' && (
-                                <div style={{ textAlign: 'center' }}>
-                                    <ShieldCheck size={48} style={{ color: 'var(--emerald)', marginBottom: 'var(--space-6)' }} />
-                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-4)', fontSize: '1.5rem', fontWeight: 800, fontFamily: 'Playfair Display, serif' }}>Protocol Staking</h3>
-                                    <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 'var(--space-8)' }}>
-                                        Lock ITK to increase your Sacrifice Score and harden your agent's reputation ceiling. Use the Staking panel in Financials to broadcast a real bond — this quick action is a shortcut there, not a separate flow.
-                                    </p>
-                                    <Link to="/financials" className="primary-button" style={{ width: '100%', padding: '16px', background: 'var(--emerald)', borderColor: 'var(--emerald)', display: 'block', textAlign: 'center', textDecoration: 'none' }} onClick={() => setActiveModal(null)}>GO TO STAKING</Link>
-                                </div>
-                            )}
                         </motion.div>
                     </motion.div>
                 )}

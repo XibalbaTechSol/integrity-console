@@ -13,13 +13,13 @@ test.describe('consolidated operator workspaces', () => {
     expect(errors).toEqual([]);
   });
 
-  test('Funds & Access includes live AIS capital-gate context', async ({ page }) => {
+  test('Wallet page includes live AIS capital-gate context and no cut finance tabs', async ({ page }) => {
     await page.goto('/treasury');
-    await expect(page.getByRole('heading', { name: 'Funds & Access' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Wallet', exact: true })).toBeVisible();
     await expect(page.getByLabel('Capital gate context')).toBeVisible();
-    await expect(page.getByText('Wallet', { exact: true })).toBeVisible();
-    await expect(page.getByText('Staking', { exact: true })).toBeVisible();
-    await expect(page.getByText('Credit', { exact: true })).toBeVisible();
+    // Staking and credit were removed with the cut contracts (integrity-core A1).
+    await expect(page.getByRole('button', { name: 'Staking', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Credit', exact: true })).toHaveCount(0);
   });
 
   test('Security & Policy merges production security tabs and excludes the attack demo', async ({ page }) => {

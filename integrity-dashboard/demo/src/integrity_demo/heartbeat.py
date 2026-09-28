@@ -110,12 +110,11 @@ _TASK_TEMPLATES = {
 _SAFE_INTENT_TYPES = ["payment", "contract_call", "data_query", "trading_decision"]
 _VIOLATION_INTENT_TYPES = ["EMR_WRITE", "exfiltrate_customer_records"]
 
-# Realistic nested-span shapes per persona, matching the real
-# agent_conversation -> agent_tool_allocate_capital nesting main.py's own
-# capital-allocation flow already produces -- a root "agent_task" span with
+# Realistic nested-span shapes per persona -- a root "agent_task" span with
 # 1-2 real child spans (llm_call/tool_call), not a single flat span, so
 # Trace Analytics' DAG/Gantt views and Compare Traces have real structure to
-# render for every persona, not just the one main.py exercises.
+# render for every persona. (Span names are labels only; the capital-allocation
+# flow main.py once ran was dropped with the markets contracts.)
 _TRACE_SHAPES = {
     "healthcare_agent": [
         ("review_patient_chart", [("llm_call.summarize_chart", None), ("tool_call.check_formulary_interactions", None)]),

@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { ethers } from 'ethers';
 import { oracle, AgentSummary } from '../services/oracle';
 import { userapi, getToken, UserResponse } from '../services/userapi';
 import { BASE_SEPOLIA_CHAIN_ID } from '../constants';
@@ -58,7 +57,6 @@ export interface Agent {
   alias?: string | null;
   verification_tier: number;
   current_ais?: number;
-  staked_itk?: number;
   tee_verified?: boolean;
   /** Cortex's mounted-store namespace. A DID alone is not a unique memory authority. */
   store_id?: string;
@@ -86,7 +84,6 @@ interface User {
 interface Stats {
   active_nodes: number;
   aggregate_ais: number;
-  protocol_staked_itk: number;
 }
 
 interface DashboardContextType {
@@ -328,41 +325,24 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setAgents(prev => prev.map(a => (a.namespace_key || a.id) === (selectedAgent.namespace_key || selectedAgent.id) ? { ...a, current_ais: ais.ais, tee_verified: ais.zk_boost > 1 } : a));
       })
       .catch(() => { /* agent may not have telemetry yet — leave current_ais unset */ });
-    // A DID can be present in the off-chain directory before CORE has a
-    // controller/primitives binding. Do not poll an on-chain stake route for
-    // that state; the resulting 404 is expected, not a browser error.
-    // The unscoped directory is a read-only operator/dev view. Avoid a per-agent stake
-    // fan-out there: it exhausts public RPC limits and is not an authorization signal.
-    if (!selectedAgent.controller || ALLOW_UNSCOPED_AGENT_DIRECTORY) return () => { active = false; };
-    oracle.getStake(selectedAgent.eth_address)
-      .then(stake => {
-        if (!active) return;
-        // total_stake is a raw wei string off the chain (Slasher.stakes) — convert to ITK.
-        setAgents(prev => prev.map(a => (a.namespace_key || a.id) === (selectedAgent.namespace_key || selectedAgent.id) ? { ...a, staked_itk: Number(ethers.formatEther(stake.total_stake)) } : a));
-      })
-      .catch(() => { /* no Slasher clone yet */ });
     return () => { active = false; };
   }, [selectedAgent?.namespace_key, selectedAgent?.id]);
 
   // Protocol-wide stats aggregated live from the real agent set (no single oracle
-  // endpoint returns network-wide AIS/stake — this is derived, real aggregation,
-  // not a mock; see PRODUCTION_GAPS.md).
+  // endpoint returns network-wide AIS — this is derived, real aggregation, not a mock).
+  // Stake totals were dropped with the oracle's stake route; staking is deferred.
   useEffect(() => {
     if (ALLOW_UNSCOPED_AGENT_DIRECTORY) {
       setStats(null);
       return;
     }
-    if (agents.length === 0) { setStats(agentsLoading ? null : { active_nodes: 0, aggregate_ais: 0, protocol_staked_itk: 0 }); return; }
+    if (agents.length === 0) { setStats(agentsLoading ? null : { active_nodes: 0, aggregate_ais: 0 }); return; }
     let active = true;
-    Promise.all([
-      oracle.getLeaderboard().catch(() => []),
-      Promise.all(agents.map(a => a.controller ? oracle.getStake(a.eth_address).catch(() => null) : Promise.resolve(null))),
-    ]).then(([leaderboard, stakes]) => {
+    oracle.getLeaderboard().catch(() => []).then(leaderboard => {
       if (!active) return;
       const scores = leaderboard.map(e => Number(e.effective_score)).filter(n => !Number.isNaN(n));
       const aggregate_ais = scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-      const protocol_staked_itk = stakes.reduce((sum, s) => sum + (s ? Number(ethers.formatEther(s.total_stake)) : 0), 0);
-      setStats({ active_nodes: agents.length, aggregate_ais, protocol_staked_itk });
+      setStats({ active_nodes: agents.length, aggregate_ais });
     });
     return () => { active = false; };
   }, [agents.length, agentsLoading]);
