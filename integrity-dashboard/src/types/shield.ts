@@ -19,6 +19,18 @@ export interface ShieldDevice {
     } | null;
 }
 
+// One row of a device's agent-binding audit trail (GET /api/shield/devices/{id}/agent-bindings).
+// A device has exactly one current binding (unbound_at null); earlier rows are history.
+export interface ShieldAgentBinding {
+    id: number;
+    tenant_id: string;
+    device_id: string;
+    agent_id: string;
+    registration_status: string;
+    bound_at: string;
+    unbound_at: string | null;
+}
+
 export interface ShieldDecisionAction {
     action: string;
     severity?: string;

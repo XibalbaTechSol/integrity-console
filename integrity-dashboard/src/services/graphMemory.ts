@@ -96,12 +96,50 @@ async function getJson<T>(path: string): Promise<T> {
     return response.json() as Promise<T>;
 }
 
+// Cortex (local_api.py `_verify_csrf`) requires an X-Cortex-CSRF-Token header only on writes
+// authenticated by its SameSite=None session cookie; bearer-authenticated calls (the same-origin
+// /cortex-api proxy in vite.config.ts attaches one) are not CSRF targets. The token can only be
+// obtained via a CORS-mediated read of GET /api/auth/csrf, since the cookie is HttpOnly and
+// scoped to Cortex's own origin. That endpoint answers 400 when the request carries no cookie
+// session, which means no token is needed: return null and send the write without the header.
+let csrfTokenPromise: Promise<string | null> | null = null;
+
+async function getCsrfToken(): Promise<string | null> {
+    if (!csrfTokenPromise) {
+        csrfTokenPromise = fetch(`${GRAPH_MEMORY_URL}/api/auth/csrf`, {
+            credentials: 'include',
+            ...(GRAPH_MEMORY_TOKEN ? { headers: { Authorization: `Bearer ${GRAPH_MEMORY_TOKEN}` } } : {}),
+        })
+            .then(async (response) => {
+                if (response.status === 400) {
+                    // Bearer-only caller: no cookie session, so no CSRF check. Not cached, so a
+                    // cookie session established later still gets a token on the next write.
+                    csrfTokenPromise = null;
+                    return null;
+                }
+                if (!response.ok) {
+                    throw new Error(`could not fetch Cortex CSRF token: ${response.status}`);
+                }
+                const body = await response.json();
+                return body.csrf_token as string;
+            })
+            .catch((err) => {
+                csrfTokenPromise = null; // let the next write attempt retry, not stay poisoned
+                throw err;
+            });
+    }
+    return csrfTokenPromise;
+}
+
 async function postJson<T>(path: string, payload: Record<string, unknown>): Promise<T> {
+    const csrfToken = await getCsrfToken();
     const response = await fetch(`${GRAPH_MEMORY_URL}${path}`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...(GRAPH_MEMORY_TOKEN ? { Authorization: `Bearer ${GRAPH_MEMORY_TOKEN}` } : {}),
+            ...(csrfToken ? { 'X-Cortex-CSRF-Token': csrfToken } : {}),
         },
         body: JSON.stringify(payload),
     });
@@ -127,7 +165,8 @@ export const graphMemory = {
     integrityLinks: (limit = 50) => getJson<IntegrityLinksStatus>(`/api/integrity-links?limit=${limit}`),
 
     // Sessions
-    sessions: (limit = 100, agentId?: string, storeId?: string) => getJson<Session[]>(`/api/sessions?limit=${limit}${agentId ? `&agent_id=${encodeURIComponent(agentId)}` : ''}${storeId ? `&store_id=${encodeURIComponent(storeId)}` : ''}`),
+    // Keep the timeline selector bounded; large session projections can contend with active writers.
+    sessions: (limit = 20, agentId?: string, storeId?: string) => getJson<Session[]>(`/api/sessions?limit=${limit}${agentId ? `&agent_id=${encodeURIComponent(agentId)}` : ''}${storeId ? `&store_id=${encodeURIComponent(storeId)}` : ''}`),
     invocations: (limit = 100) => getJson<InvocationCorrelation[]>(`/api/invocations?limit=${limit}`),
     sessionOtel: (id: string) => getJson<OtelEvent[]>(`/api/session/${encodeURIComponent(id)}/otel`),
     // Cross-system test log write (~/.claude/plans/velvet-giggling-quill.md) -- browser-reachable
