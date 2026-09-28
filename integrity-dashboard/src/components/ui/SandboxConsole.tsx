@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Cpu, Zap, Code } from 'lucide-react';
 
@@ -58,7 +59,7 @@ export const SandboxConsole = () => {
     }, [performanceVariance, hgiRaw, avgPartnerAIS, gpuHours, stakedRatio, agentAge, volume, tier]);
 
     return (
-        <div className="card" style={{ padding: '2rem' }}>
+        <div className="card" style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', padding: 'clamp(1rem, 3vw, 2rem)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '2rem' }}>
                 <Code color="var(--text-secondary)" size={24} />
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Protocol Sandbox</h2>
@@ -67,13 +68,13 @@ export const SandboxConsole = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: '2rem', minWidth: 0, overflowX: 'hidden' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Simulation Parameters</h3>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Performance Variance (Entropy)</label>
-                        <input 
+                        <input aria-label="Performance variance"
                             type="range" min="0" max="1" step="0.01" 
                             value={performanceVariance} 
                             onChange={(e) => setPerformanceVariance(parseFloat(e.target.value))} 
@@ -84,7 +85,7 @@ export const SandboxConsole = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Human Grounding Index (HGI)</label>
-                        <input 
+                        <input aria-label="Human Grounding Index"
                             type="range" min="0" max="1" step="0.01" 
                             value={hgiRaw} 
                             onChange={(e) => setHgiRaw(parseFloat(e.target.value))} 
@@ -95,7 +96,7 @@ export const SandboxConsole = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Verified GPU Hours (Sacrifice)</label>
-                        <input 
+                        <input aria-label="Verified GPU hours"
                             type="number" 
                             value={gpuHours} 
                             onChange={(e) => setGpuHours(parseInt(e.target.value))} 
@@ -105,7 +106,7 @@ export const SandboxConsole = () => {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                         <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Identity Verification Tier</label>
-                        <select 
+                        <select aria-label="Identity verification tier"
                             value={tier} 
                             onChange={(e) => setTier(parseInt(e.target.value))}
                             style={{ padding: '0.5rem', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}

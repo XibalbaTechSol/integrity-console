@@ -25,8 +25,24 @@ export interface AgentResponse {
     did_document: Record<string, unknown> | null;
 }
 
+export interface Erc8004BindingDto {
+    agent_id: string;
+    chain_id: number;
+    identity_registry_address: string;
+    agent_token_id: string;
+    registration_uri: string;
+    registration_sha256: string;
+    nft_owner_address: string;
+    agent_wallet_address: string | null;
+    binding_status: string;
+    verified_at: string;
+    last_checked_at: string;
+}
+
 export interface AgentSummary {
     id: string;
+    /** Lowercase on-chain controller when the DID has a verified CORE binding. */
+    controller?: string | null;
     /** Primary XNS handle (e.g. "xibalba.integrity"), read on-chain by the oracle. Prefer
      *  this over `name` for display — it's the protocol's own naming authority. `null` when
      *  the agent hasn't claimed one or XNS isn't deployed on this chain. */
@@ -46,7 +62,16 @@ export interface AisComponents {
 
 export interface AisResponse {
     agent_id: string;
+    scoring_profile: string;
+    ais_base: number;
+    ais_post_boost: number;
     ais: number;
+    tier_ceiling: number;
+    verification_tier: number;
+    /** Null for legacy registry clones that predate on-chain tier enforcement. */
+    onchain_assurance_tier: number | null;
+    onchain_tier_ceiling: number | null;
+    onchain_assurance_consistent: boolean | null;
     components: AisComponents;
     weights: Record<string, number>;
     zk_boost: number;
@@ -54,6 +79,18 @@ export interface AisResponse {
     period_start: string;
     period_end: string;
     event_count: number;
+    evidence_tier: string;
+    data_sufficiency: 'no_events' | 'observed_events' | string;
+    authoritative_input_source: string;
+    proxy_axes: string[];
+    missing_axes: string[];
+    constraint_score: number;
+    shadow_gate: {
+        entropy_pass: boolean;
+        grounding_pass: boolean;
+        compliance_pass: boolean;
+        would_pass: boolean;
+    };
     onchain_zk_boost_consistent: boolean | null;
 }
 
@@ -304,6 +341,28 @@ export interface AgentHandleDto {
     handle: string | null;
 }
 
+// Oracle-local XNS directory (backend::handlers -- xns_available/xns_resolve/xns_claim),
+// distinct from the on-chain XnsResolveDto/resolveXns above. An agent can hold one of
+// these without ever registering on-chain; every agent that completes full on-chain
+// registration is required to hold exactly one (see migration 0022's header note).
+export interface XnsAvailabilityDto {
+    handle: string;
+    available: boolean;
+    /** Populated only when `available` is false. */
+    suggestions: string[];
+}
+
+export interface XnsHandleResolveDto {
+    handle: string;
+    agent_id: string;
+}
+
+export interface XnsHandleDto {
+    agent_id: string;
+    handle: string;
+    claimed_at: string;
+}
+
 export interface CreditDto {
     agent_id: string;
     total_allocated: string;
@@ -335,6 +394,22 @@ export interface AuditLogEntryDto {
     reason_code: string | null;
     detail: string | null;
     created_at: string;
+}
+
+// backend::handlers::get_audit_invocation_join: every durable audit row for one
+// invocation id. Used to fill evidence that fell outside the per-agent reconciliation
+// window (db::reconcile_agent_intent_outcome is capped at 200 rows).
+export interface AuditInvocationDto {
+    invocation_id: string;
+    rows: Array<{
+        id: string;
+        agent_id: string | null;
+        event_type: string;
+        decision: string;
+        intent_type?: string | null;
+        metadata: { intended_state_hash?: string; invocation_id?: string; [key: string]: unknown };
+        created_at: string;
+    }>;
 }
 
 export interface IntentOutcomeDto {
@@ -373,6 +448,11 @@ class OracleError extends Error {
 }
 
 async function get<T>(path: string): Promise<T> {
+    // Oracle's read API is a public/read-only surface in the current deployment and
+    // intentionally uses permissive CORS. Do not send browser credentials here: wildcard
+    // CORS and credentialed requests are incompatible, and the dashboard must not imply
+    // that an Oracle read proves user authorization. Authenticated user scope comes from
+    // userapi's separate HttpOnly session boundary.
     const res = await fetch(`${ORACLE_URL}${path}`);
     if (!res.ok) {
         throw new OracleError(res.status, `Oracle request failed: ${res.status} ${path}`);
@@ -404,11 +484,15 @@ export interface RegisterAgentRequest {
     primitives: PrimitiveSetDto;
     ed25519_pubkey_hex?: string;
     eth_address_hex?: string;
+    /** Mandatory: every agent completing this registration must claim a unique
+     *  Oracle-local XNS handle in the same request (see migration 0022's header note). */
+    handle: string;
 }
 
 export interface RegisterAgentResponse {
     id: string;
     verification_tier: number;
+    handle: string;
     primitives: PrimitiveSetDto;
     controller: string;
     domain_id: string;
@@ -495,6 +579,7 @@ function historyQuery(bucket?: HistoryBucket, since?: string): string {
 
 export const oracle = {
     getAgent: (id: string) => get<AgentResponse>(`/v1/agent/${encodeURIComponent(id)}`),
+    getErc8004: (id: string) => get<Erc8004BindingDto | null>(`/v1/agent/${encodeURIComponent(id)}/erc8004`),
     // Resolve an agent's real on-chain SovereignAgent contract address from its DID. The
     // dashboard keys agents by DID (Agent.eth_address actually holds the DID), so any on-chain
     // write that needs the real address must resolve it here rather than using that field.
@@ -562,6 +647,8 @@ export const oracle = {
     },
     getReconciliation: (agentId: string) =>
         get<IntentOutcomeDto[]>(`/v1/agent/${encodeURIComponent(agentId)}/reconciliation`),
+    getAuditInvocation: (invocationId: string) =>
+        get<AuditInvocationDto>(`/v1/audit/invocation/${encodeURIComponent(invocationId)}`),
 
     // Generic audit-log write, reused by the Guided System Test wizard's cross-system
     // fan-out (testResults.ts) so a dashboard-triggered test result is durably queryable
@@ -604,6 +691,19 @@ export const oracle = {
         get<XnsResolveDto>(`/v1/xns/resolve?handle=${encodeURIComponent(handle.replace(/^@/, ''))}`),
     // Reverse: the agent's primary XNS handle (backend::handlers::get_agent_handle).
     getAgentHandle: (id: string) => get<AgentHandleDto>(`/v1/agent/${encodeURIComponent(id)}/handle`),
+
+    // Oracle-local XNS directory: chat-app-style username search/claim, independent of
+    // on-chain state. Live-as-you-type availability check; returns close, currently-free
+    // suggestions when the requested handle is taken (backend::handlers::xns_available).
+    xnsAvailable: (handle: string) =>
+        get<XnsAvailabilityDto>(`/v1/xns/available/${encodeURIComponent(handle)}`),
+    // Resolve an Oracle-local handle to the agent that holds it (backend::handlers::xns_resolve).
+    xnsResolveHandle: (handle: string) =>
+        get<XnsHandleResolveDto>(`/v1/xns/handle/${encodeURIComponent(handle)}`),
+    // Claim a handle for an agent -- 409 if taken, or if that agent already holds a
+    // different one (backend::handlers::xns_claim).
+    xnsClaim: (agentId: string, handle: string) =>
+        post<XnsHandleDto>('/v1/xns/claim', { agent_id: agentId, handle }),
 
     // Live IntegrityGovernance proposals, newest first (backend::handlers::
     // get_governance_proposals). Returns 400 (MissingSingleton) until the Governance contract is deployed —

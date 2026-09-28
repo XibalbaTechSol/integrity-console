@@ -39,23 +39,34 @@ function MermaidDiagram({ source }: { source: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    setSvg('');
+    setError('');
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setError('Diagram rendering timed out. The source is shown below so the content remains inspectable.');
+    }, 8000);
     const render = async () => {
       try {
         const mermaid = await loadMermaid();
         const id = `wiki-mermaid-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
         const result = await mermaid.render(id, source);
-        if (!cancelled) setSvg(result.svg);
+        if (!cancelled) {
+          window.clearTimeout(timeout);
+          setSvg(result.svg);
+        }
       } catch (reason) {
-        if (!cancelled) setError(reason instanceof Error ? reason.message : 'Unable to render diagram');
+        if (!cancelled) {
+          window.clearTimeout(timeout);
+          setError(reason instanceof Error ? reason.message : 'Unable to render diagram');
+        }
       }
     };
     render();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(timeout); };
   }, [reactId, source]);
 
   if (error) return <div className="wiki-diagram-error" role="alert"><strong>Diagram could not be rendered.</strong><span>{error}</span><pre><code>{source}</code></pre></div>;
   if (!svg) return <div className="wiki-diagram-loading" role="status">Rendering diagram…</div>;
-  return <figure className="wiki-diagram" aria-label="Protocol diagram" dangerouslySetInnerHTML={{ __html: svg }} />;
+  return <figure className="wiki-diagram" aria-label="Protocol diagram" tabIndex={0} dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
 const categoryMeta = {
@@ -359,7 +370,7 @@ export default function WikiPage() {
         <div className="wiki-mobile-controls"><button onClick={() => setNavOpen(true)}><Menu size={17} /> Protocol TOC</button><button onClick={() => setTocOpen(true)}>On this page <ChevronRight size={16} /></button></div>
         <article id="article-top">
           <div className="wiki-article-meta"><span>{categoryMeta[active.category as keyof typeof categoryMeta]?.label || active.category}</span><span>Updated {active.updated || 'from source'}</span></div>
-          <h1>{active.title}</h1>
+
           <p className="wiki-deck">{active.excerpt}</p>
           <div className="wiki-rule" />
           <MarkdownArticle body={active.body} currentPage={active} onNavigate={selectPage} />
@@ -371,7 +382,7 @@ export default function WikiPage() {
       </main>
 
       <aside className={`wiki-toc ${tocOpen ? 'is-open' : ''}`}>
-        <div className="wiki-mobile-rail-title"><span>On this page</span><button onClick={() => setTocOpen(false)}><X size={18} /></button></div>
+        <div className="wiki-mobile-rail-title"><span>On this page</span><button aria-label="Close table of contents" onClick={() => setTocOpen(false)}><X size={18} /></button></div>
         <p className="wiki-rail-label">On this page</p>
         <nav className="wiki-toc-tree" aria-label="Table of contents">
           <button className={activeHeading === 'article-top' ? 'active level-1' : 'level-1'} onClick={() => visitHeading('article-top')}>{active.title}</button>
@@ -396,7 +407,7 @@ export default function WikiPage() {
 
     {searchOpen && <div className="wiki-search-backdrop" onMouseDown={() => setSearchOpen(false)}>
       <div className="wiki-command" onMouseDown={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Search wiki">
-        <div className="wiki-command-input"><Search size={20} /><input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search the protocol" /><button onClick={() => setSearchOpen(false)}><X size={18} /></button></div>
+        <div className="wiki-command-input"><Search size={20} /><input aria-label="Search the protocol" ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search the protocol" /><button aria-label="Close search" onClick={() => setSearchOpen(false)}><X size={18} /></button></div>
         <div className="wiki-command-results">{results.length ? results.map((page, index) => <button key={page.id} onClick={() => selectPage(page)}><div><strong>{page.title}</strong><span>{page.category} · {page.excerpt}</span></div><kbd>⌘ {index + 1}</kbd></button>) : <p>No knowledge matched that search.</p>}</div>
       </div>
     </div>}

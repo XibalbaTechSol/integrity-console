@@ -1,4 +1,5 @@
-import { GRAPH_MEMORY_URL } from '../config';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { GRAPH_MEMORY_TOKEN, GRAPH_MEMORY_URL } from '../config';
 
 // Mirrors xibalba_cortex.local_api's routes exactly, which themselves are thin wrappers around
 // GraphStore's own methods (store.py) -- no response envelope, each route just returns the
@@ -11,6 +12,8 @@ import type {
     ExtractionProposal,
     HybridRetrieveResult,
     GraphMemoryStats,
+    AgentMemorySummary,
+    CortexAgentWorkspace,
     GraphPayload,
     InferenceManifest,
     InferenceTask,
@@ -37,6 +40,8 @@ import type {
 } from '../types/graphMemory';
 
 export type {
+    AgentMemorySummary,
+    CortexAgentWorkspace,
     Attachment,
     ContextContribution,
     EntityRelation,
@@ -80,27 +85,38 @@ export type {
 // ---------------------------------------------------------------------------
 
 async function getJson<T>(path: string): Promise<T> {
-    const response = await fetch(`${GRAPH_MEMORY_URL}${path}`, { credentials: 'include' });
+    const response = await fetch(`${GRAPH_MEMORY_URL}${path}`, {
+        credentials: 'include',
+        ...(GRAPH_MEMORY_TOKEN ? { headers: { Authorization: `Bearer ${GRAPH_MEMORY_TOKEN}` } } : {}),
+    });
     if (!response.ok) {
         const body = await response.json().catch(() => ({ error: response.statusText }));
-        throw new Error(body.error ?? `request failed: ${response.status}`);
+        throw Object.assign(new Error(body.error ?? `request failed: ${response.status}`), { status: response.status });
     }
     return response.json() as Promise<T>;
 }
 
-// Cortex's session cookie is SameSite=None (2026-09-15, needed for this cross-origin dashboard
-// to present it at all) -- writes therefore need an explicit CSRF token, since SameSite=None
-// drops the free CSRF protection SameSite=Strict used to provide. The token itself can only be
-// obtained via a CORS-mediated read of /api/auth/csrf's JSON body (this dashboard's origin has
-// to be on Cortex's --allowed-origins list); it cannot be read directly from the cookie jar,
-// since that cookie is HttpOnly and, even if it weren't, is scoped to Cortex's own origin, not
-// this dashboard's. See xibalba-cortex's local_api.py `_csrf_token_for` for the server side.
-let csrfTokenPromise: Promise<string> | null = null;
+// Cortex (local_api.py `_verify_csrf`) requires an X-Cortex-CSRF-Token header only on writes
+// authenticated by its SameSite=None session cookie; bearer-authenticated calls (the same-origin
+// /cortex-api proxy in vite.config.ts attaches one) are not CSRF targets. The token can only be
+// obtained via a CORS-mediated read of GET /api/auth/csrf, since the cookie is HttpOnly and
+// scoped to Cortex's own origin. That endpoint answers 400 when the request carries no cookie
+// session, which means no token is needed: return null and send the write without the header.
+let csrfTokenPromise: Promise<string | null> | null = null;
 
-async function getCsrfToken(): Promise<string> {
+async function getCsrfToken(): Promise<string | null> {
     if (!csrfTokenPromise) {
-        csrfTokenPromise = fetch(`${GRAPH_MEMORY_URL}/api/auth/csrf`, { credentials: 'include' })
+        csrfTokenPromise = fetch(`${GRAPH_MEMORY_URL}/api/auth/csrf`, {
+            credentials: 'include',
+            ...(GRAPH_MEMORY_TOKEN ? { headers: { Authorization: `Bearer ${GRAPH_MEMORY_TOKEN}` } } : {}),
+        })
             .then(async (response) => {
+                if (response.status === 400) {
+                    // Bearer-only caller: no cookie session, so no CSRF check. Not cached, so a
+                    // cookie session established later still gets a token on the next write.
+                    csrfTokenPromise = null;
+                    return null;
+                }
                 if (!response.ok) {
                     throw new Error(`could not fetch Cortex CSRF token: ${response.status}`);
                 }
@@ -120,7 +136,11 @@ async function postJson<T>(path: string, payload: Record<string, unknown>): Prom
     const response = await fetch(`${GRAPH_MEMORY_URL}${path}`, {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json', 'X-Cortex-CSRF-Token': csrfToken },
+        headers: {
+            'Content-Type': 'application/json',
+            ...(GRAPH_MEMORY_TOKEN ? { Authorization: `Bearer ${GRAPH_MEMORY_TOKEN}` } : {}),
+            ...(csrfToken ? { 'X-Cortex-CSRF-Token': csrfToken } : {}),
+        },
         body: JSON.stringify(payload),
     });
     if (!response.ok) {
@@ -135,14 +155,18 @@ async function postJson<T>(path: string, payload: Record<string, unknown>): Prom
 // ---------------------------------------------------------------------------
 
 export const graphMemory = {
+    accountMe: () => getJson<{ account?: { email?: string } }>('/api/auth/me'),
     // Read operations — store health & overview
     stats: () => getJson<GraphMemoryStats>('/api/stats'),
+    agentSummary: (agentId: string, limit = 8, storeId?: string) =>
+        getJson<AgentMemorySummary>(`/api/agent/${encodeURIComponent(agentId)}/summary?limit=${limit}${storeId ? `&store_id=${encodeURIComponent(storeId)}` : ''}`),
+    agents: (limit = 100) => getJson<{ agents: CortexAgentWorkspace[]; primary_profile_id?: string; oracle_reachable?: boolean }>(`/api/agents?limit=${limit}`),
     status: () => getJson<StoreStatus>('/api/status'),
     integrityLinks: (limit = 50) => getJson<IntegrityLinksStatus>(`/api/integrity-links?limit=${limit}`),
 
     // Sessions
     // Keep the timeline selector bounded; large session projections can contend with active writers.
-    sessions: (limit = 20) => getJson<Session[]>(`/api/sessions?limit=${limit}`),
+    sessions: (limit = 20, agentId?: string, storeId?: string) => getJson<Session[]>(`/api/sessions?limit=${limit}${agentId ? `&agent_id=${encodeURIComponent(agentId)}` : ''}${storeId ? `&store_id=${encodeURIComponent(storeId)}` : ''}`),
     invocations: (limit = 100) => getJson<InvocationCorrelation[]>(`/api/invocations?limit=${limit}`),
     sessionOtel: (id: string) => getJson<OtelEvent[]>(`/api/session/${encodeURIComponent(id)}/otel`),
     // Cross-system test log write (~/.claude/plans/velvet-giggling-quill.md) -- browser-reachable

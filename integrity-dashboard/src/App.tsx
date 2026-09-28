@@ -1,31 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { lazy, Suspense } from 'react';
 import { Navigate, Routes, Route } from 'react-router-dom';
 import 'katex/dist/katex.min.css';
 import './index.css';
 import LandingPage from './LandingPage';
-import Dashboard from './Dashboard';
-import IdentityPage from './pages/IdentityPage';
-import FinancialsPage from './pages/FinancialsPage';
-import HealthPage from './pages/HealthPage';
-import ShieldPage from './pages/ShieldPage';
-import QuantPage from './pages/QuantPage';
-import LicencePage from './pages/LicencePage';
-import KernelPage from './pages/KernelPage';
-import KernelIntentPage from './pages/KernelIntentPage';
+import SystemControlPage from './pages/SystemControlPage';
 import AuthPage from './pages/AuthPage';
-import SettingsPage from './pages/SettingsPage';
-import { DeveloperPage } from './pages/DeveloperPage';
 import DocsPage from './pages/DocsPage';
-import CortexPage from './pages/CortexPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
-import { IntelligencePage } from './pages/IntelligencePage';
-import CorrelationPage from './pages/CorrelationPage';
-import { ActuarialHub } from './components/tabs/ActuarialHub';
+
+
 import { DashboardProvider } from './context/DashboardContext';
 import { SettingsProvider } from './context/SettingsContext';
 import MainAppLayout from './layouts/MainAppLayout';
 import PublicLayout from './layouts/PublicLayout';
+import { AgentRegistryPage } from './pages/AgentRegistryPage';
+import { AisPage } from './pages/AisPage';
+import TreasuryControlPage from './pages/TreasuryControlPage';
+import ProtocolDashboardPage from './pages/ProtocolDashboardPage';
+import CorrelationPage from './pages/CorrelationPage';
+import HealthPage from './pages/HealthPage';
+import SettingsPage from './pages/SettingsPage';
 
 const WikiPage = lazy(() => import('./pages/WikiPage'));
 
@@ -36,29 +32,50 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/wiki" element={<Suspense fallback={<div style={{ minHeight: '100vh', background: '#07111d' }} />}><WikiPage /></Suspense>} />
           <Route element={<PublicLayout />}>
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
           </Route>
           <Route element={<MainAppLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/identity" element={<IdentityPage />} />
-            <Route path="/financials" element={<FinancialsPage />} />
-            <Route path="/intelligence" element={<IntelligencePage />} />
-            <Route path="/correlation" element={<CorrelationPage />} />
-            <Route path="/cortex" element={<CortexPage />} />
-            <Route path="/prediction-markets" element={<ActuarialHub mode="markets" />} />
+            <Route path="/dashboard" element={<ProtocolDashboardPage />} />
+            <Route path="/agents" element={<AgentRegistryPage />} />
+            {/* AIS radar, simulator, telemetry and derivation math: Oracle-computed AIS
+                shown per selected agent (display only; scoring lives in scoring-core). */}
+            <Route path="/ais" element={<AisPage />} />
+            <Route path="/evidence" element={<CorrelationPage />} />
+            <Route path="/treasury" element={<TreasuryControlPage />} />
             <Route path="/health" element={<HealthPage />} />
-            <Route path="/shield" element={<ShieldPage />} />
-            <Route path="/quant" element={<QuantPage />} />
-            <Route path="/licence" element={<LicencePage />} />
-            <Route path="/kernel" element={<KernelPage />} />
-            <Route path="/kernel-intent" element={<KernelIntentPage />} />
-            <Route path="/memory" element={<Navigate to="/cortex" replace />} />
-            <Route path="/developer" element={<DeveloperPage />} />
+            <Route path="/system" element={<SystemControlPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/wiki" element={<Suspense fallback={<div style={{ minHeight: '100vh', background: '#07111d' }} />}><WikiPage /></Suspense>} />
+
+            {/* Legacy deep links converge on one canonical page each. */}
+            {/* Identity Management (Register/Claim) lives on ProtocolDashboardPage's
+                default Overview tab, not on the agent registry -- this was previously
+                misrouted to /agents, where no such controls exist. */}
+            <Route path="/identity" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/intelligence" element={<Navigate to="/ais" replace />} />
+            <Route path="/knowledge" element={<Navigate to="/agents" replace />} />
+            <Route path="/memory" element={<Navigate to="/agents" replace />} />
+            <Route path="/records" element={<Navigate to="/evidence" replace />} />
+            <Route path="/proofs" element={<Navigate to="/evidence" replace />} />
+            <Route path="/contracts" element={<Navigate to="/evidence" replace />} />
+            <Route path="/activity" element={<Navigate to="/evidence" replace />} />
+            <Route path="/correlation" element={<Navigate to="/evidence" replace />} />
+            <Route path="/wallets" element={<Navigate to="/treasury" replace />} />
+            <Route path="/transactions" element={<Navigate to="/treasury" replace />} />
+            <Route path="/financials" element={<Navigate to="/treasury" replace />} />
+            <Route path="/prediction-markets" element={<Navigate to="/treasury" replace />} />
+            <Route path="/quant" element={<Navigate to="/treasury" replace />} />
+            {/* Protection was a boundary-only handoff, not a dashboard surface. */}
+            <Route path="/security" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/shield" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/fleet" element={<Navigate to="/agents" replace />} />
+            <Route path="/kernel" element={<Navigate to="/system" replace />} />
+            <Route path="/kernel-intent" element={<Navigate to="/system" replace />} />
+            <Route path="/licence" element={<Navigate to="/system" replace />} />
+            <Route path="/developer" element={<Navigate to="/system" replace />} />
           </Route>
         </Routes>
       </DashboardProvider>

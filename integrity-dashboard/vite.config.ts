@@ -1,46 +1,56 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { resolve } from 'node:path'
-import { execFileSync } from 'node:child_process'
-import { defineConfig } from 'vite'
+import { defineConfig, type ProxyOptions } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const cortexHome = process.env.CORTEX_HOME ?? resolve(homedir(), '.hermes/xibalba-cortex')
-const cortexTokenFile = process.env.CORTEX_DEV_TOKEN_FILE ?? resolve(cortexHome, '.viewer-dev.token')
+// Same-origin proxies for the local Shield backend and Cortex API. The bearer
+// tokens are read here, on the Node side, and attached to proxied requests only:
+// they are never compiled into the browser bundle (VITE_* values are). Both the
+// dev server and `vite preview` (the managed integrity-dashboard.service) use
+// these, and both bind to loopback.
+//
+// Token files are the ones those services already use locally; override with
+// DASHBOARD_SHIELD_TOKEN_FILE / DASHBOARD_CORTEX_TOKEN_FILE. A missing file
+// leaves the request unauthenticated, so the page shows its honest
+// "API unavailable" state instead of failing to start.
+const shieldTokenFile =
+  process.env.DASHBOARD_SHIELD_TOKEN_FILE ?? resolve(homedir(), '.xibalba-shield/backend-admin.token')
+const cortexTokenFile =
+  process.env.DASHBOARD_CORTEX_TOKEN_FILE ?? resolve(homedir(), '.hermes/xibalba-cortex/.viewer-dev.token')
 
-function localCortexToken(): string {
-  if (existsSync(cortexTokenFile)) return readFileSync(cortexTokenFile, 'utf8').trim()
-  mkdirSync(cortexHome, { recursive: true })
-  const output = execFileSync(
-    'uv',
-    ['run', 'xibalba-cortex-ingest-tokens', '--home', cortexHome, 'issue', '--label', 'dashboard-local-dev', '--role', 'operator'],
-    { cwd: resolve(import.meta.dirname, '../../xibalba-cortex'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
-  )
-  const token = output.trim().split(/\r?\n/).at(-1)?.trim() ?? ''
-  if (!token) throw new Error('Cortex development token issuance returned no token')
-  writeFileSync(cortexTokenFile, `${token}\n`, { mode: 0o600 })
-  chmodSync(cortexTokenFile, 0o600)
-  return token
+function readToken(path: string): string {
+  return existsSync(path) ? readFileSync(path, 'utf8').trim() : ''
+}
+
+function withBearer(target: string, tokenFile: string, extra: ProxyOptions = {}): ProxyOptions {
+  const token = readToken(tokenFile)
+  return {
+    target,
+    ...extra,
+    configure: (proxy) => {
+      proxy.on('proxyReq', (request) => {
+        // Replace, never forward, whatever Authorization the browser sent.
+        request.removeHeader('Authorization')
+        if (token) request.setHeader('Authorization', `Bearer ${token}`)
+      })
+    },
+  }
+}
+
+const proxy: Record<string, ProxyOptions> = {
+  // Canonical Shield control plane (retired 8421/8765 must not be revived).
+  '/api/shield': withBearer('http://127.0.0.1:8435', shieldTokenFile, { changeOrigin: true }),
+  // Root Cortex local API (all agent profiles mounted read-only).
+  '/cortex-api': withBearer('http://127.0.0.1:8420', cortexTokenFile, {
+    changeOrigin: false,
+    rewrite: (path) => path.replace(/^\/cortex-api/, ''),
+  }),
 }
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      '/cortex-api': {
-        target: process.env.CORTEX_LOCAL_API_URL ?? 'http://127.0.0.1:8420',
-        changeOrigin: false,
-        rewrite: (path) => path.replace(/^\/cortex-api/, ''),
-        configure: (proxy) => {
-          const token = localCortexToken()
-          proxy.on('proxyReq', (request) => request.setHeader('Authorization', `Bearer ${token}`))
-        },
-      },
-      '/api/shield': {
-        target: 'http://127.0.0.1:8765',
-        changeOrigin: true,
-      }
-    }
-  }
+  server: { proxy },
+  preview: { proxy },
 })

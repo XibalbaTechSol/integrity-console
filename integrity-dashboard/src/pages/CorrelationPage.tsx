@@ -4,6 +4,7 @@ import { useDashboard } from '../context/DashboardContext';
 import { graphMemory, type InvocationCorrelation } from '../services/graphMemory';
 import { oracle, type IntentOutcomeDto } from '../services/oracle';
 import { shieldBackend, type ShieldDecision } from '../services/shieldBackend';
+import { SHIELD_TENANT_ID } from '../config';
 
 type CombinedInvocation = {
   invocationId: string;
@@ -24,19 +25,30 @@ const STATUS: Record<string, { label: string; color: string; bg: string }> = {
   legacy_hash_only: { label: 'Legacy hash only', color: '#94a3b8', bg: 'rgba(148,163,184,.12)' },
 };
 
-function Stage({ present, label, warning = false }: { present: boolean; label: string; warning?: boolean }) {
+function Stage({ present, label, warning = false, title }: { present: boolean; label: string; warning?: boolean; title?: string }) {
   const color = warning ? '#f59e0b' : present ? '#10b981' : 'var(--text-muted)';
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color, fontSize: '0.76rem', whiteSpace: 'nowrap' }}>
+    <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color, fontSize: '0.76rem', whiteSpace: 'nowrap' }}>
       {warning ? <AlertTriangle size={14} /> : present ? <CheckCircle2 size={14} /> : <CircleDashed size={14} />}
       {label}
     </span>
   );
 }
 
+const RUNTIME_HOOK_TITLE =
+  "Agent runtime pre-tool hook recorded in Cortex (root store). Shield event memories live in Shield's Cortex profile and are not shown in this stage.";
+
 function shortId(value: string) {
   return `${value.slice(0, 8)}…${value.slice(-6)}`;
 }
+
+// Most recent timestamp any source recorded for a row (used for ordering).
+function lastSeen(row: CombinedInvocation): string {
+  return row.cortex?.last_seen_at ?? row.oracle?.outcome_at ?? row.oracle?.intent_at ?? row.shield?.received_at ?? '';
+}
+
+// Max direct Oracle invocation lookups per load for rows outside the reconciliation window.
+const INVOCATION_BACKFILL_LIMIT = 25;
 
 export default function CorrelationPage() {
   const { selectedAgent } = useDashboard();
@@ -49,7 +61,9 @@ export default function CorrelationPage() {
   const load = useCallback(async () => {
     setLoading(true);
     const agentId = selectedAgent?.id;
-    const tenantId = selectedAgent?.eth_address;
+    // Shield tenants are control-plane namespaces, not agent addresses; same mapping as
+    // SystemSummaryCard (configured tenant first, selected agent as the demo fallback).
+    const tenantId = SHIELD_TENANT_ID || selectedAgent?.eth_address;
     const [cortexResult, oracleResult, shieldResult] = await Promise.allSettled([
       graphMemory.invocations(200),
       agentId ? oracle.getReconciliation(agentId) : Promise.resolve([]),
@@ -79,11 +93,33 @@ export default function CorrelationPage() {
       });
     } else if (shieldResult.status === 'rejected') nextErrors.push('Shield decision API unavailable');
 
-    setRows(Array.from(byId.values()).sort((a, b) => {
-      const at = a.cortex?.last_seen_at ?? a.oracle?.outcome_at ?? a.oracle?.intent_at ?? a.shield?.received_at ?? '';
-      const bt = b.cortex?.last_seen_at ?? b.oracle?.outcome_at ?? b.oracle?.intent_at ?? b.shield?.received_at ?? '';
-      return bt.localeCompare(at);
-    }));
+    // The per-agent reconciliation is capped at 200 rows, so busy agents push older
+    // invocations out of it even though the Oracle still holds their signed intent.
+    // For the most recent rows that other sources saw but the window missed, look the
+    // invocation up directly (bounded, so a page load stays a handful of requests).
+    const missing = Array.from(byId.values())
+      .filter(row => !row.oracle && (row.shield || row.cortex))
+      .sort((a, b) => lastSeen(b).localeCompare(lastSeen(a)))
+      .slice(0, INVOCATION_BACKFILL_LIMIT);
+    const backfill = await Promise.allSettled(missing.map(row => oracle.getAuditInvocation(row.invocationId)));
+    backfill.forEach((result, index) => {
+      if (result.status !== 'fulfilled') return;
+      // Only a BCC-admitted intent counts as signed-intent evidence.
+      const admitted = result.value.rows.find(audit => audit.decision === 'allow' && audit.metadata?.intended_state_hash);
+      if (!admitted) return;
+      missing[index].oracle = {
+        invocation_id: result.value.invocation_id,
+        intended_state_hash: admitted.metadata.intended_state_hash ?? null,
+        intent_type: admitted.intent_type ?? null,
+        intent_at: admitted.created_at,
+        tool: null,
+        outcome: null,
+        outcome_at: null,
+        status: 'intent_without_outcome',
+      };
+    });
+
+    setRows(Array.from(byId.values()).sort((a, b) => lastSeen(b).localeCompare(lastSeen(a))));
     setErrors(nextErrors);
     setLoading(false);
   }, [selectedAgent?.id, selectedAgent?.eth_address]);
@@ -109,7 +145,7 @@ export default function CorrelationPage() {
             Follow one attempted action across Cortex runtime hooks, Shield enforcement, the signed BCC intent, and Oracle outcome evidence.
           </p>
         </div>
-        <button className="btn btn-secondary" onClick={() => void load()} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+        <button className="secondary-button" onClick={() => void load()} disabled={loading} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <RefreshCw size={16} className={loading ? 'spin' : undefined} /> Refresh evidence
         </button>
       </div>
@@ -151,7 +187,11 @@ export default function CorrelationPage() {
                 <span><code title={row.invocationId} style={{ color: 'var(--text-primary)' }}>{shortId(row.invocationId)}</code><small style={{ display: 'block', color: 'var(--text-muted)', marginTop: 4 }}>{row.cortex?.tool_name ?? row.oracle?.intent_type ?? 'Unclassified action'}</small></span>
                 <span style={{ color: tone.color, background: tone.bg, padding: '5px 8px', borderRadius: 4, width: 'fit-content', fontSize: '0.72rem', fontWeight: 600 }}>{tone.label}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-                  <Stage present={Boolean(row.cortex?.pre_tool)} label="Cortex" />
+                  {/* This stage is the agent runtime's pre-tool hook as recorded in Cortex (root store,
+                      GET /api/invocations). It is NOT "does Cortex hold this event": Shield's own
+                      event memories live in the Shield Cortex profile and are not joined here, so a
+                      Shield row can show this stage empty while Cortex holds its memory. */}
+                  <Stage present={Boolean(row.cortex?.pre_tool)} label="Runtime hook" title={RUNTIME_HOOK_TITLE} />
                   <Stage present={Boolean(row.shield)} label="Shield" />
                   <Stage present={Boolean(row.oracle?.intent_at)} label="BCC" />
                   <Stage present={Boolean(row.oracle?.outcome_at ?? row.cortex?.post_tool)} label="Outcome" warning={statusKey.includes('conflict') || statusKey.includes('duplicate')} />
@@ -160,7 +200,7 @@ export default function CorrelationPage() {
               </button>
               {open && (
                 <div className="correlation-detail" style={{ padding: '0 16px 18px 62px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)', background: 'var(--glass-surface-light)' }}>
-                  <section><h3 style={{ fontSize: '.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Runtime</h3><code style={{ fontSize: '.72rem', wordBreak: 'break-all' }}>{row.invocationId}</code><p style={{ color: 'var(--text-secondary)', fontSize: '.8rem' }}>{row.cortex?.pre_tool?.intent_rationale ?? 'No Cortex pre-tool evidence.'}</p></section>
+                  <section><h3 style={{ fontSize: '.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Runtime</h3><code style={{ fontSize: '.72rem', wordBreak: 'break-all' }}>{row.invocationId}</code><p style={{ color: 'var(--text-secondary)', fontSize: '.8rem' }}>{row.cortex?.pre_tool?.intent_rationale ?? 'No runtime pre-tool hook recorded in Cortex for this invocation.'}</p></section>
                   <section><h3 style={{ fontSize: '.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Shield / policy</h3><p style={{ color: 'var(--text-secondary)', fontSize: '.8rem' }}>{row.shield ? `${row.shield.decision.decision?.action ?? 'unknown'} · ${row.shield.decision.rule?.name ?? 'policy decision'}` : 'No Shield decision correlated.'}</p></section>
                   <section><h3 style={{ fontSize: '.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Signed intent</h3><code style={{ fontSize: '.72rem', wordBreak: 'break-all' }}>{row.oracle?.intended_state_hash ?? row.cortex?.pre_tool?.tool_input_hash ?? 'No signed BCC intent observed.'}</code></section>
                   <section><h3 style={{ fontSize: '.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Outcome</h3><p style={{ color: 'var(--text-secondary)', fontSize: '.8rem' }}>{row.oracle?.outcome ?? row.cortex?.post_tool?.outcome ?? 'No outcome reported.'}</p></section>

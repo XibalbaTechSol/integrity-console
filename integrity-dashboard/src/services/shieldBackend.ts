@@ -36,15 +36,22 @@ export type {
 // HTTP helpers
 // ---------------------------------------------------------------------------
 
+// With the default same-origin proxy the token is empty and the proxy authenticates;
+// only an explicitly configured token is sent from the browser.
+function authHeaders(token: string): Record<string, string> {
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function adminGet<T>(path: string, params?: Record<string, string>, token = SHIELD_BACKEND_TOKEN): Promise<T> {
-    const url = new URL(`${SHIELD_BACKEND_URL}${path}`);
+    // Base = page origin, so an empty (same-origin) SHIELD_BACKEND_URL is valid.
+    const url = new URL(`${SHIELD_BACKEND_URL}${path}`, window.location.origin);
     if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     const response = await fetch(url.toString(), {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders(token),
     });
     if (!response.ok) {
         const body = await response.json().catch(() => ({ error: response.statusText }));
-        throw new Error(body.error ?? `shield-backend request failed: ${response.status}`);
+        throw Object.assign(new Error(body.error ?? `shield-backend request failed: ${response.status}`), { status: response.status });
     }
     return response.json() as Promise<T>;
 }
@@ -54,13 +61,13 @@ async function adminPost<T>(path: string, payload: Record<string, unknown>, toke
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            ...authHeaders(token),
         },
         body: JSON.stringify(payload),
     });
     if (!response.ok) {
         const body = await response.json().catch(() => ({ error: response.statusText }));
-        throw new Error(body.error ?? `shield-backend request failed: ${response.status}`);
+        throw Object.assign(new Error(body.error ?? `shield-backend request failed: ${response.status}`), { status: response.status });
     }
     return response.json() as Promise<T>;
 }
@@ -70,10 +77,14 @@ async function adminPost<T>(path: string, payload: Record<string, unknown>, toke
 // ---------------------------------------------------------------------------
 
 export const shieldBackend = {
-    // Health check (no auth)
+    // Health check is protected by the backend admin token in local/dev deployments. Reports
+    // the HTTP status alongside the body so callers can tell "up but this admin token isn't
+    // valid" (401/403) apart from a genuinely unreachable backend.
     health: () =>
-        fetch(`${SHIELD_BACKEND_URL}/api/shield/health`)
-            .then(r => r.json() as Promise<{ ok: boolean; service: string }>),
+        fetch(`${SHIELD_BACKEND_URL}/api/shield/health`, {
+            headers: authHeaders(SHIELD_BACKEND_TOKEN),
+        })
+            .then(async r => ({ ...(await r.json().catch(() => ({ ok: false, service: 'shield' }))) as { ok: boolean; service: string }, httpStatus: r.status })),
 
     // Admin read routes
     dashboardSummary: (tenantId: string, token = SHIELD_BACKEND_TOKEN) =>
@@ -103,6 +114,12 @@ export const shieldBackend = {
     // Admin write routes
     enrollDevice: (payload: { tenant_id: string; device_id: string; device_role?: string }, token?: string) =>
         adminPost<ShieldEnrollment>('/api/shield/enroll', payload, token),
+    setDeviceAgentBindingStatus: (payload: { tenant_id: string; device_id: string; agent_id: string; action: 'detach' | 'revoke' }, token?: string) =>
+        adminPost<{ binding: Record<string, unknown> }>(
+            `/api/shield/devices/${encodeURIComponent(payload.device_id)}/agent-bindings/${encodeURIComponent(payload.agent_id)}/${payload.action}`,
+            { tenant_id: payload.tenant_id, device_id: payload.device_id, agent_id: payload.agent_id },
+            token,
+        ),
     seedDemo: (payload: { tenant_id: string } | string, token = SHIELD_BACKEND_TOKEN) =>
         adminPost<ShieldSeedResult>('/api/shield/demo/seed', typeof payload === 'string' ? { tenant_id: payload } : payload, token),
     // Generic cross-system test-run log (~/.claude/plans/velvet-giggling-quill.md) -- see

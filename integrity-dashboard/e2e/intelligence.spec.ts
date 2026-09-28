@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { collectPageErrors } from './test-utils';
 
-// IntelligencePage (src/pages/IntelligencePage.tsx, route "/intelligence") is mostly
+// AisPage (src/pages/AisPage.tsx, route "/ais"; "/intelligence" redirects there) is mostly
 // client-side: 4 static KaTeX formula cards, a Radar panel driven by DashboardContext's
 // selectedAgent (real oracle data), a filter toolbar, and a "custom telemetry" feature
 // persisted to localStorage (`integrity_custom_telemetry`) — no dedicated backend of its
 // own for that feature.
 
-test.describe('/intelligence (IntelligencePage)', () => {
+test.describe('/intelligence -> /ais (AisPage)', () => {
   test.beforeEach(async ({ page }) => {
     // Custom telemetry fields persist in localStorage across tests in the same browser
     // context — start each test from a clean slate so toolbar/modal assertions are
@@ -23,13 +23,18 @@ test.describe('/intelligence (IntelligencePage)', () => {
     expect(errors, `Uncaught errors: ${errors.map(e => e.message).join('; ')}`).toEqual([]);
   });
 
-  test('renders all four AIS formula cards with real KaTeX, not raw LaTeX text', async ({ page }) => {
+  test('renders all five AIS formula cards with real KaTeX, not raw LaTeX text', async ({ page }) => {
+    // Titles verbatim from integrity-oracle/scoring-core/src/lib.rs's real formulas --
+    // the previous titles ("Stability (Entropy Control)", "Grounding (Human-in-the-Loop)",
+    // "Sacrifice (Economic Commitment)") described formulas that were fabricated and never
+    // matched what the oracle actually computes (see AisPage.tsx's own comment on
+    // the fix). "Compliance" was previously untested entirely.
     await page.goto('/intelligence');
-    const titles = ['Stability (Entropy Control)', 'Grounding (Human-in-the-Loop)', 'Sacrifice (Economic Commitment)', 'Overall Agent Integrity Score'];
+    const titles = ['Stability (Entropy)', 'Grounding (Human Oversight)', 'Sacrifice (Compute Commitment)', 'Compliance', 'Overall Agent Integrity Score'];
     for (const title of titles) {
       await expect(page.getByRole('heading', { name: title })).toBeVisible();
     }
-    // At minimum, one block formula per card (4) plus the inline math spans in each
+    // At minimum, one block formula per card (5) plus the inline math spans in each
     // card's description — exact count is fragile against copy changes, so assert a
     // floor and that nothing failed to parse, rather than a brittle exact number.
     const katexBlocks = page.locator('.katex');
@@ -46,8 +51,15 @@ test.describe('/intelligence (IntelligencePage)', () => {
     // midpoint, so the default (unscrolled) view was still clipped on both sides. The fix
     // is justify-content: flex-start, so the formula's beginning is flush left and always
     // fully visible without user interaction — assert that directly via scrollLeft.
+    //
+    // Selects the formula box via its own `.thin-scrollbar-x` class (added along with the
+    // slim custom scrollbar styling) rather than ".katex.first()" — the Overall AIS card's
+    // description contains several *inline* KaTeX spans (w_E, w_G, ...) that appear before
+    // the block formula in DOM order, so ".katex.first()" resolved to one of those instead
+    // of the block formula box.
     await page.goto('/intelligence');
-    const overallFormulaBox = page.getByText('Overall Agent Integrity Score').locator('../..').locator('.katex').first().locator('../..');
+    const overallCard = page.getByRole('heading', { name: 'Overall Agent Integrity Score' }).locator('../..');
+    const overallFormulaBox = overallCard.locator('.thin-scrollbar-x');
     await expect(overallFormulaBox).toBeVisible();
     const scrollLeft = await overallFormulaBox.evaluate((el) => el.scrollLeft);
     expect(scrollLeft).toBe(0);
@@ -63,8 +75,14 @@ test.describe('/intelligence (IntelligencePage)', () => {
     await page.waitForLoadState('networkidle');
     const hasAgent = await page.getByText('Cryptographic Address').isVisible().catch(() => false);
     if (hasAgent) {
-      await expect(page.getByText('Agent Integrity Score (AIS)', { exact: true })).toBeVisible();
-      await expect(page.getByText(/\/ 1000|No reading yet/)).toBeVisible();
+      // Scoped to the radar Panel itself (by its own heading, "<agent> // Multi-Dimensional
+      // Integrity Radar") -- the page also has a live "AIS Mechanics Explorer" simulator
+      // whose own "Resulting AIS" readout renders an unrelated "X / 1000" span, which
+      // otherwise makes an unscoped page-wide search match 2 elements (strict-mode
+      // violation).
+      const radarPanel = page.getByText(/Multi-Dimensional Integrity Radar/).locator('../..');
+      await expect(radarPanel.getByText('Agent Integrity Score (AIS)', { exact: true })).toBeVisible();
+      await expect(radarPanel.getByText(/\/ 1000|No reading yet/)).toBeVisible();
     } else {
       await expect(page.getByText(/Multi-Dimensional Integrity Radar/)).toHaveCount(0);
     }

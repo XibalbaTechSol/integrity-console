@@ -24,7 +24,9 @@ integrity-seed-audit = "integrity_demo.seed_audit:main"
 packages = ["src/integrity_demo"]
 
 [tool.uv.sources]
-integrity-sdk = { path = "../../integrity-sdk" }
+# The SDK lives in integrity-core. Pinned to its main branch until the integrity-sdk-v0.1.0 tag
+# exists (integrity-core docs/EXECUTION_PLAN.md A2), then pinned to that tag.
+integrity-sdk = { git = "https://github.com/XibalbaTechSol/integrity-core", subdirectory = "integrity-sdk", branch = "main" }
 
 [dependency-groups]
 dev = [

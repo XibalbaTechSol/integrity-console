@@ -1,0 +1,73 @@
+name: CI
+
+# Per-package validation for the console. Split from integrity-core's CI
+# (integrity-core docs/EXECUTION_PLAN.md, A1).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: integrity-console-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+  UV_VERSION: "0.11.x"
+
+jobs:
+  userapi:
+    name: integrity-userapi (pytest)
+    runs-on: ubuntu-latest
+    services:
+      userapi-postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: integrity_userapi
+          POSTGRES_USER: integrity
+          POSTGRES_PASSWORD: integrity_dev_only
+        ports:
+          - "5435:5432"
+        options: >-
+          --health-cmd "pg_isready -U integrity -d integrity_userapi"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: uv sync
+        working-directory: integrity-userapi
+      - run: uv run pytest
+        working-directory: integrity-userapi
+
+  dashboard:
+    name: integrity-dashboard (build + lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: npm ci --legacy-peer-deps
+        working-directory: integrity-dashboard
+      - run: npm run build
+        working-directory: integrity-dashboard
+      - run: npm run lint
+        working-directory: integrity-dashboard
+      - run: uv run pytest
+        working-directory: integrity-dashboard/demo
+

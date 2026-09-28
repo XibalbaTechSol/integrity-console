@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -33,6 +34,7 @@ export default function SettingsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+      <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Settings</h1>
       <SubTabs 
         tabs={[
           { id: 'appearance', label: 'Appearance', icon: <Palette size={16} /> },
@@ -44,7 +46,7 @@ export default function SettingsPage() {
         setActiveTab={setActiveTab as any} 
       />
 {/* Settings Content */}
-      <div style={{ flex: 1 }} className="card">
+      <div style={{ flex: 1 }} className="card" role="tabpanel" id={`settings-panel-${activeTab}`} aria-labelledby={`settings-tab-${activeTab}`}>
         {activeTab === 'appearance' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Appearance Settings</h3>
@@ -79,10 +81,11 @@ export default function SettingsPage() {
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, marginBottom: '1rem' }}>
                 <Type size={16} /> Typography
               </label>
-              <select 
+              <label htmlFor="settings-font" style={{ display: 'contents' }}>
+              <select id="settings-font" aria-label="Font family"
                 value={font} 
                 onChange={e => updateSettings({ font: e.target.value as any })}
-                className="button"
+                className="secondary-button"
                 style={{ width: '100%', padding: '1rem', textAlign: 'left', marginBottom: '1rem' }}
               >
                 <option value="System Default">System Default</option>
@@ -91,10 +94,11 @@ export default function SettingsPage() {
                 <option value="Fira Code">Fira Code (Monospace)</option>
                 <option value="Playfair Display">Playfair Display (Serif)</option>
               </select>
+              </label>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Font Size: {fontSize}px</span>
-                <input 
+                <input aria-label="Font size"
                   type="range" 
                   min="12" 
                   max="24" 
@@ -144,7 +148,7 @@ export default function SettingsPage() {
                   <button 
                     key={mode}
                     onClick={() => setLayoutMode(mode)}
-                    className="button"
+                    className="secondary-button"
                     style={{ 
                       flex: 1, 
                       padding: '1rem',
@@ -167,7 +171,7 @@ export default function SettingsPage() {
                   <button 
                     key={s}
                     onClick={() => updateSettings({ headerStyle: s })}
-                    className="button"
+                    className="secondary-button"
                     style={{ 
                       flex: 1, 
                       padding: '1rem',
@@ -200,7 +204,7 @@ export default function SettingsPage() {
                   Keys are issued by userapi with a fixed AIS trust ceiling — there's no per-key name or scoped permissions on the backend yet.
                 </p>
                 {createError && <div style={{ color: '#f44336', fontSize: '0.85rem' }}>{createError}</div>}
-                <button onClick={handleCreateKey} disabled={creating} className="button primary" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Plus size={16} /> {creating ? 'Generating…' : 'Generate Key'}</button>
+                <button onClick={handleCreateKey} disabled={creating} className="primary-button" style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Plus size={16} /> {creating ? 'Generating…' : 'Generate Key'}</button>
               </div>
             )}
 

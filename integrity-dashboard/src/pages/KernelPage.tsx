@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import { ShieldAlert, Search, RefreshCw, Cpu, Users, Wallet, Gauge } from 'lucide-react';
 import { Panel } from '../components/shared/Panel';
 import { INTEGRITY_ACCOUNT_ABI, INTEGRITY_KERNEL_ABI } from '../chain/kernel';
+import { withRetry } from '../chain/retry';
 import { RPC_URL, KERNEL_REFERENCE } from '../constants';
 
 // Read-only viewer for a Phase I IntegrityAccount + its currently-bound IntegrityKernel
@@ -127,6 +128,7 @@ export default function KernelPage() {
     setLoading(true);
     setError(null);
     try {
+      await withRetry(async () => {
       const provider = new ethers.JsonRpcProvider(RPC_URL);
       const accountCode = await provider.getCode(addr);
       if (accountCode === '0x') {
@@ -246,10 +248,17 @@ export default function KernelPage() {
         epochLengthSeconds,
       });
       localStorage.setItem(LAST_ADDRESS_KEY, addr);
+      });
     } catch (e) {
       setKernel(null);
+      const message = e instanceof Error ? e.message : '';
+      const isCallException = /CALL_EXCEPTION|missing revert data|execution reverted/i.test(message);
       setError(
-        e instanceof Error ? `Could not read this address as an IntegrityAccount: ${e.message}` : 'Could not read this address as an IntegrityAccount.',
+        isCallException
+          ? 'This address did not respond as a compatible IntegrityAccount on the selected network. Verify the address and network, then retry.'
+          : message
+            ? `Could not read this address as an IntegrityAccount: ${message}`
+            : 'Could not read this address as an IntegrityAccount.',
       );
     } finally {
       setLoading(false);
@@ -274,6 +283,7 @@ export default function KernelPage() {
       transition={{ duration: 0.28, ease: 'easeOut' }}
       style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
     >
+
       <Panel title="Kernel & guardians" icon={<Cpu size={16} />}>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 var(--space-4)' }}>
           Read-only viewer for a Phase I <code>IntegrityAccount</code> and whichever{' '}

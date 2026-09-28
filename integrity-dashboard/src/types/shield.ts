@@ -7,11 +7,20 @@ export interface ShieldDevice {
     last_seen_at: string | null;
     enrolled_at: string;
     agent_label?: string;
+    /** Canonical agent identity returned by Shield's enriched device record. */
     integrity_agent_id?: string | null;
     agent_id?: string | null;
-    device_agent_pair?: { pair_id?: string; binding?: string };
+    device_agent_pair?: {
+        pair_id: string;
+        device_id: string;
+        shield_agent_id: string;
+        memory_namespace: string;
+        binding: string;
+    } | null;
 }
 
+// One row of a device's agent-binding audit trail (GET /api/shield/devices/{id}/agent-bindings).
+// A device has exactly one current binding (unbound_at null); earlier rows are history.
 export interface ShieldAgentBinding {
     id: number;
     tenant_id: string;
@@ -54,15 +63,22 @@ export interface ShieldDashboardSummary {
     latest_decisions: ShieldDecision[];
     latest_metrics: Record<string, unknown> | null;
     integrations: ShieldIntegration[];
-    exporter_status: Array<{ device_id: string; status: { did_registered?: boolean; oracle_readback?: unknown } }>;
+    exporter_status: ShieldExporterStatus[];
 }
 
 export interface ShieldExporterStatus {
     device_id: string;
-    did_registered: boolean;
-    bcc_middleware: string;
-    oracle_readback: string;
-    synthetic?: boolean;
+    status: {
+        did_registered?: boolean;
+        bcc_middleware?: string;
+        oracle_readback?: string;
+        synthetic?: boolean;
+        opa?: { healthy?: boolean; last_checked_at?: string | null; last_error?: string | null };
+        policy?: { healthy?: boolean; active_policy_version?: string; active_policy_hash?: string; last_error?: string | null };
+        endpoint_posture?: 'compliant' | 'noncompliant' | 'unknown' | string;
+        sensors?: { attached?: boolean; lost_events?: number; last_event_at?: string | null };
+        exporter?: { export_failures?: number; queue_depth?: number | null };
+    };
     updated_at?: string;
 }
 

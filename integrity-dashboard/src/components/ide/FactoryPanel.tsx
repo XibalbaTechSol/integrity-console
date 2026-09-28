@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // @ts-nocheck
 import { useState, useRef, useEffect } from 'react';
 import { ethers } from 'ethers';
@@ -303,7 +304,7 @@ export function FactoryPanel() {
   const lineCount = code.split('\n').length;
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ flex: 1, minHeight: 0, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
       {/* Visual Assertions for Testing Compatibility */}
       <span style={{ display: 'none' }}>Contract Logic Template</span>
 
@@ -311,10 +312,13 @@ export function FactoryPanel() {
       <div 
         style={{ 
           display: 'grid', 
-          gridTemplateColumns: isMobile ? '1fr' : '240px 1fr 340px', 
+          gridTemplateColumns: isMobile ? '1fr' : '240px minmax(0, 1fr) 340px',
+          gridTemplateRows: isMobile ? 'auto minmax(0, 1fr) auto' : 'minmax(0, 1fr)',
           background: '#141417', 
           flex: 1,
-          overflow: 'hidden'
+          minHeight: 0,
+          minWidth: 0,
+          overflow: isMobile ? 'auto' : 'hidden'
         }}
       >
         {/* SIDEBAR 1: Explorer Tree */}
@@ -428,10 +432,11 @@ export function FactoryPanel() {
               borderBottom: '1px solid var(--glass-border)', 
               display: 'flex', 
               justifyContent: 'space-between', 
-              alignItems: 'center', 
+              alignItems: 'center',
               padding: '8px 16px',
               minHeight: '45px',
-              gap: '12px'
+              gap: '12px',
+              flexWrap: isMobile ? 'wrap' : 'nowrap'
             }}
           >
             {/* Open File Tab */}
@@ -456,8 +461,8 @@ export function FactoryPanel() {
             </div>
 
             {/* AI Copilot Input */}
-            <div style={{ flex: '1 1 auto', display: 'flex', gap: '8px', padding: '0 8px', minWidth: '100px', maxWidth: '500px' }}>
-              <input
+            <div style={{ flex: isMobile ? '1 1 100%' : '1 1 240px', display: 'flex', gap: '8px', padding: '0 8px', minWidth: isMobile ? 0 : '180px', maxWidth: isMobile ? 'none' : '500px', order: isMobile ? 3 : 0 }}>
+              <input aria-label="AI Contract Copilot"
                 type="text"
                 placeholder="AI Contract Copilot (Powered by SDK Telemetry) - e.g. 'Add a function to withdraw funds'"
                 style={{
@@ -491,8 +496,8 @@ export function FactoryPanel() {
               <button 
                 onClick={handleBuild}
                 disabled={isCompiling || isDeploying}
-                className="btn btn-ghost"
-                style={{ padding: '5px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                className="secondary-button"
+                style={{ padding: '5px 12px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', color: '#f8fafc', border: '1px solid #3b3b45', background: '#24242b' }}
               >
                 {isCompiling ? <RefreshCw className="animate-spin" size={12} /> : <Hammer size={12} />}
                 <span>Build Source</span>
@@ -501,7 +506,7 @@ export function FactoryPanel() {
               <button 
                 onClick={() => handleDeploy()}
                 disabled={isDeploying || isCompiling}
-                className="btn btn-primary"
+                className="primary-button"
                 style={{ padding: '5px 14px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, boxShadow: '0 0 10px rgba(212, 175, 55, 0.2)' }}
               >
                 {isDeploying ? <RefreshCw className="animate-spin" size={12} /> : <Play size={12} />}
@@ -517,7 +522,7 @@ export function FactoryPanel() {
               style={{ 
                 width: '36px', 
                 background: '#19191d', 
-                color: '#65656c', 
+                color: '#a3a3ad',
                 fontFamily: 'monospace', 
                 fontSize: '0.75rem', 
                 textAlign: 'right', 
@@ -559,7 +564,7 @@ export function FactoryPanel() {
               />
 
               {/* Raw editable Textarea on top */}
-              <textarea
+              <textarea aria-label="Contract source editor"
                 ref={textareaRef}
                 value={code}
                 onChange={e => setCode(e.target.value)}
@@ -644,7 +649,7 @@ export function FactoryPanel() {
             </div>
             
             {/* Terminal Logs View */}
-            <div style={{ flex: 1, padding: '8px 16px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem', color: '#a5a5a9', lineHeight: 1.4 }}>
+            <div role="region" aria-label="Terminal output" tabIndex={0} style={{ flex: 1, padding: '8px 16px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.7rem', color: '#a5a5a9', lineHeight: 1.4 }}>
               {terminalTab === 'terminal' ? (
                 <>
                   {terminalLogs.map((log, index) => (
@@ -692,18 +697,18 @@ export function FactoryPanel() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Outcomes</label>
-                <input type="number" min={2} max={8} className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktOutcomes} onChange={e => setMktOutcomes(e.target.value)} />
+                <input aria-label="Market outcomes" type="number" min={2} max={8} className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktOutcomes} onChange={e => setMktOutcomes(e.target.value)} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Min AIS</label>
-                <input type="number" className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktMinAis} onChange={e => setMktMinAis(e.target.value)} />
+                <input aria-label="Market minimum AIS" type="number" className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktMinAis} onChange={e => setMktMinAis(e.target.value)} />
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>Resolve Deadline (hours)</label>
-              <input type="number" className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktDeadlineHours} onChange={e => setMktDeadlineHours(e.target.value)} />
+              <input aria-label="Market resolve deadline hours" type="number" className="input" style={{ fontSize: '0.75rem', padding: '6px', background: '#101014', border: '1px solid var(--glass-border)', color: 'var(--text-primary)' }} value={mktDeadlineHours} onChange={e => setMktDeadlineHours(e.target.value)} />
             </div>
-            {!walletAddress && <button className="btn btn-primary" style={{ fontSize: '0.72rem', padding: '6px' }} onClick={connectWallet}>Connect Wallet</button>}
+            {!walletAddress && <button className="primary-button" style={{ fontSize: '0.72rem', padding: '6px' }} onClick={connectWallet}>Connect Wallet</button>}
           </div>
 
           {/* Real deploy receipt */}
@@ -1047,7 +1052,7 @@ export function ContractsListAndDetails() {
 
             <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)', padding: '6px 12px', minWidth: '220px' }}>
               <Search size={14} style={{ color: 'var(--text-muted)', marginRight: '8px' }} />
-              <input
+              <input aria-label="Search owned contracts"
                 type="text"
                 placeholder="Search contracts..."
                 value={searchQuery}

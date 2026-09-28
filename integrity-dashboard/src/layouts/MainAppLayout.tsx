@@ -1,34 +1,27 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { AppHeader } from '../components/AppHeader';
 import { useDashboard } from '../context/DashboardContext';
-import { useIsMobile } from '../utils/useIsMobile';
+import '../pages/ProtocolDashboardPage.css';
 
 export default function MainAppLayout() {
   const { layoutMode } = useDashboard();
   const location = useLocation();
-  const isMobile = useIsMobile(768);
-  const isCortex = location.pathname === '/cortex';
-  const isFullWidth = location.pathname === '/developer' || isCortex;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   return (
-    <div className={isCortex ? 'main-app-layout memory-route' : 'main-app-layout'} style={{ display: 'flex', flexDirection: layoutMode === 'header' ? 'column' : 'row', minHeight: '100vh', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>
-      {layoutMode === 'sidebar' && <div className="memory-sidebar-shell"><Sidebar /></div>}
-      {layoutMode === 'header' && <AppHeader />}
-      
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', minHeight: layoutMode === 'header' ? 'calc(100vh - 70px)' : '100vh' }}>
-        <div style={{ 
-          padding: isFullWidth ? '0' : isMobile ? '1rem' : '2rem 3rem',
-          maxWidth: isFullWidth ? 'none' : '1400px', 
-          margin: '0 auto',
-          width: '100%',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
+    <div className="protocol-app" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)', color: 'var(--text-primary)' }}>
+      {layoutMode === 'sidebar' && <Sidebar />}
+      <main className="protocol-main" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <AppHeader />
+        <div className="protocol-content" style={{ flex: 1 }}>
           <Outlet />
         </div>
-      </div>
+      </main>
     </div>
   );
 }

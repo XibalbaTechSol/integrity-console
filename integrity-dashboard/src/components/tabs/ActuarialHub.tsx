@@ -27,6 +27,7 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
 
   const [markets, setMarkets] = useState<MarketSummaryDto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [marketsError, setMarketsError] = useState<string | null>(null);
   const [logs, setLogs] = useState<ExecutionLog[]>([]);
   // Agent.eth_address holds the DID; the real on-chain SovereignAgent address (needed to
   // route every write via execute, and to tell if this agent created a market) is resolved.
@@ -50,17 +51,34 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
 
   const fetchMarkets = useCallback(async () => {
     setLoading(true);
+    setMarketsError(null);
     try { setMarkets(await oracle.listMarkets()); }
-    catch { setMarkets([]); }
+    catch {
+      setMarkets([]);
+      setMarketsError('Live market data is unavailable. Check that the Oracle API is running, then retry.');
+    }
     finally { setLoading(false); }
   }, []);
 
   useEffect(() => { if (mode === 'markets') fetchMarkets(); }, [mode, fetchMarkets]);
 
   const [benchmarks, setBenchmarks] = useState<BenchmarkDto[]>([]);
+  const [benchmarksLoading, setBenchmarksLoading] = useState(false);
+  const [benchmarksError, setBenchmarksError] = useState<string | null>(null);
   useEffect(() => {
     if (mode !== 'stability') return;
-    oracle.getBenchmarks().then(setBenchmarks).catch(() => setBenchmarks([]));
+    let active = true;
+    setBenchmarksLoading(true);
+    setBenchmarksError(null);
+    oracle.getBenchmarks()
+      .then((value) => { if (active) setBenchmarks(value); })
+      .catch(() => {
+        if (!active) return;
+        setBenchmarks([]);
+        setBenchmarksError('Benchmark telemetry is unavailable. Check the Oracle API before retrying.');
+      })
+      .finally(() => { if (active) setBenchmarksLoading(false); });
+    return () => { active = false; };
   }, [mode]);
 
   useEffect(() => {
@@ -188,15 +206,20 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
     // oracle (GET /v1/benchmarks) — behavioral stability + grounding per underlying model.
     return (
       <div className="flex-col gap-6">
+        <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Model stability</h1>
         <Panel title="Model Stability Leaderboard" icon={<BarChart2 size={18} />}>
           <div className="text-muted" style={{ fontSize: '0.8rem', marginBottom: 'var(--space-3)' }}>
             Underlying models ranked by real telemetry: behavioral stability (1 − variance) and grounding fidelity, aggregated across every agent using them.
           </div>
-          <div className="table-container">
+          <div className="table-container" role="region" aria-label="Market records" tabIndex={0}>
             <table className="table" style={{ fontSize: '0.85rem' }}>
               <thead><tr><th>Model</th><th>Provider</th><th>Sim. AIS</th><th>Stability</th><th>Grounding</th><th>Samples</th></tr></thead>
               <tbody>
-                {benchmarks.length === 0 ? (
+                {benchmarksLoading ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted">Loading benchmark telemetry…</td></tr>
+                ) : benchmarksError ? (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted" role="status">{benchmarksError}</td></tr>
+                ) : benchmarks.length === 0 ? (
                   <tr><td colSpan={6} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted">No benchmark telemetry yet.</td></tr>
                 ) : benchmarks.map((b) => (
                   <tr key={b.model_name}>
@@ -225,6 +248,7 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
 
   return (
     <div className="flex-col gap-6">
+      <h1 style={{ margin: 0, fontSize: '1.6rem' }}>Prediction markets</h1>
       <Panel title="Deploy a Market" icon={<Zap size={18} />}>
         <div className="grid-cols-2" style={{ gap: 'var(--space-6)' }}>
           <div className="flex-col gap-4">
@@ -253,9 +277,9 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
               <input id="mkt-dur" type="number" className="input" value={durationHours} onChange={e => setDurationHours(e.target.value)} />
             </div>
             {!walletAddress ? (
-              <button className="btn btn-primary" onClick={connectWallet}>Connect Wallet</button>
+              <button className="primary-button" onClick={connectWallet}>Connect Wallet</button>
             ) : (
-              <button className="btn btn-primary" onClick={handleCreateMarket} disabled={isCreating || !selectedAgent || !question.trim()}>
+              <button className="primary-button" onClick={handleCreateMarket} disabled={isCreating || !selectedAgent || !question.trim()}>
                 {isCreating ? 'Deploying…' : <>Deploy Market <Plus size={16} style={{ marginLeft: 8 }} /></>}
               </button>
             )}
@@ -280,8 +304,8 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
       </Panel>
 
       <Panel title="Live Markets" icon={<Handshake size={18} />}
-        action={<button className="btn btn-icon" onClick={fetchMarkets} disabled={loading}><RefreshCw size={14} className={loading ? 'spin' : ''} /></button>}>
-        <div className="table-container">
+        action={<button aria-label="Refresh live markets" className="secondary-button" onClick={fetchMarkets} disabled={loading}><RefreshCw size={14} className={loading ? 'spin' : ''} /></button>}>
+        <div className="table-container" role="region" aria-label="Market allocations" tabIndex={0}>
           <table className="table">
             <thead>
               <tr><th>Question</th><th>Outcomes</th><th>Min AIS</th><th>Total Staked</th><th>Deadline</th><th>Status</th><th>Action</th></tr>
@@ -289,6 +313,8 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
             <tbody>
               {loading ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>Loading real markets…</td></tr>
+              ) : marketsError ? (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted" role="status">{marketsError}</td></tr>
               ) : markets.length === 0 ? (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>No markets deployed yet.</td></tr>
               ) : markets.map(m => {
@@ -314,21 +340,21 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
                     <td><StatusBadge status={m.resolved ? 'resolved' : past ? 'pending' : 'active'} /></td>
                     <td>
                       {m.resolved ? (
-                        <button className="btn btn-ghost" style={{ padding: '4px 8px', fontSize: '0.72rem', color: 'var(--success)' }}
+                        <button className="secondary-button" style={{ padding: '4px 8px', fontSize: '0.72rem', color: 'var(--success)' }}
                           disabled={actionBusy === m.address} onClick={() => handleClaim(m)}>
                           <Trophy size={12} style={{ marginRight: 4 }} /> Claim
                         </button>
                       ) : isCreator && past ? (
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {Array.from({ length: m.outcome_count }).map((_, i) => (
-                            <button key={i} className="btn btn-ghost" style={{ padding: '3px 7px', fontSize: '0.68rem', color: 'var(--primary)' }}
+                            <button key={i} className="secondary-button" style={{ padding: '3px 7px', fontSize: '0.68rem', color: 'var(--primary)' }}
                               disabled={actionBusy === m.address} onClick={() => handleResolve(m, i)}>
                               <Gavel size={10} style={{ marginRight: 2 }} /> #{i}
                             </button>
                           ))}
                         </div>
                       ) : (
-                        <button className="btn" style={{ padding: '4px 8px', fontSize: '0.72rem' }}
+                        <button className="secondary-button" style={{ padding: '4px 8px', fontSize: '0.72rem' }}
                           disabled={!selectedAgent || past} onClick={() => { setPosMarket(m); setPosOutcome('0'); }}>
                           Enter Position
                         </button>
@@ -348,7 +374,7 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
           <div style={{ position: 'relative', width: '100%', maxWidth: 460, background: 'var(--bg-secondary)', border: '1px solid var(--primary)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
             <div style={{ padding: 'var(--space-5)', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Enter Position</h3>
-              <button onClick={() => !posBusy && setPosMarket(null)} className="btn btn-icon" aria-label="Close"><X size={18} /></button>
+              <button onClick={() => !posBusy && setPosMarket(null)} className="secondary-button" aria-label="Close"><X size={18} /></button>
             </div>
             <div style={{ padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ fontSize: '0.85rem' }}>{posMarket.question}</div>
@@ -365,7 +391,7 @@ export function ActuarialHub({ mode }: { mode: 'markets' | 'stability' }) {
               <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                 Pulled from your agent's SovereignAgent (topped up from your wallet if short), AIS-gated on entry.
               </div>
-              <button className="btn btn-primary" onClick={handleEnterPosition} disabled={posBusy}>
+              <button className="primary-button" onClick={handleEnterPosition} disabled={posBusy}>
                 {posBusy ? 'Submitting…' : 'Stake Position'}
               </button>
             </div>
