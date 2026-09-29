@@ -29,7 +29,7 @@ See [`docs/audits/2026-08-06-status.md`](docs/audits/2026-08-06-status.md), the 
 
 ## Ecosystem Role: 👁️ The Human Control Center
 
-This component is the **conscious observer** in a three-repository ecosystem designed as a living organism (this directory is a component of `integrity-core`, not a fourth repository):
+This component is the **conscious observer** in a four-repository ecosystem designed as a living organism (`integrity-console`, this directory's own repository since the 2026-09-28 A1 split, alongside `integrity-core`, `xibalba-cortex`, and `xibalba-shield`):
 
 | Repository | Analogy | Role |
 |---|---|---|

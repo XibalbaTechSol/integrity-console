@@ -3,10 +3,12 @@
 **Updated:** 2026-08-29
 **Status:** Presentation and operator-workflow proof of concept; not standalone production.
 
-**Corrected 2026-08-12:** this component was previously developed as a separate `integrity-mvp`
-repository (that standalone repo is now stale/superseded, not deleted). It is a component of
-`integrity-core`, not a separate repository — "this repo" below refers to `integrity-core`, this
-document to the `integrity-dashboard/` component specifically.
+**Corrected 2026-08-12, superseded 2026-09-28:** this component was previously developed as a
+separate `integrity-mvp` repository (that standalone repo is now stale/superseded, not deleted),
+then merged into `integrity-core` as the `integrity-dashboard/` component. `integrity-core`
+`docs/EXECUTION_PLAN.md` Phase A1 (2026-09-28) split it back out, with full history, into its own
+repository, `integrity-console` — see this repository's own `README.md`. "This repo" below refers
+to `integrity-console`, this document to its `integrity-dashboard/` directory specifically.
 
 ## 1. Purpose
 
@@ -26,7 +28,7 @@ document to the `integrity-dashboard/` component specifically.
 
 ## 3. Ecosystem Role: 👁️ The Human Control Center
 
-This component is the conscious observer in a three-repository ecosystem designed as a living organism (this directory is a component of `integrity-core`, not a fourth repository):
+This component is the conscious observer in a four-repository ecosystem designed as a living organism (`integrity-console`, this directory's own repository since the 2026-09-28 A1 split, alongside `integrity-core`, `xibalba-cortex`, and `xibalba-shield`):
 
 - **🧠 The Brain** (`xibalba-cortex`): The agent's cognitive store — memories, context, reasoning provenance, session Merkle roots.
 - **🛡️ The Immune System** (`xibalba-shield`): Endpoint enforcement, kernel sensing, policy gating, semantic guardrails.
