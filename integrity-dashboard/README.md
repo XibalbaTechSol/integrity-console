@@ -57,7 +57,7 @@ See [`../docs/architecture/ecosystem-dependencies.md`](../docs/architecture/ecos
 
 ## System relationship
 
-`integrity-dashboard/` sits at the top of a three-repository operator stack:
+`integrity-dashboard/` sits in a four-repository operator stack:
 
 `integrity-core/integrity-dashboard -> xibalba-cortex -> integrity-core`
 

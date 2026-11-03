@@ -6,7 +6,7 @@
 **Corrected 2026-08-12, superseded 2026-09-28:** this component was previously developed as a
 separate `integrity-mvp` repository (that standalone repo is now stale/superseded, not deleted),
 then merged into `integrity-core` as the `integrity-dashboard/` component. `integrity-core`
-`docs/EXECUTION_PLAN.md` Phase A1 (2026-09-28) split it back out, with full history, into its own
+`docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md` Phase A1 (2026-09-28) split it back out, with full history, into its own
 repository, `integrity-console` — see this repository's own `README.md`. "This repo" below refers
 to `integrity-console`, this document to its `integrity-dashboard/` directory specifically.
 

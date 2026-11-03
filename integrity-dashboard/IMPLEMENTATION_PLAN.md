@@ -4,7 +4,7 @@
 **Repository:** `integrity-console` (component: `integrity-dashboard/`) — previously a separate
 `integrity-mvp` repository (corrected 2026-08-12, that repo is now stale/superseded), then merged
 into `integrity-core`, then split back out with full history into its own repository,
-`integrity-console`, in `integrity-core` `docs/EXECUTION_PLAN.md` Phase A1 (2026-09-28).
+`integrity-console`, in `integrity-core` `docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md` Phase A1 (2026-09-28).
 **Role:** React/Vite presentation and operator-workflow layer for the Integrity Protocol product stack.
 
 This document merges the repo README, SPECIFICATION.md, PRODUCTION_GAPS.md, docs/audits/2026-08-06-status.md, archived product plans, current wiki work, and cross-repo specifications into one implementation task ledger. Each capability is marked Closed, Planned, Blocked, or Todo.
