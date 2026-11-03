@@ -3,8 +3,10 @@
 The operator console for the Integrity Protocol: the web dashboard agents are registered and
 monitored through, the user-account API behind it, and the demo scenario engine.
 
+The cross-product execution authority is maintained in [integrity-core/docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md](https://github.com/XibalbaTechSol/integrity-core/blob/main/docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md). Console documentation defines UI and API implementation only; the console holds no authority over Integrity identity, packs, receipts, Shield enforcement, or Cortex content.
+
 It was split out of [integrity-core](https://github.com/XibalbaTechSol/integrity-core) with its
-full history (integrity-core `docs/EXECUTION_PLAN.md`, Phase A1). The console is a *client* of
+full history (integrity-core `docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md`, Phase A1). The console is a *client* of
 the protocol: it reads the oracle's HTTP API and the chain, and talks to Shield and Cortex. It
 holds no protocol logic of its own.
 
