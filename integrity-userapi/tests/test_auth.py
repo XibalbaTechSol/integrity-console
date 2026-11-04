@@ -195,3 +195,102 @@ async def test_login_success_resets_the_failure_count(client: httpx.AsyncClient)
     assert still_ok.status_code == 200
 
     login_rate_limiter.reset()
+
+
+async def test_google_auth_with_valid_id_token_creates_user_and_wallet(
+    client: httpx.AsyncClient, db_pool, monkeypatch
+) -> None:
+    from app.config import settings
+
+    fake_userinfo = {
+        "sub": "google-user-sub-12345",
+        "email": "newgoogleuser@example.com",
+        "email_verified": "true",
+        "aud": settings.google_client_id,
+    }
+
+    async def fake_get(self, url, **kwargs):
+        if "tokeninfo" in str(url):
+            return httpx.Response(200, json=fake_userinfo, request=httpx.Request("GET", str(url)))
+        return httpx.Response(404, request=httpx.Request("GET", str(url)))
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", fake_get)
+
+    resp = await client.post("/auth/google", json={"id_token": "valid.dummy.jwt"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["token_type"] == "bearer"
+    assert data["access_token"]
+
+    # Verify user was created in DB
+    user_row = await db_pool.fetchrow(
+        "SELECT id, email, google_id FROM users WHERE email = $1", "newgoogleuser@example.com"
+    )
+    assert user_row is not None
+    assert user_row["google_id"] == "google-user-sub-12345"
+
+    # Verify custodial wallet was initialized
+    wallet_row = await db_pool.fetchrow(
+        "SELECT app_wallet_address, itk_balance_wei FROM user_wallets WHERE user_id = $1",
+        user_row["id"],
+    )
+    assert wallet_row is not None
+    assert wallet_row["app_wallet_address"].startswith("0x")
+
+
+async def test_google_auth_links_existing_email_user(
+    client: httpx.AsyncClient, db_pool, monkeypatch
+) -> None:
+    from app.config import settings
+
+    # 1. Register normal user
+    email = "linkme@example.com"
+    await _register(client, email=email)
+
+    fake_userinfo = {
+        "sub": "google-link-sub-99999",
+        "email": email,
+        "email_verified": True,
+        "aud": settings.google_client_id,
+    }
+
+    async def fake_get(self, url, **kwargs):
+        if "tokeninfo" in str(url):
+            return httpx.Response(200, json=fake_userinfo, request=httpx.Request("GET", str(url)))
+        return httpx.Response(404, request=httpx.Request("GET", str(url)))
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", fake_get)
+
+    resp = await client.post("/auth/google", json={"id_token": "valid.token"})
+    assert resp.status_code == 200
+
+    # User's google_id should now be set
+    user_row = await db_pool.fetchrow("SELECT id, google_id FROM users WHERE email = $1", email)
+    assert user_row["google_id"] == "google-link-sub-99999"
+
+
+async def test_google_auth_rejects_unverified_email(
+    client: httpx.AsyncClient, monkeypatch
+) -> None:
+    from app.config import settings
+
+    fake_userinfo = {
+        "sub": "unverified-sub-1",
+        "email": "unverified@example.com",
+        "email_verified": False,
+        "aud": settings.google_client_id,
+    }
+
+    async def fake_get(self, url, **kwargs):
+        return httpx.Response(200, json=fake_userinfo, request=httpx.Request("GET", str(url)))
+
+    monkeypatch.setattr(httpx.AsyncClient, "get", fake_get)
+
+    resp = await client.post("/auth/google", json={"id_token": "unverified.token"})
+    assert resp.status_code == 401
+    assert "email not verified" in resp.json()["detail"].lower()
+
+
+async def test_google_auth_requires_credentials(client: httpx.AsyncClient) -> None:
+    resp = await client.post("/auth/google", json={})
+    assert resp.status_code == 400

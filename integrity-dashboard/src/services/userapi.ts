@@ -175,6 +175,14 @@ export const userapi = {
         setToken(token.access_token);
         return token;
     },
+    loginWithGoogle: async (params: { id_token?: string; code?: string; redirect_uri?: string; code_verifier?: string }) => {
+        const token = await request<TokenResponse>('/auth/google', {
+            method: 'POST',
+            body: JSON.stringify(params),
+        });
+        setToken(token.access_token);
+        return token;
+    },
     // Revokes the session server-side (see integrity-userapi's /auth/logout, which now also
     // clears the cookie) before dropping the local marker -- previously this only cleared
     // local state and never told the server, so the JWT stayed valid until it expired.

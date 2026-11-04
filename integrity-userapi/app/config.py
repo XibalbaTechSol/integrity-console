@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     # --- App ---
     app_name: str = "integrity-userapi"
 
+    # --- Google OAuth / GIS ---
+    google_client_id: str = "441049685638-7d1c1nd9s0rdmvvqm66meno6be98i9qv.apps.googleusercontent.com"
+    google_client_secret: str = ""
+
     # --- CORS ---
     # 4173 is the local Vite preview port and 5173 is `npm run dev`'s default;
     # 5174 is the isolated validation port; 5190 covers an
