@@ -28,12 +28,10 @@ test.describe('/settings (SettingsPage)', () => {
     expect(errors, `Uncaught errors: ${errors.map(e => e.message).join('; ')}`).toEqual([]);
   });
 
-  test('Appearance tab: switching theme updates the document data-theme attribute', async ({ page }) => {
+  test('Appearance tab: document maintains the canonical dark theme', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('button', { name: 'Cyber Mode' }).click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'cyber');
-    await page.getByRole('button', { name: 'Dark Mode' }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.getByText('The console uses a single dark palette')).toBeVisible();
   });
 
   test('Appearance tab: font size slider updates the displayed value', async ({ page }) => {
@@ -46,7 +44,7 @@ test.describe('/settings (SettingsPage)', () => {
 
   test('Branding tab: app name persists to localStorage under appSettings', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('button', { name: /Branding & Layout/ }).click();
+    await page.getByRole('tab', { name: /Branding & Layout/ }).click();
     await expect(page.getByRole('heading', { name: 'Branding & Layout' })).toBeVisible();
     const nameInput = page.locator('input[type="text"]').first();
     await nameInput.fill('E2E Test Protocol');
@@ -58,31 +56,32 @@ test.describe('/settings (SettingsPage)', () => {
 
   test('Branding tab: navigation layout toggle switches sidebar to header mode live', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('button', { name: /Branding & Layout/ }).click();
-    await expect(page.locator('.memory-sidebar-shell, aside').first()).toBeVisible();
-    await page.getByRole('button', { name: 'Header Navigation' }).click();
-    await expect(page.locator('.memory-sidebar-shell')).toHaveCount(0);
+    await page.getByRole('tab', { name: /Branding & Layout/ }).click();
+    await expect(page.locator('.protocol-sidebar, aside').first()).toBeVisible();
+    await page.getByRole('button', { name: /header Navigation/i }).click();
+    await expect(page.locator('.protocol-sidebar')).toHaveCount(0);
     // Switch back so later tests in this file see the default sidebar layout.
-    await page.getByRole('button', { name: 'Sidebar Navigation' }).click();
+    await page.getByRole('button', { name: /sidebar Navigation/i }).click();
+    await expect(page.locator('.protocol-sidebar')).toBeVisible();
   });
 
   test('Developer API tab: signed-out state shows the real sign-in prompt, not fake keys', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('button', { name: /Developer API/ }).click();
+    await page.getByRole('tab', { name: /Developer API/ }).click();
     await expect(page.getByText('Sign in to manage real userapi-issued API keys.')).toBeVisible();
     await expect(page.getByText('No API keys generated yet.')).toBeVisible();
   });
 
   test('Privacy & Security tab renders the real PrivacyPanel', async ({ page }) => {
     await page.goto('/settings');
-    await page.getByRole('button', { name: /Privacy & Security/ }).click();
+    await page.getByRole('tab', { name: /Privacy & Security/ }).click();
     await expect(page.getByRole('heading', { name: 'Privacy & Security Options' })).toBeVisible();
   });
 
   test('Developer API tab: signed-in user can generate, view, and revoke a real API key', async ({ page }) => {
     await registerAndSignIn(page);
     await page.goto('/settings');
-    await page.getByRole('button', { name: /Developer API/ }).click();
+    await page.getByRole('tab', { name: /Developer API/ }).click();
 
     await expect(page.getByText('Sign in to manage real userapi-issued API keys.')).not.toBeVisible();
     await page.getByRole('button', { name: /Generate Key/ }).click();

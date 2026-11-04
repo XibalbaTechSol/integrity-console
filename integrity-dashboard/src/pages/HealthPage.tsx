@@ -690,8 +690,8 @@ export default function HealthPage() {
                         {agents.length === 0 ? (
                           <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted">No agents registered on this network.</td></tr>
                         ) : (
-                          agents.map((agent: any) => (
-                            <tr key={agent.id}>
+                          agents.map((agent: any, index: number) => (
+                            <tr key={agent.namespace_key || `${agent.id}-${agent.store_id || index}`}>
                               <td><strong style={{ color: agent.id === selectedAgent?.id ? 'var(--theme-accent)' : 'inherit' }}>{agent.alias || agent.name || agent.id}</strong></td>
                               <td><code style={{ fontSize: '0.75rem' }}>{agent.id.slice(0, 24)}...</code></td>
                               <td>{agent.verification_tier}</td>
@@ -951,8 +951,8 @@ export default function HealthPage() {
                         ) : quarantinedAgents.length === 0 ? (
                           <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--success)' }}>No agents currently quarantined.</td></tr>
                         ) : (
-                          quarantinedAgents.map(qa => (
-                            <tr key={qa.agentId}>
+                          quarantinedAgents.map((qa, index) => (
+                            <tr key={qa.agentId ? `${qa.agentId}-${index}` : `${qa.agentDid}-${index}`}>
                               <td className="mono" title={qa.agentDid}>{qa.agentDid.substring(0, 24)}...</td>
                               <td className="mono" style={{ color: 'var(--danger)' }}>{(Number(qa.lockedStake) / 1e18).toLocaleString()} ITK</td>
                               <td>

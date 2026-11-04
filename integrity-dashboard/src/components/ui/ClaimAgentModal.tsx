@@ -115,7 +115,7 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
             <Shield size={20} color="var(--theme-accent)" />
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>Claim Existing Agent</h3>
           </div>
-          <button onClick={onClose} className="secondary-button" aria-label="Close modal"><X size={20} /></button>
+          <button onClick={onClose} className="secondary-button" aria-label="Close" title="Close"><X size={20} /></button>
         </div>
 
         <div style={{ padding: 'var(--space-8)' }}>

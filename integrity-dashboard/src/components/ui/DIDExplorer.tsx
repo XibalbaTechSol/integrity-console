@@ -118,7 +118,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
             <div style={{ padding: 'var(--space-6) var(--space-8)', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-surface-light)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                     <Fingerprint size={22} style={{ color: 'var(--theme-accent)' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'white', fontFamily: 'Playfair Display, serif' }}>Sovereign Identity Explorer</h3>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'white' }}>Sovereign Identity Explorer</h3>
                 </div>
 
                 <div style={{ display: 'flex', gap: 'var(--space-2)', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: 'var(--r-md)', marginTop: isMobile ? 'var(--space-4)' : 0 }}>
@@ -214,7 +214,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                         <div style={{ width: '100px', height: '100px', borderRadius: '24px', background: 'rgba(201, 168, 76, 0.15)', border: '2px solid var(--theme-accent)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', boxShadow: '0 0 40px rgba(201, 168, 76, 0.2)' }}>
                                             <Fingerprint size={48} />
                                         </div>
-                                        <h4 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 8px', fontFamily: 'Playfair Display, serif' }}>{agent.alias || "Sovereign Node"}</h4>
+                                        <h4 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px' }}>{agent.alias || "Sovereign Node"}</h4>
                                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', background: 'var(--theme-accent-muted)', borderRadius: 'var(--r-xl)', border: '1px solid var(--border)', marginBottom: '32px' }}>
                                             <Shield size={12} style={{ color: 'var(--theme-accent)' }} />
                                             <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tier {agent.verification_tier} Guardian</span>
@@ -253,7 +253,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
                                             <ShieldCheck size={32} style={{ color: 'var(--emerald)' }} />
-                                            <h4 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, fontFamily: 'Playfair Display, serif' }}>Verifiable Reputation Credential</h4>
+                                            <h4 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Verifiable Reputation Credential</h4>
                                         </div>
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Standardized W3C VC Data Model v1.1 // Integrity Protocol Profile</p>
                                     </div>
@@ -269,7 +269,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                     ].map((stat, i) => (
                                         <div key={i} style={{ padding: '20px', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
                                             <div style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>{stat.label}</div>
-                                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: stat.color, fontFamily: 'Playfair Display, serif' }}>{stat.value}</div>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: stat.color, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>

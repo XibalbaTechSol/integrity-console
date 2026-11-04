@@ -52,29 +52,19 @@ export default function SettingsPage() {
             <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Appearance Settings</h3>
             
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, marginBottom: '1rem' }}>
-                <Palette size={16} /> Color Theme
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                <Palette size={16} /> Appearance
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-                {(['light', 'dark', 'cyber', 'xibalba'] as const).map(t => (
-                  <button 
-                    key={t}
-                    onClick={() => updateSettings({ theme: t })}
-                    style={{ 
-                      padding: '1.5rem', 
-                      borderRadius: '8px', 
-                      border: theme === t ? '2px solid var(--text-primary)' : '1px solid var(--border-color)',
-                      background: t === 'light' ? '#f5f5f5' : (t === 'cyber' ? '#261447' : (t === 'xibalba' ? '#050d18' : '#1a1a1a')),
-                      color: t === 'light' ? '#111' : (t === 'cyber' ? '#00FFCC' : (t === 'xibalba' ? '#f59e0b' : '#fff')),
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      textTransform: 'capitalize'
-                    }}
-                  >
-                    {t} Mode
-                  </button>
-                ))}
-              </div>
+              {/* The theme picker offered light, cyber and xibalba. `light` had no
+                  stylesheet at all, so choosing it changed nothing, and each of the
+                  others redefined --accent-color, which is what left the console
+                  showing two different accents at once. The console is dark-only
+                  (operator decision, 2026-11-03). */}
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ink-muted)', maxWidth: '58ch', lineHeight: 1.55 }}>
+                The console uses a single dark palette so that colour carries meaning:
+                blue marks what you can act on, and green, amber and red report agent
+                state. There is nothing to choose here.
+              </p>
             </div>
 
             <div>
@@ -88,11 +78,11 @@ export default function SettingsPage() {
                 className="secondary-button"
                 style={{ width: '100%', padding: '1rem', textAlign: 'left', marginBottom: '1rem' }}
               >
-                <option value="System Default">System Default</option>
-                <option value="Inter">Inter (Sans-serif)</option>
-                <option value="Roboto">Roboto (Sans-serif)</option>
-                <option value="Fira Code">Fira Code (Monospace)</option>
-                <option value="Playfair Display">Playfair Display (Serif)</option>
+                {/* Only the families the console actually loads. Roboto, Fira Code
+                    and Playfair Display were options here but were never used by the
+                    app shell, which hardcoded its own family. */}
+                <option value="Inter">Inter</option>
+                <option value="System Default">System default</option>
               </select>
               </label>
 
@@ -251,7 +241,6 @@ export default function SettingsPage() {
 
         {activeTab === 'privacy' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Privacy & Security Options</h3>
             <PrivacyPanel />
           </div>
         )}

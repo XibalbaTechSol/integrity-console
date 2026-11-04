@@ -93,7 +93,7 @@ html {
 .command-center .control-header { padding-top: 0; }
 .protocol-overview { --protocol-line: color-mix(in srgb, var(--gold) 48%, var(--border-color)); }
 .protocol-overview .control-header { padding: 2.15rem 0 1.6rem; }
-.protocol-overview .control-header h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(2rem, 3.2vw, 2.85rem); font-weight: 600; letter-spacing: -0.045em; }
+.protocol-overview .control-header h1 { font-family: var(--font-family); font-size: clamp(2rem, 3.2vw, 2.85rem); font-weight: 600; letter-spacing: -0.045em; }
 .protocol-overview .control-header p { max-width: 660px; font-size: .9rem; }
 .protocol-overview .control-eyebrow { color: var(--gold); }
 .protocol-overview .control-primary-action, .protocol-overview .control-secondary-action { min-height: 42px; border-radius: 7px; }
@@ -434,20 +434,69 @@ html {
   .knowledge-graph-layout, .knowledge-graph-stage { min-height: 380px; }
 }
 
-:root {
-  --bg-color: #08111b;
-  --surface-color: #0d1824;
-  --border-color: #213246;
-  --border: var(--border-color);
-  --text-primary: #eef5fb;
-  --text-secondary: #8ea1b4;
-  --font-family: system-ui, -apple-system, sans-serif;
-  --base-font-size: 16px;
-  --accent-color: #36a7ff;
-  --accent-hover: #1b8cd4;
-  --glass-border: #213246;
+/* ---------------------------------------------------------------------------
+   Canonical token set for the operator console.
 
-  /* Dashboard Ported Variables */
+   One ground, one accent, four status hues. The console is dark-only by
+   operator decision (2026-11-03): the light / cyber / xibalba themes and the
+   Settings picker that drove them were removed. Each theme redefined
+   --accent-color, so the console genuinely had two accents at once -- the app
+   shell painted its chrome protocol-blue while the active theme told every
+   other page the accent was emerald. Green now means one thing: healthy.
+
+   Legacy names are kept as aliases so call sites resolve to the same values
+   rather than needing 35 files edited at once. Prefer the canonical names in
+   new code.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* Ground, deepest to most elevated. */
+  --ground: #08111b;
+  --surface: #0d1824;
+  --surface-raised: #111f2d;
+  --surface-sunken: #0a1520;
+  --line: #213246;
+  --line-strong: #2d4361;
+
+  /* Ink. */
+  --ink: #eef5fb;
+  --ink-muted: #8ea1b4;
+  --ink-dim: #536b83;
+
+  /* Accent -- the only colour that means "you can act on this". */
+  --accent: #36a7ff;
+  --accent-hover: #5cb8ff;
+  --accent-press: #1b8cd4;
+  --accent-ink: #06111c;
+  --accent-wash: rgba(54, 167, 255, 0.12);
+  --accent-line: rgba(54, 167, 255, 0.38);
+
+  /* Status -- these encode state and are never used as decoration. */
+  --success: #42d68b;
+  --success-wash: rgba(66, 214, 139, 0.12);
+  --warning: #f0b429;
+  --warning-wash: rgba(240, 180, 41, 0.12);
+  --danger: #ff6b7a;
+  --danger-wash: rgba(255, 107, 122, 0.12);
+
+  /* Typography: one sans, one mono. */
+  --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --base-font-size: 16px;
+
+  /* Geometry: one radius. 50% is reserved for status dots and avatars. */
+  --radius: 4px;
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --r-sm: var(--radius);
+  --r-md: var(--radius);
+  --r-lg: var(--radius);
+  --r-xl: var(--radius);
+
+  /* Spacing. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -455,63 +504,39 @@ html {
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-10: 2.5rem;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --r-sm: var(--radius-sm);
-  --r-md: var(--radius-md);
-  --r-lg: var(--radius-lg);
-  --r-xl: var(--radius-xl);
-  --bg-primary: var(--bg-color);
-  --bg-secondary: var(--surface-color);
-  --glass-surface-light: rgba(255, 255, 255, 0.05);
-  --gold: #f59e0b;
-  --gold-muted: rgba(245, 158, 11, 0.15);
-  --emerald: #10b981;
-  --navy-deep: #0f172a;
-  --success: #10b981;
-  --danger: #f43f5e;
-  --primary: var(--accent-color);
-  --theme-accent: var(--accent-color);
-  --theme-accent-muted: rgba(16, 185, 129, 0.15);
-}
 
-[data-theme='dark'] {
-  color-scheme: dark;
-  --bg-color: #0f1115;
-  --surface-color: #16181d;
-  --border-color: #272a30;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent-color: #10b981;
-  --accent-hover: #34d399;
-  --theme-accent: var(--accent-color);
-  --theme-accent-muted: rgba(16, 185, 129, 0.15);
-}
+  /* ---- Legacy aliases. Same values, old names. ---- */
+  --bg-color: var(--ground);
+  --bg-primary: var(--ground);
+  --surface-color: var(--surface);
+  --bg-secondary: var(--surface);
+  --navy-deep: var(--surface-raised);
+  --border-color: var(--line);
+  --border: var(--line);
+  --glass-border: var(--line);
+  --glass-surface-light: rgba(255, 255, 255, 0.04);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-muted);
+  --accent-color: var(--accent);
+  --primary: var(--accent);
+  --theme-accent: var(--accent);
+  /* Was rgba(16,185,129,.15) -- an emerald wash behind a blue accent. */
+  --theme-accent-muted: var(--accent-wash);
+  --emerald: var(--success);
+  --gold: var(--warning);
+  --gold-muted: var(--warning-wash);
 
-[data-theme='cyber'] {
-  --bg-color: #0D0221;
-  --surface-color: #261447;
-  --border-color: #F90093;
-  --text-primary: #00FFCC;
-  --text-secondary: #B399FF;
-  --accent-color: #FF0055;
-  --accent-hover: #D00045;
-  --theme-accent: var(--accent-color);
-  --theme-accent-muted: rgba(255, 0, 85, 0.15);
-}
-
-[data-theme='xibalba'] {
-  --bg-color: #050d18;
-  --surface-color: #0f172a;
-  --border-color: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --accent-color: #f59e0b;
-  --accent-hover: #fbbf24;
-  --theme-accent: var(--accent-color);
-  --theme-accent-muted: rgba(245, 158, 11, 0.15);
+  /* The app shell's names. These used to be declared on .protocol-app only,
+     so the shared Panel component's `color: var(--protocol-blue)` silently
+     fell back to inherited ink anywhere outside that subtree. */
+  --protocol-bg: var(--ground);
+  --protocol-surface: var(--surface);
+  --protocol-surface-2: var(--surface-raised);
+  --protocol-line: var(--line);
+  --protocol-text: var(--ink);
+  --protocol-muted: var(--ink-muted);
+  --protocol-blue: var(--accent);
+  --protocol-green: var(--success);
 }
 
 body {
@@ -526,6 +551,10 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
 }
 
 a {
@@ -544,7 +573,7 @@ a:hover {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-family: 'Raleway', sans-serif;
+  font-family: inherit;
   font-weight: 600;
   transition: all 0.2s ease;
 }
@@ -1110,6 +1139,15 @@ input[type=range]::-moz-range-track {
 .thin-scrollbar-x {
   scrollbar-width: thin;
   scrollbar-color: var(--glass-border) transparent;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.thin-scrollbar-x .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0;
 }
 .thin-scrollbar-x::-webkit-scrollbar { height: 5px; }
 .thin-scrollbar-x::-webkit-scrollbar-track { background: transparent; }
@@ -1177,7 +1215,7 @@ input[type=range]::-moz-range-track {
   }
 }
 /* Keep accent-filled actions readable across the selectable themes. */
-.btn-primary, .button.primary, .memory-primary-button, .shield-primary-button { color: #052e24; }
+.btn-primary, .button.primary, .memory-primary-button, .shield-primary-button { color: var(--accent-ink, #06111c); }
 
 /* Unified Protocol SubTabs */
 .protocol-tabs {
@@ -1216,14 +1254,14 @@ input[type=range]::-moz-range-track {
   justify-content: center;
   gap: 8px;
   padding: 10px 17px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm, 4px);
   font: 600 12px inherit;
   cursor: pointer;
 }
 .primary-button {
   border: 1px solid var(--protocol-blue, var(--accent-color, #36a7ff));
   background: var(--protocol-blue, var(--accent-color, #36a7ff));
-  color: #06111c;
+  color: var(--accent-ink, #06111c);
 }
 
 .fleet-wallet-overview,
@@ -1244,9 +1282,9 @@ input[type=range]::-moz-range-track {
 
 .landing-page .primary-button,
 .public-layout .primary-button {
-  background: var(--accent-color);
-  border-color: var(--accent-color);
-  color: #052e24;
+  background: var(--protocol-blue, var(--accent-color, #36a7ff));
+  border-color: var(--protocol-blue, var(--accent-color, #36a7ff));
+  color: var(--accent-ink, #06111c);
 }
 
 @media (max-width: 760px) {

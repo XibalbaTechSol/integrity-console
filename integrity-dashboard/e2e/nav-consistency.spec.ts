@@ -1,63 +1,48 @@
 import { test, expect } from '@playwright/test';
-import { NAVIGATION_GROUPS, NAVIGATION_ITEMS } from '../src/navigation';
+import { NAVIGATION_ITEMS } from '../src/navigation';
 
-const APP_ROUTES = ['/financials', '/settings'];
+const APP_ROUTES = ['/dashboard', '/treasury', '/settings'];
 const NAV_HREFS = NAVIGATION_ITEMS.map((item) => item.to);
 
 test.describe('authenticated navigation consistency', () => {
   for (const route of APP_ROUTES) {
-    test(`${route} renders the canonical navigation`, async ({ page }) => {
+    test(`${route} renders the canonical protocol navigation`, async ({ page }) => {
       await page.goto(route);
       await page.waitForLoadState('networkidle');
-      const links = page.locator('.memory-sidebar-shell nav a');
-      const sidebar = page.locator('.memory-sidebar-shell');
+      const links = page.locator('.protocol-sidebar nav[aria-label="Protocol navigation"] a');
       await expect(links).toHaveCount(NAV_HREFS.length);
       const hrefs = await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')));
       expect(hrefs).toEqual(NAV_HREFS);
-      const navBounds = await sidebar.locator('nav[aria-label="Primary navigation"]').evaluate((element) => {
-        const active = element.querySelector<HTMLElement>('a[aria-current="page"]');
-        const nav = element.getBoundingClientRect();
-        const link = active?.getBoundingClientRect();
-        return Boolean(link && link.top >= nav.top && link.bottom <= nav.bottom);
-      });
-      expect(navBounds).toBe(true);
-      for (const group of NAVIGATION_GROUPS) {
-        await expect(sidebar.locator('nav > div > div').filter({ hasText: group.section })).toHaveText(group.section);
-      }
     });
   }
 
-  test('protocol surface exposes every canonical page', async ({ page }) => {
+  test('protocol surface exposes every canonical page in order', async ({ page }) => {
     await page.goto('/dashboard');
     const links = page.locator('.protocol-sidebar nav[aria-label="Protocol navigation"] a');
     await expect(links).toHaveCount(NAV_HREFS.length);
-    const hrefs = await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')));
-    expect(hrefs).toEqual(NAV_HREFS);
-  });
-
-  test('header mode uses the same canonical route order', async ({ page }) => {
-    await page.goto('/settings');
-    await page.getByRole('tab', { name: /Branding & Layout/ }).click();
-    await page.getByRole('button', { name: 'Header Navigation' }).click();
-
-    for (const route of NAV_HREFS) {
-      await page.locator(`header nav[aria-label="Primary navigation"] a[href="${route}"]`).click();
-      await page.waitForTimeout(100);
-      const links = page.locator('header nav[aria-label="Primary navigation"] a');
-      await expect(links).toHaveCount(NAV_HREFS.length);
-      const hrefs = await links.evaluateAll((items) => items.map((item) => item.getAttribute('href')));
-      expect(hrefs).toEqual(NAV_HREFS);
+    for (let i = 0; i < NAVIGATION_ITEMS.length; i++) {
+      const item = NAVIGATION_ITEMS[i];
+      await expect(links.nth(i)).toHaveAttribute('href', item.to);
+      await expect(links.nth(i)).toContainText(item.label);
     }
   });
 
-  test('sidebar remains usable when the navigation exceeds the viewport', async ({ page }) => {
+  test('legacy route /financials redirects cleanly to /treasury with active nav', async ({ page }) => {
     await page.goto('/financials');
-    const nav = page.locator('.memory-sidebar-shell nav[aria-label="Primary navigation"]');
-    await expect(nav).toBeVisible();
-    expect(await nav.evaluate((element) => element.scrollHeight)).toBeGreaterThan(await nav.evaluate((element) => element.clientHeight));
-    await page.getByRole('link', { name: 'Developer', exact: true }).click();
-    await expect(page).toHaveURL(/\/developer$/);
-    await expect(page.getByRole('heading', { name: 'Developer', exact: true })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollTop)).toBe(0);
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/treasury$/);
+    const activeLink = page.locator('.protocol-sidebar nav[aria-label="Protocol navigation"] a.active');
+    await expect(activeLink).toHaveAttribute('href', '/treasury');
+  });
+
+  test('sidebar profile dropdown opens and provides Settings and Disconnect', async ({ page }) => {
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+    const profile = page.locator('.sidebar-profile');
+    await expect(profile).toBeVisible();
+    await profile.click();
+    await expect(page.locator('.profile-dropdown')).toBeVisible();
+    await expect(page.locator('.profile-dropdown a[href="/settings"]')).toBeVisible();
+    await expect(page.locator('.profile-dropdown button')).toContainText('Disconnect');
   });
 });

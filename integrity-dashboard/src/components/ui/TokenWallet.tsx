@@ -308,7 +308,7 @@ export const TokenWallet = () => {
                         {isFetching ? (
                             <div className="skeleton" style={{ height: '80px', width: '280px', margin: '0 auto var(--space-4)', borderRadius: 'var(--r-md)' }} />
                         ) : (
-                            <div style={{ fontSize: '4.5rem', fontWeight: 700, color: 'white', fontFamily: 'Playfair Display, serif', lineHeight: 1 }}>
+                            <div style={{ fontSize: '4.5rem', fontWeight: 700, color: 'var(--ink, white)', fontFamily: 'var(--font-mono, monospace)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                                 {parseFloat(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </div>
                         )}
@@ -477,7 +477,7 @@ export const TokenWallet = () => {
 
                             {activeModal === 'send' && !walletAddress && (
                                 <div style={{ textAlign: 'center' }}>
-                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-6)', fontSize: '1.5rem', fontWeight: 800, fontFamily: 'Playfair Display, serif' }}>Connect a wallet first</h3>
+                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-6)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink, white)' }}>Connect a wallet first</h3>
                                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 'var(--space-8)' }}>
                                         Sending moves ITK out of this agent's own SovereignAgent contract via <code>execute()</code> --
                                         only the agent's registered controller wallet can authorize that.
@@ -494,7 +494,7 @@ export const TokenWallet = () => {
                             )}
                             {activeModal === 'send' && walletAddress && (
                                 <form onSubmit={handleTransfer}>
-                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-8)', fontSize: '1.5rem', fontWeight: 800, fontFamily: 'Playfair Display, serif' }}>Initiate Transfer</h3>
+                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-8)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink, white)' }}>Initiate Transfer</h3>
                                     <div style={{ marginBottom: 'var(--space-6)' }}>
                                         <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                             Select Agent Recipient
@@ -531,7 +531,7 @@ export const TokenWallet = () => {
 
                             {activeModal === 'receive' && (
                                 <div style={{ textAlign: 'center' }}>
-                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-8)', fontSize: '1.5rem', fontWeight: 800, fontFamily: 'Playfair Display, serif' }}>Receive Assets</h3>
+                                    <h3 style={{ marginTop: 0, marginBottom: 'var(--space-8)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink, white)' }}>Receive Assets</h3>
                                     {address ? (
                                         <div style={{ background: 'white', padding: 'var(--space-6)', borderRadius: 'var(--r-md)', display: 'inline-block', marginBottom: 'var(--space-8)', boxShadow: '0 0 30px rgba(201, 168, 76, 0.2)' }}>
                                             <canvas ref={qrCanvasRef} width={200} height={200} />
