@@ -71,6 +71,21 @@ const measure = (page: Page) => page.evaluate(() => {
   return out;
 });
 
+
+/**
+ * Reveal-on-scroll sections start at opacity 0, and the sweep skips invisible
+ * elements -- so without this, 27 elements on the landing page were never
+ * measured and the route passed having covered a fraction of itself.
+ */
+const revealAll = (page: Page) => page.evaluate(async () => {
+  const step = window.innerHeight * 0.8;
+  for (let y = 0; y < document.body.scrollHeight; y += step) {
+    window.scrollTo(0, y);
+    await new Promise(r => setTimeout(r, 200));
+  }
+  window.scrollTo(0, 0);
+});
+
 const toHex = (rgb: string): string | null => {
   const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(rgb);
   if (!m) return null;
@@ -87,6 +102,8 @@ for (const route of ROUTES) {
 
     await page.goto(route, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1500);
+    await revealAll(page);
+    await page.waitForTimeout(800);
 
     const data = await measure(page);
 
@@ -112,6 +129,8 @@ for (const route of ROUTES) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(route, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1500);
+    await revealAll(page);
+    await page.waitForTimeout(800);
 
     const count = await page.locator('body *').count();
     expect(count, `${route} rendered too little to measure overflow`).toBeGreaterThan(20);
