@@ -138,7 +138,7 @@ export const XNSSearchService: React.FC = () => {
                     onClick={() => runSearch(query)}
                     disabled={isLoading || !query.trim()}
                     className="primary-button"
-                    style={{ borderRadius: 'calc(var(--r-md) - 2px)' }}
+                    style={{ borderRadius: 'var(--radius)' }}
                 >
                     {isLoading ? <Loader2 size={14} className="pulse" /> : <ArrowRight size={14} />}
                 </button>
@@ -150,13 +150,13 @@ export const XNSSearchService: React.FC = () => {
                     alignItems: 'center',
                     gap: '12px',
                     padding: '12px',
-                    background: 'rgba(244, 63, 94, 0.08)',
-                    border: '1px solid rgba(244, 63, 94, 0.2)',
+                    background: 'rgba(255, 107, 122, 0.08)',
+                    border: '1px solid rgba(255, 107, 122, 0.2)',
                     borderRadius: 'var(--r-md)',
                     fontSize: '0.75rem',
                     color: 'rgba(255,255,255,0.7)'
                 }}>
-                    <AlertTriangle size={16} style={{ color: '#f43f5e', flexShrink: 0 }} />
+                    <AlertTriangle size={16} style={{ color: 'var(--danger)', flexShrink: 0 }} />
                     {error}
                 </div>
             )}
@@ -167,13 +167,13 @@ export const XNSSearchService: React.FC = () => {
                     alignItems: 'center',
                     gap: '12px',
                     padding: '12px',
-                    background: 'rgba(16, 185, 129, 0.08)',
-                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                    background: 'rgba(66, 214, 139, 0.08)',
+                    border: '1px solid rgba(66, 214, 139, 0.2)',
                     borderRadius: 'var(--r-md)',
                     fontSize: '0.75rem',
                     color: 'rgba(255,255,255,0.85)'
                 }}>
-                    <CheckCircle2 size={16} style={{ color: '#10b981', flexShrink: 0 }} />
+                    <CheckCircle2 size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
                     <span><strong>{claimed}</strong> is claimed. This agent is now identified by that handle across the ecosystem instead of its DID.</span>
                 </div>
             )}
@@ -188,7 +188,7 @@ export const XNSSearchService: React.FC = () => {
                     flexDirection: 'column',
                     gap: '12px'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--success)', fontWeight: 800 }}>
                         <CheckCircle2 size={16} />
                         <span className="mono">{availableHandle}</span> is available
                     </div>
@@ -255,13 +255,13 @@ export const XNSSearchService: React.FC = () => {
                             <div style={{
                                 width: '32px',
                                 height: '32px',
-                                borderRadius: '8px',
-                                background: 'rgba(16, 185, 129, 0.1)',
+                                borderRadius: 'var(--radius)',
+                                background: 'rgba(66, 214, 139, 0.1)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}>
-                                <Fingerprint size={18} style={{ color: '#10b981' }} />
+                                <Fingerprint size={18} style={{ color: 'var(--success)' }} />
                             </div>
                             <div>
                                 <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 800 }}>
@@ -283,11 +283,11 @@ export const XNSSearchService: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '4px' }}>VERIFICATION</div>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#60a5fa' }}>Tier {result.verification_tier ?? 0}</div>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-hover)' }}>Tier {result.verification_tier ?? 0}</div>
                          </div>
-                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '4px' }}>IDENTIFIED BY</div>
                             <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--theme-accent)' }}>
                                 {result.handle ? 'XNS handle' : 'DID'}

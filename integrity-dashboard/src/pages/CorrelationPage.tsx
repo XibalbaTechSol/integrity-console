@@ -14,19 +14,19 @@ type CombinedInvocation = {
 };
 
 const STATUS: Record<string, { label: string; color: string; bg: string }> = {
-  reconciled: { label: 'Reconciled', color: '#10b981', bg: 'rgba(16,185,129,.12)' },
-  complete: { label: 'Runtime complete', color: '#60a5fa', bg: 'rgba(96,165,250,.12)' },
-  awaiting_outcome: { label: 'Awaiting outcome', color: '#f59e0b', bg: 'rgba(245,158,11,.12)' },
-  intent_without_outcome: { label: 'Missing outcome', color: '#f59e0b', bg: 'rgba(245,158,11,.12)' },
-  outcome_without_intent: { label: 'Orphan outcome', color: '#f43f5e', bg: 'rgba(244,63,94,.12)' },
-  orphan_outcome: { label: 'Orphan runtime outcome', color: '#f43f5e', bg: 'rgba(244,63,94,.12)' },
-  duplicate_invocation: { label: 'Duplicate ID', color: '#f43f5e', bg: 'rgba(244,63,94,.12)' },
-  correlation_conflict: { label: 'Correlation conflict', color: '#f43f5e', bg: 'rgba(244,63,94,.12)' },
-  legacy_hash_only: { label: 'Legacy hash only', color: '#94a3b8', bg: 'rgba(148,163,184,.12)' },
+  reconciled: { label: 'Reconciled', color: 'var(--success)', bg: 'rgba(66, 214, 139, .12)' },
+  complete: { label: 'Runtime complete', color: 'var(--accent-hover)', bg: 'rgba(54, 167, 255, .12)' },
+  awaiting_outcome: { label: 'Awaiting outcome', color: 'var(--warning)', bg: 'rgba(240, 180, 41, .12)' },
+  intent_without_outcome: { label: 'Missing outcome', color: 'var(--warning)', bg: 'rgba(240, 180, 41, .12)' },
+  outcome_without_intent: { label: 'Orphan outcome', color: 'var(--danger)', bg: 'rgba(255, 107, 122, .12)' },
+  orphan_outcome: { label: 'Orphan runtime outcome', color: 'var(--danger)', bg: 'rgba(255, 107, 122, .12)' },
+  duplicate_invocation: { label: 'Duplicate ID', color: 'var(--danger)', bg: 'rgba(255, 107, 122, .12)' },
+  correlation_conflict: { label: 'Correlation conflict', color: 'var(--danger)', bg: 'rgba(255, 107, 122, .12)' },
+  legacy_hash_only: { label: 'Legacy hash only', color: 'var(--ink-muted)', bg: 'rgba(148,163,184,.12)' },
 };
 
 function Stage({ present, label, warning = false, title }: { present: boolean; label: string; warning?: boolean; title?: string }) {
-  const color = warning ? '#f59e0b' : present ? '#10b981' : 'var(--text-muted)';
+  const color = warning ? 'var(--warning)' : present ? 'var(--success)' : 'var(--text-muted)';
   return (
     <span title={title} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color, fontSize: '0.76rem', whiteSpace: 'nowrap' }}>
       {warning ? <AlertTriangle size={14} /> : present ? <CheckCircle2 size={14} /> : <CircleDashed size={14} />}
@@ -167,7 +167,7 @@ export default function CorrelationPage() {
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {[['all', 'All'], ['attention', 'Needs attention'], ['reconciled', 'Reconciled'], ['awaiting_outcome', 'Awaiting outcome']].map(([id, label]) => (
-          <button key={id} onClick={() => setFilter(id)} style={{ padding: '8px 12px', border: `1px solid ${filter === id ? 'var(--theme-accent)' : 'var(--glass-border)'}`, background: filter === id ? 'var(--theme-accent-muted)' : 'transparent', color: filter === id ? 'var(--theme-accent)' : 'var(--text-secondary)', borderRadius: 4, cursor: 'pointer', fontSize: '0.78rem' }}>{label}</button>
+          <button key={id} onClick={() => setFilter(id)} style={{ padding: '8px 12px', border: `1px solid ${filter === id ? 'var(--theme-accent)' : 'var(--glass-border)'}`, background: filter === id ? 'var(--theme-accent-muted)' : 'transparent', color: filter === id ? 'var(--theme-accent)' : 'var(--text-secondary)', borderRadius: 'var(--radius)', cursor: 'pointer', fontSize: '0.78rem' }}>{label}</button>
         ))}
       </div>
 
@@ -178,14 +178,14 @@ export default function CorrelationPage() {
         {filtered.length === 0 && <div style={{ padding: 'var(--space-8)', textAlign: 'center', color: 'var(--text-muted)' }}>{loading ? 'Loading correlation evidence…' : 'No invocation evidence matches this view.'}</div>}
         {filtered.map(row => {
           const statusKey = row.oracle?.status ?? row.cortex?.runtime_status ?? 'unknown';
-          const tone = STATUS[statusKey] ?? { label: 'Partial evidence', color: '#94a3b8', bg: 'rgba(148,163,184,.12)' };
+          const tone = STATUS[statusKey] ?? { label: 'Partial evidence', color: 'var(--ink-muted)', bg: 'rgba(148,163,184,.12)' };
           const open = expanded === row.invocationId;
           return (
             <div key={row.invocationId} style={{ borderBottom: '1px solid var(--glass-border)' }}>
               <button className="correlation-row" onClick={() => setExpanded(open ? null : row.invocationId)} style={{ width: '100%', display: 'grid', gridTemplateColumns: '34px minmax(190px,1.25fr) minmax(120px,.8fr) minmax(320px,2fr) minmax(140px,.8fr)', gap: 12, padding: '15px 16px', alignItems: 'center', border: 0, background: open ? 'var(--glass-surface-light)' : 'transparent', color: 'var(--text-primary)', cursor: 'pointer', textAlign: 'left' }}>
                 {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 <span><code title={row.invocationId} style={{ color: 'var(--text-primary)' }}>{shortId(row.invocationId)}</code><small style={{ display: 'block', color: 'var(--text-muted)', marginTop: 4 }}>{row.cortex?.tool_name ?? row.oracle?.intent_type ?? 'Unclassified action'}</small></span>
-                <span style={{ color: tone.color, background: tone.bg, padding: '5px 8px', borderRadius: 4, width: 'fit-content', fontSize: '0.72rem', fontWeight: 600 }}>{tone.label}</span>
+                <span style={{ color: tone.color, background: tone.bg, padding: '5px 8px', borderRadius: 'var(--radius)', width: 'fit-content', fontSize: '0.72rem', fontWeight: 600 }}>{tone.label}</span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
                   {/* This stage is the agent runtime's pre-tool hook as recorded in Cortex (root store,
                       GET /api/invocations). It is NOT "does Cortex hold this event": Shield's own
@@ -211,9 +211,9 @@ export default function CorrelationPage() {
         })}
       </div>
 
-      {errors.length > 0 && <div style={{ color: '#f59e0b', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><AlertTriangle size={15} /> Partial view: {errors.join(' · ')}</div>}
-      {rows.some(row => row.oracle?.status === 'correlation_conflict' || row.oracle?.status === 'duplicate_invocation') && <div style={{ color: '#f43f5e', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><XCircle size={15} /> Conflicting correlation evidence requires operator review; it is never counted as reconciled.</div>}
-      {reconciled > 0 && <div style={{ color: '#10b981', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><ShieldCheck size={15} /> Reconciled rows have one signed intent and one authoritative outcome sharing the same invocation identifier.</div>}
+      {errors.length > 0 && <div style={{ color: 'var(--warning)', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><AlertTriangle size={15} /> Partial view: {errors.join(' · ')}</div>}
+      {rows.some(row => row.oracle?.status === 'correlation_conflict' || row.oracle?.status === 'duplicate_invocation') && <div style={{ color: 'var(--danger)', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><XCircle size={15} /> Conflicting correlation evidence requires operator review; it is never counted as reconciled.</div>}
+      {reconciled > 0 && <div style={{ color: 'var(--success)', fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 8 }}><ShieldCheck size={15} /> Reconciled rows have one signed intent and one authoritative outcome sharing the same invocation identifier.</div>}
     </div>
   );
 }

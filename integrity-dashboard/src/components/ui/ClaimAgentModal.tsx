@@ -148,7 +148,7 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
 
                 {result?.controls ? (
                   <div className="flex-col gap-4">
-                    <div style={{ padding: 'var(--space-4)', background: 'rgba(16, 185, 129, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ padding: 'var(--space-4)', background: 'rgba(66, 214, 139, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <CheckCircle size={20} color="var(--success)" />
                       <div style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600 }}>Your wallet holds this agent's controller role.</div>
                     </div>
@@ -175,7 +175,7 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
                     </button>
                   </div>
                 ) : (
-                  <div style={{ padding: 'var(--space-4)', background: 'rgba(239, 68, 68, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ padding: 'var(--space-4)', background: 'rgba(255, 107, 122, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--danger)', fontWeight: 600, fontSize: '0.85rem' }}>
                       <XCircle size={18} /> Connected wallet is not the controller.
                     </div>

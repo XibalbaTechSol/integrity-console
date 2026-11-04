@@ -45,7 +45,7 @@ export default function LandingPage() {
   return (
     <div className="landing-page" style={{ color: 'var(--text-primary)' }}>
       {/* 1. Global Navigation & Header */}
-      <header className="landing-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 3rem', background: 'rgba(25, 25, 25, 0.8)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--border-color)' }}>
+      <header className="landing-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 3rem', background: 'rgba(8, 17, 27, 0.8)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <img src="https://xibalbatechsol.github.io/XibalbaSolutionsLogo.png" alt="Xibalba Solutions" style={{ height: '40px' }} />
           <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px' }}>Integrity Protocol</span>
@@ -102,9 +102,9 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #ef4444' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--danger)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: '#ef4444' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(255, 107, 122, 0.1)', borderRadius: 'var(--radius)', color: 'var(--danger)' }}>
                   <Zap size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>The 9-Second Problem</h3>
@@ -114,9 +114,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #f59e0b' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--warning)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px', color: '#f59e0b' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(240, 180, 41, 0.1)', borderRadius: 'var(--radius)', color: 'var(--warning)' }}>
                   <Scale size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>The Regulatory Void</h3>
@@ -126,9 +126,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #3b82f6' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--accent)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', color: '#3b82f6' }}>
+                <div style={{ padding: '0.75rem', background: 'rgba(54, 167, 255, 0.1)', borderRadius: 'var(--radius)', color: 'var(--accent)' }}>
                   <Search size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>Black Box Telemetry</h3>
@@ -153,7 +153,7 @@ export default function LandingPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }}>
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ background: 'var(--bg-card)', padding: '2.5rem', border: '1px solid var(--glass-border)' }}>
             <h3 style={{ marginBottom: '1.5rem', fontSize: '1.4rem' }}>The Geometric Volume Formula</h3>
-            <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '2rem', overflowX: 'auto' }}>
+            <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '2rem', overflowX: 'auto' }}>
               <BlockMath math={aisFormula} />
             </div>
             
@@ -163,15 +163,15 @@ export default function LandingPage() {
                 <span style={{ color: 'var(--text-secondary)' }}>Predictability & Drift bounds</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border-color)', paddingBottom: '0.5rem' }}>
-                <strong style={{ color: '#4caf50' }}>Grounding ($S_&#123;grounding&#125;$)</strong>
+                <strong style={{ color: 'var(--success)' }}>Grounding ($S_&#123;grounding&#125;$)</strong>
                 <span style={{ color: 'var(--text-secondary)' }}>RAG hallucination rates</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border-color)', paddingBottom: '0.5rem' }}>
-                <strong style={{ color: '#f59e0b' }}>Sacrifice ($S_&#123;sacrifice&#125;$)</strong>
+                <strong style={{ color: 'var(--warning)' }}>Sacrifice ($S_&#123;sacrifice&#125;$)</strong>
                 <span style={{ color: 'var(--text-secondary)' }}>$ITK Token collateral locked</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <strong style={{ color: '#2196f3' }}>Compliance ($S_&#123;compliance&#125;$)</strong>
+                <strong style={{ color: 'var(--accent)' }}>Compliance ($S_&#123;compliance&#125;$)</strong>
                 <span style={{ color: 'var(--text-secondary)' }}>Policy adherence (OPA/Rego)</span>
               </div>
             </div>
@@ -187,10 +187,10 @@ export default function LandingPage() {
             </p>
             
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <div style={{ padding: '0.75rem 1rem', background: 'rgba(76, 175, 80, 0.1)', color: '#4caf50', border: '1px solid rgba(76, 175, 80, 0.3)', borderRadius: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ padding: '0.75rem 1rem', background: 'rgba(66, 214, 139, 0.1)', color: 'var(--success)', border: '1px solid rgba(66, 214, 139, 0.3)', borderRadius: 'var(--radius)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Shield size={18} /> Proof-of-Inference
               </div>
-              <div style={{ padding: '0.75rem 1rem', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '6px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ padding: '0.75rem 1rem', background: 'rgba(240, 180, 41, 0.1)', color: 'var(--warning)', border: '1px solid rgba(240, 180, 41, 0.3)', borderRadius: 'var(--radius)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Cpu size={18} /> Sovereign Hardware
               </div>
             </div>
@@ -256,39 +256,39 @@ export default function LandingPage() {
 
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem' }}>
             <motion.div variants={fadeInUp} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(33, 150, 243, 0.3)' }}>
-                <ShieldAlert size={28} color="#2196f3" />
+              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(54, 167, 255, 0.3)' }}>
+                <ShieldAlert size={28} color="var(--accent)" />
               </div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Xibalba Shield</h3>
               <p style={{ color: 'var(--theme-accent)', fontWeight: 600, marginBottom: '1rem' }}>Market: AI Security & Threat Detection</p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1, marginBottom: '1.5rem' }}>
                 Xibalba Shield intercepts rogue actions in under 50ms using strict OPA policy gates. It actively blocks prompt injection attacks, discovers shadow AI, and guarantees Real-time Agent Security before any system mutations occur.
               </p>
-              <Link to="/shield" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: '#2196f3', color: '#2196f3' }}>View Shield Prototype</Link>
+              <Link to="/shield" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: 'var(--accent)', color: 'var(--accent)' }}>View Shield Prototype</Link>
             </motion.div>
 
             <motion.div variants={fadeInUp} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(76, 175, 80, 0.3)' }}>
-                <Activity size={28} color="#4caf50" />
+              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(66, 214, 139, 0.3)' }}>
+                <Activity size={28} color="var(--success)" />
               </div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Integrity Health</h3>
               <p style={{ color: 'var(--theme-accent)', fontWeight: 600, marginBottom: '1rem' }}>Market: Healthcare IT & HIPAA</p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1, marginBottom: '1.5rem' }}>
                 Utilizing the novel <code>SmartBAA</code> and client-side PHI <code>Redactor</code>, Integrity Health unlocks secure FHIR data through patient consent flowcharts. We ensure "Minimum Necessary" data ever reaches the LLM.
               </p>
-              <Link to="/health" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: '#4caf50', color: '#4caf50' }}>View Health Prototype</Link>
+              <Link to="/health" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: 'var(--success)', color: 'var(--success)' }}>View Health Prototype</Link>
             </motion.div>
 
             <motion.div variants={fadeInUp} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
-                <TrendingUp size={28} color="#f59e0b" />
+              <div style={{ background: 'var(--bg-color)', width: '56px', height: '56px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', border: '1px solid rgba(240, 180, 41, 0.3)' }}>
+                <TrendingUp size={28} color="var(--warning)" />
               </div>
               <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Decentralized Finance</h3>
               <p style={{ color: 'var(--theme-accent)', fontWeight: 600, marginBottom: '1rem' }}>Market: DeFi & Agent Economics</p>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1, marginBottom: '1.5rem' }}>
                 Powered by the <code>$ITK</code> token. Each agent holds value in its own <code>SovereignAgent</code> account, moves it only through the Integrity gate, and faces slashing penalties for measurable hallucination events.
               </p>
-              <Link to="/financials" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: '#f59e0b', color: '#f59e0b' }}>View Finance Prototype</Link>
+              <Link to="/financials" className="secondary-button" style={{ textAlign: 'center', textDecoration: 'none', borderColor: 'var(--warning)', color: 'var(--warning)' }}>View Finance Prototype</Link>
             </motion.div>
           </motion.div>
         </div>
@@ -318,31 +318,31 @@ export default function LandingPage() {
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1.5rem', fontWeight: 500, fontFamily: 'monospace' }}>W3C DID v1.0</td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Agent Identity</td>
-                  <td style={{ padding: '1.5rem' }}><span style={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
+                  <td style={{ padding: '1.5rem' }}><span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Base standard for <code>did:integrity:*</code> providing portable identities.</td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1.5rem', fontWeight: 500, fontFamily: 'monospace' }}>VC Data Model</td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Agent Reputation</td>
-                  <td style={{ padding: '1.5rem' }}><span style={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
+                  <td style={{ padding: '1.5rem' }}><span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Off-chain Verifiable Credentials powering AIS evaluations securely.</td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1.5rem', fontWeight: 500, fontFamily: 'monospace' }}>ERC-721 (XNS)</td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Registry</td>
-                  <td style={{ padding: '1.5rem' }}><span style={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
+                  <td style={{ padding: '1.5rem' }}><span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>NFT-based human-readable agent domains (e.g. <code>.xibalba</code>).</td>
                 </tr>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '1.5rem', fontWeight: 500, fontFamily: 'monospace' }}>EIP-712</td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Meta-Tx</td>
-                  <td style={{ padding: '1.5rem' }}><span style={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
+                  <td style={{ padding: '1.5rem' }}><span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Typed structured data hashing for gasless agent state updates.</td>
                 </tr>
                 <tr>
                   <td style={{ padding: '1.5rem', fontWeight: 500, fontFamily: 'monospace' }}>Noir/Barretenberg</td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>ZK Proving</td>
-                  <td style={{ padding: '1.5rem' }}><span style={{ color: '#4caf50', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
+                  <td style={{ padding: '1.5rem' }}><span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14}/> Implemented</span></td>
                   <td style={{ padding: '1.5rem', color: 'var(--text-secondary)' }}>Zero-knowledge circuits to mask confidential telemetry.</td>
                 </tr>
               </tbody>
@@ -412,20 +412,20 @@ export default function LandingPage() {
             <div style={{ display: 'flex', gap: '1.5rem' }}>
               <div style={{ flex: 1 }}>
                 <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Full Name</label>
-                <input id="contact-name" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="John Doe" />
+                <input id="contact-name" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="John Doe" />
               </div>
               <div style={{ flex: 1 }}>
                 <label htmlFor="contact-organization" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Organization</label>
-                <input id="contact-organization" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Corp" />
+                <input id="contact-organization" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Corp" />
               </div>
             </div>
             <div>
               <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Work Email</label>
-              <input id="contact-email" type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="john@acmecorp.com" />
+              <input id="contact-email" type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="john@acmecorp.com" />
             </div>
             <div>
               <label htmlFor="contact-use-case" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Target Use Case</label>
-              <select id="contact-use-case" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
+              <select id="contact-use-case" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
                 <option>Integrity Health (HIPAA)</option>
                 <option>Xibalba Shield (Security)</option>
                 <option>DeFi / Agentic Capital</option>
@@ -434,7 +434,7 @@ export default function LandingPage() {
             </div>
             <div>
               <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Direct Message</label>
-              <textarea id="contact-message" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="Tell us about your infrastructure goals..."></textarea>
+              <textarea id="contact-message" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="Tell us about your infrastructure goals..."></textarea>
             </div>
             <button type="button" className="primary-button" style={{ padding: '1rem', fontSize: '1rem', fontWeight: 600 }}>Submit Inquiry</button>
           </form>

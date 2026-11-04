@@ -1,3 +1,4 @@
+import { palette, aisSeries } from '../../theme';
 import { useMemo, useState } from 'react';
 import { Sliders, Zap, RotateCcw } from 'lucide-react';
 import {
@@ -34,7 +35,7 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
         <span style={{ color: 'var(--text-muted)' }}>{label}</span>
         <span style={{ fontWeight: 700, color }}>{value.toFixed(1)}</span>
       </div>
-      <div style={{ height: '8px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+      <div style={{ height: '8px', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${(value / MAX_COMPONENT_SCORE) * 100}%`, background: color, transition: 'width 0.15s ease' }} />
       </div>
     </div>
@@ -138,7 +139,7 @@ export function AisSimulator() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', cursor: 'pointer' }}>
               <input aria-label="Real ZK proof verified this period" type="checkbox" checked={zk} onChange={(e) => setZk(e.target.checked)} />
-              <Zap size={14} color={zk ? '#f59e0b' : 'var(--text-muted)'} />
+              <Zap size={14} color={zk ? palette.warning : palette.inkMuted} />
               Real ZK proof verified this period (x1.15)
             </label>
             <button onClick={() => applyPreset(PRESETS[1])} className="secondary-button btn-xs" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -154,7 +155,7 @@ export function AisSimulator() {
                   key={i}
                   onClick={() => setTier(i)}
                   style={{
-                    flex: 1, padding: '6px 4px', fontSize: '0.6rem', borderRadius: '6px', cursor: 'pointer',
+                    flex: 1, padding: '6px 4px', fontSize: '0.6rem', borderRadius: 'var(--radius)', cursor: 'pointer',
                     border: `1px solid ${tier === i ? 'var(--theme-accent)' : 'var(--glass-border)'}`,
                     background: tier === i ? 'var(--theme-accent-muted)' : 'transparent',
                     color: tier === i ? 'var(--theme-accent)' : 'var(--text-muted)',
@@ -169,10 +170,10 @@ export function AisSimulator() {
 
         {/* Outputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <Bar label="S_entropy (Stability)" value={breakdown.s_entropy} color="#2196f3" />
-          <Bar label="S_grounding" value={breakdown.s_grounding} color="#4caf50" />
-          <Bar label="S_sacrifice" value={breakdown.s_sacrifice} color="#f59e0b" />
-          <Bar label="S_compliance" value={breakdown.s_compliance} color="#c4b5fd" />
+          <Bar label="S_entropy (Stability)" value={breakdown.s_entropy} color={aisSeries.entropy} />
+          <Bar label="S_grounding" value={breakdown.s_grounding} color={aisSeries.grounding} />
+          <Bar label="S_sacrifice" value={breakdown.s_sacrifice} color={aisSeries.sacrifice} />
+          <Bar label="S_compliance" value={breakdown.s_compliance} color={aisSeries.compliance} />
 
           <div style={{
             marginTop: '8px', padding: '16px', borderRadius: 'var(--radius-md)',
@@ -187,9 +188,9 @@ export function AisSimulator() {
             </div>
             <div className="mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
               base {breakdown.weighted.toFixed(1)} · post-boost {breakdown.raw.toFixed(1)} · final {breakdown.ais.toFixed(1)} · profile {AIS_PROFILE}
-              {breakdown.tierCapped && <span style={{ color: '#f59e0b' }}> -- capped at tier ceiling {breakdown.ceiling}</span>}
+              {breakdown.tierCapped && <span style={{ color: 'var(--warning)' }}> -- capped at tier ceiling {breakdown.ceiling}</span>}
             </div>
-            <div style={{ fontSize: '0.68rem', color: breakdown.shadowGate ? 'var(--text-muted)' : '#f59e0b' }}>
+            <div style={{ fontSize: '0.68rem', color: breakdown.shadowGate ? 'var(--ink-muted)' : 'var(--warning)' }}>
               Shadow floor diagnostic: {breakdown.shadowGate ? 'would pass' : 'would fail'}; proposed gate is not enforced.
             </div>
             {breakdown.ais < 1 && (

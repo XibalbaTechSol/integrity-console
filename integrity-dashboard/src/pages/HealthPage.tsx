@@ -485,7 +485,7 @@ export default function HealthPage() {
       {/* ─── Hero HIPAA Gateway Bar ─── */}
       <div
         style={{
-          background: 'linear-gradient(135deg, rgba(201, 168, 76, 0.05) 0%, rgba(5, 13, 24, 0.95) 100%)',
+          background: 'linear-gradient(135deg, rgba(240, 180, 41, 0.05) 0%, rgba(8, 17, 27, 0.95) 100%)',
           border: '1px solid var(--theme-accent-muted)',
           borderRadius: 'var(--radius-lg)',
           padding: 'var(--space-6) var(--space-8)',
@@ -498,11 +498,11 @@ export default function HealthPage() {
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--theme-accent)' }}>Integrity Health</div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--ink)' }}>Integrity Health</div>
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.6rem', fontWeight: 800,
-              padding: '2px 8px', borderRadius: '999px', textTransform: 'uppercase', letterSpacing: '0.05em',
-              color: '#10b981', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
+              padding: '2px 8px', borderRadius: 'var(--radius)', textTransform: 'uppercase', letterSpacing: '0.05em',
+              color: 'var(--success)', background: 'rgba(66, 214, 139, 0.12)', border: '1px solid rgba(66, 214, 139, 0.3)',
             }}>
               HIPAA-aligned
             </span>
@@ -524,7 +524,7 @@ export default function HealthPage() {
           </div>
 
           <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-3) var(--space-5)', textAlign: 'center', minWidth: '120px' }}>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--danger)', lineHeight: 1 }}>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: baas.some(b => b.status === 'Disputed') ? 'var(--danger)' : 'var(--ink)', lineHeight: 1 }}>
               {loading ? '—' : baas.filter(b => b.status === 'Disputed').length}
             </div>
             <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '4px' }}>
@@ -543,7 +543,7 @@ export default function HealthPage() {
 
         {/* TAB 1: Smart BAAs */}
 
-          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: "12px", border: "1px solid var(--glass-border)" }}>
+          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: 'var(--radius)', border: "1px solid var(--glass-border)" }}>
             <BaaAuthoringPanel
               walletAddress={walletAddress}
               selectedAgent={selectedAgent}
@@ -575,9 +575,9 @@ export default function HealthPage() {
                       </thead>
                       <tbody>
                         {loading ? (
-                          <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Loading…</td></tr>
+                          <tr><td colSpan={5} className="empty-state">Loading…</td></tr>
                         ) : baas.length === 0 ? (
-                          <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No BAAs found for this agent.</td></tr>
+                          <tr><td colSpan={5} className="empty-state">No BAAs found for this agent.</td></tr>
                         ) : (
                           baas.map(b => {
                             const canSign = b.status === 'Proposed' && !!saAddr && b.business_associate.toLowerCase() === saAddr.toLowerCase();
@@ -643,12 +643,12 @@ export default function HealthPage() {
               {/* Clinical Allowlist */}
               <Panel title="Clinical Allowlist (BCC Runtime Policy)" icon={<Shield size={18} color="var(--theme-accent)" />}>
                 <div className="flex-col gap-4">
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.22)', padding: '10px 12px', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', background: 'rgba(66, 214, 139, 0.08)', border: '1px solid rgba(66, 214, 139, 0.22)', padding: '10px 12px', borderRadius: 'var(--radius-sm)' }}>
                     <strong style={{ color: 'var(--success)' }}>Observation by default.</strong> This rule records which agents are configured for clinical workloads; it does not revoke tools or block a registered agent. An operator must explicitly switch BCC to enforcement for a selected policy/workload.
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="text-muted" style={{ fontSize: '0.85rem' }}>Agents observed for the clinical policy pack.</span>
-                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: '12px' }}>{allowlist.length} agents</span>
+                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 'var(--radius)' }}>{allowlist.length} agents</span>
                   </div>
                   {allowlistLoading ? <p className="text-muted" style={{ fontSize: '0.85rem' }}>Loading allowlist...</p> : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -674,7 +674,7 @@ export default function HealthPage() {
                 <div className="flex-col gap-4">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="text-muted" style={{ fontSize: '0.85rem' }}>Registered Oracle Agents.</span>
-                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: '12px' }}>{agents.length} agents</span>
+                    <span style={{ fontSize: '0.75rem', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 'var(--radius)' }}>{agents.length} agents</span>
                   </div>
                   <div className="table-container" tabIndex={0}>
                     <table className="table">
@@ -688,12 +688,16 @@ export default function HealthPage() {
                       </thead>
                       <tbody>
                         {agents.length === 0 ? (
-                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }} className="text-muted">No agents registered on this network.</td></tr>
+                          <tr><td colSpan={4} className="empty-state">No agents registered on this network.</td></tr>
                         ) : (
                           agents.map((agent: any, index: number) => (
                             <tr key={agent.namespace_key || `${agent.id}-${agent.store_id || index}`}>
                               <td><strong style={{ color: agent.id === selectedAgent?.id ? 'var(--theme-accent)' : 'inherit' }}>{agent.alias || agent.name || agent.id}</strong></td>
-                              <td><code style={{ fontSize: '0.75rem' }}>{agent.id.slice(0, 24)}...</code></td>
+                              {/* This panel is one half of a two-column grid, so a
+                                  24-character DID pushed Tier and Status outside the
+                                  scroll container -- two of the four columns were
+                                  invisible until you scrolled sideways. */}
+                              <td><code style={{ fontSize: '0.75rem' }} title={agent.id}>{agent.id.slice(0, 14)}…</code></td>
                               <td>{agent.verification_tier}</td>
                               <td><StatusBadge status="active" /></td>
                             </tr>
@@ -709,7 +713,7 @@ export default function HealthPage() {
 
         {/* TAB 2: PHI Access Gates */}
 
-          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: "12px", border: "1px solid var(--glass-border)" }}>
+          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: 'var(--radius)', border: "1px solid var(--glass-border)" }}>
             <div className="grid-cols-2" style={{ gap: 'var(--space-6)' }}>
 
               {/* Record Gate Consent Contracts */}
@@ -732,9 +736,9 @@ export default function HealthPage() {
                       </thead>
                       <tbody>
                         {consentsLoading ? (
-                          <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>Loading…</td></tr>
+                          <tr><td colSpan={5} className="empty-state">Loading…</td></tr>
                         ) : consents.length === 0 ? (
-                          <tr><td colSpan={5} style={{ textAlign: 'center', padding: '2rem' }}>No known gates for this browser yet — grant one below.</td></tr>
+                          <tr><td colSpan={5} className="empty-state">No known gates for this browser yet — grant one below.</td></tr>
                         ) : (
                           consents.map(c => {
                             const key = `${c.patient}-${c.recordHash}-${c.agent}`;
@@ -816,7 +820,7 @@ export default function HealthPage() {
 
         {/* TAB 3: Audit & Compliance */}
 
-          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: "12px", border: "1px solid var(--glass-border)" }}>
+          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: 'var(--radius)', border: "1px solid var(--glass-border)" }}>
             {/* Interaction Logs + Violations */}
             <div className="grid-cols-3" style={{ gap: 'var(--space-6)' }}>
 
@@ -843,10 +847,10 @@ export default function HealthPage() {
                             <td>{l.agent}</td>
                             <td>
                               <span style={{
-                                fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px',
-                                background: l.status === 'PASSED' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                                fontSize: '0.65rem', padding: '2px 6px', borderRadius: 'var(--radius)',
+                                background: l.status === 'PASSED' ? 'rgba(66, 214, 139, 0.1)' : 'rgba(255, 107, 122, 0.1)',
                                 color: l.status === 'PASSED' ? 'var(--success)' : 'var(--danger)',
-                                border: `1px solid ${l.status === 'PASSED' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)'}`,
+                                border: `1px solid ${l.status === 'PASSED' ? 'rgba(66, 214, 139, 0.2)' : 'rgba(255, 107, 122, 0.2)'}`,
                                 fontWeight: 700
                               }}>
                                 {l.status}
@@ -886,8 +890,8 @@ export default function HealthPage() {
                             <div
                               key={v.id}
                               style={{
-                                background: 'rgba(244, 63, 94, 0.05)',
-                                border: '1px solid rgba(244, 63, 94, 0.2)',
+                                background: 'rgba(255, 107, 122, 0.05)',
+                                border: '1px solid rgba(255, 107, 122, 0.2)',
                                 borderRadius: 'var(--radius-md)',
                                 padding: 'var(--space-4)',
                               }}
@@ -922,7 +926,7 @@ export default function HealthPage() {
 
         {/* TAB 4: Quarantine Zone */}
 
-          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: "12px", border: "1px solid var(--glass-border)" }}>
+          <div className="flex-col gap-6" style={{ background: "rgba(0,0,0,0.2)", padding: "24px", borderRadius: 'var(--radius)', border: "1px solid var(--glass-border)" }}>
             <div className="grid-cols-1" style={{ gap: 'var(--space-6)' }}>
               <Panel title="Agent Circuit Breakers (Quarantine Zone)" icon={<AlertTriangle size={18} color="var(--danger)" />}>
                 <div className="flex-col gap-4">
@@ -947,9 +951,9 @@ export default function HealthPage() {
                       </thead>
                       <tbody>
                         {quarantineLoading ? (
-                          <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem' }}>Scanning fleet stake state…</td></tr>
+                          <tr><td colSpan={3} className="empty-state">Scanning fleet stake state…</td></tr>
                         ) : quarantinedAgents.length === 0 ? (
-                          <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--success)' }}>No agents currently quarantined.</td></tr>
+                          <tr><td colSpan={3} className='empty-state'>No agents currently quarantined.</td></tr>
                         ) : (
                           quarantinedAgents.map((qa, index) => (
                             <tr key={qa.agentId ? `${qa.agentId}-${index}` : `${qa.agentDid}-${index}`}>
@@ -957,9 +961,9 @@ export default function HealthPage() {
                               <td className="mono" style={{ color: 'var(--danger)' }}>{(Number(qa.lockedStake) / 1e18).toLocaleString()} ITK</td>
                               <td>
                                 <span style={{
-                                  fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px',
-                                  background: 'rgba(244, 63, 94, 0.1)', color: 'var(--danger)',
-                                  border: '1px solid rgba(244, 63, 94, 0.2)', fontWeight: 700
+                                  fontSize: '0.65rem', padding: '2px 6px', borderRadius: 'var(--radius)',
+                                  background: 'rgba(255, 107, 122, 0.1)', color: 'var(--danger)',
+                                  border: '1px solid rgba(255, 107, 122, 0.2)', fontWeight: 700
                                 }}>
                                   QUARANTINED
                                 </span>

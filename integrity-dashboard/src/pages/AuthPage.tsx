@@ -58,7 +58,10 @@ const AuthPage: React.FC = () => {
           google.accounts.id.renderButton(container, {
             theme: 'filled_black',
             size: 'large',
-            width: 400,
+            // A fixed 400 overflowed every phone viewport: the button is wider
+            // than a 390px screen, so the whole page scrolled sideways. Google
+            // caps this at 400, so clamp to whatever the column actually is.
+            width: Math.min(400, container.clientWidth || 400),
             text: 'continue_with',
             shape: 'rectangular',
           });
@@ -157,7 +160,7 @@ const AuthPage: React.FC = () => {
       <div className="auth-brand-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '4rem', background: 'var(--surface-color)', borderRight: '1px solid var(--border-color)' }}>
         <img src="/logo.png" alt="Xibalba Solutions" style={{ height: '48px', alignSelf: 'flex-start', marginBottom: 'auto' }} />
         <div style={{ marginTop: 'auto', marginBottom: 'auto' }}>
-          <h1 style={{ fontSize: '3rem', marginBottom: '1rem', fontFamily: 'Raleway, sans-serif' }}>Access the Agentic Economy.</h1>
+          <h1 style={{ fontSize: '3rem', marginBottom: '1rem', fontFamily: 'var(--font-family)' }}>Access the Agentic Economy.</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '500px', lineHeight: 1.6 }}>
             Sign in to manage your sovereign hardware endpoints, view protocol telemetry, and direct capital flow.
           </p>
@@ -190,7 +193,7 @@ const AuthPage: React.FC = () => {
                   background: '#222',
                   color: '#fff',
                   border: '1px solid var(--border-color)',
-                  borderRadius: '4px',
+                  borderRadius: 'var(--radius)',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   fontWeight: 600,
                 }}
@@ -217,10 +220,9 @@ const AuthPage: React.FC = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 gap: '0.75rem',
-                background: '#333',
-                color: 'white',
-                border: '1px solid #555',
-                borderRadius: '4px',
+                // Was background #333 / border #555, which overrode the
+                // .secondary-button class this element already carries and made
+                // it the one neutral-grey control in the console.
                 cursor: loading ? 'not-allowed' : 'pointer',
                 fontWeight: 600,
               }}
@@ -239,13 +241,13 @@ const AuthPage: React.FC = () => {
           <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             <div>
               <label htmlFor="auth-email" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Email</label>
-              <input id="auth-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} placeholder="john@example.com" />
+              <input id="auth-email" type="email" required value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} placeholder="john@example.com" />
             </div>
             <div>
               <label htmlFor="auth-password" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Password</label>
-              <input id="auth-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} placeholder="••••••••" />
+              <input id="auth-password" type="password" required value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} placeholder="••••••••" />
             </div>
-            {error && <div style={{ color: 'var(--danger, #f44336)', fontSize: '0.85rem' }}>{error}</div>}
+            {error && <div style={{ color: 'var(--danger, var(--danger))', fontSize: '0.85rem' }}>{error}</div>}
             <button type="submit" disabled={loading} className="primary-button" style={{ width: '100%', padding: '1rem', marginTop: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
               {loading ? 'Working…' : isLogin ? 'Sign In' : 'Sign Up'} <ArrowRight size={18} />
             </button>
