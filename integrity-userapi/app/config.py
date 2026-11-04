@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     app_name: str = "integrity-userapi"
 
     # --- Google OAuth / GIS ---
-    google_client_id: str = "441049685638-7d1c1nd9s0rdmvvqm66meno6be98i9qv.apps.googleusercontent.com"
+    google_client_id: str = ""
     google_client_secret: str = ""
 
     # --- CORS ---

@@ -202,11 +202,12 @@ async def test_google_auth_with_valid_id_token_creates_user_and_wallet(
 ) -> None:
     from app.config import settings
 
+    monkeypatch.setattr(settings, "google_client_id", "test-google-client-id")
     fake_userinfo = {
         "sub": "google-user-sub-12345",
         "email": "newgoogleuser@example.com",
         "email_verified": "true",
-        "aud": settings.google_client_id,
+        "aud": "test-google-client-id",
     }
 
     async def fake_get(self, url, **kwargs):
@@ -247,11 +248,12 @@ async def test_google_auth_links_existing_email_user(
     email = "linkme@example.com"
     await _register(client, email=email)
 
+    monkeypatch.setattr(settings, "google_client_id", "test-google-client-id")
     fake_userinfo = {
         "sub": "google-link-sub-99999",
         "email": email,
         "email_verified": True,
-        "aud": settings.google_client_id,
+        "aud": "test-google-client-id",
     }
 
     async def fake_get(self, url, **kwargs):
@@ -274,11 +276,12 @@ async def test_google_auth_rejects_unverified_email(
 ) -> None:
     from app.config import settings
 
+    monkeypatch.setattr(settings, "google_client_id", "test-google-client-id")
     fake_userinfo = {
         "sub": "unverified-sub-1",
         "email": "unverified@example.com",
         "email_verified": False,
-        "aud": settings.google_client_id,
+        "aud": "test-google-client-id",
     }
 
     async def fake_get(self, url, **kwargs):
