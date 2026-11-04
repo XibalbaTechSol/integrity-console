@@ -101,8 +101,8 @@ export default function PolicyPacksPage() {
           <div className="panel-heading"><div><span className="panel-label">Lifecycle</span><h2>Promotion model</h2></div><LockKeyhole size={18} /></div>
           <div className="flex-col gap-4" style={{ fontSize: '.85rem' }}>
             <p className="text-muted">Draft → observe → explicit enforce. Each revision is durable and can be rolled back by promoting an earlier revision.</p>
-            <div style={{ padding: 12, border: '1px solid rgba(34,197,94,.25)', background: 'rgba(34,197,94,.08)', borderRadius: 'var(--radius-sm)' }}><strong style={{ color: 'var(--success)' }}>Observation</strong><br /><span className="text-muted">Records matches and would-deny outcomes without stopping agents.</span></div>
-            <div style={{ padding: 12, border: '1px solid rgba(245,158,11,.25)', background: 'rgba(245,158,11,.08)', borderRadius: 'var(--radius-sm)' }}><strong style={{ color: 'var(--warning)' }}>Enforcement</strong><br /><span className="text-muted">An explicit operator choice. It is never implied by registration.</span></div>
+            <div style={{ padding: 12, border: '1px solid rgba(66, 214, 139, .25)', background: 'rgba(66, 214, 139, .08)', borderRadius: 'var(--radius-sm)' }}><strong style={{ color: 'var(--success)' }}>Observation</strong><br /><span className="text-muted">Records matches and would-deny outcomes without stopping agents.</span></div>
+            <div style={{ padding: 12, border: '1px solid rgba(240, 180, 41, .25)', background: 'rgba(240, 180, 41, .08)', borderRadius: 'var(--radius-sm)' }}><strong style={{ color: 'var(--warning)' }}>Enforcement</strong><br /><span className="text-muted">An explicit operator choice. It is never implied by registration.</span></div>
           </div>
         </section>
       </div>

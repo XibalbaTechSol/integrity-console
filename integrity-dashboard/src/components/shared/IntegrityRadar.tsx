@@ -48,15 +48,15 @@ const CustomTooltip = ({ active, payload, mode }: any) => {
         background: '#0c0c14',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         padding: '12px',
-        borderRadius: '8px',
+        borderRadius: 'var(--radius)',
         maxWidth: '220px',
         fontSize: '11px',
         color: 'rgba(255, 255, 255, 0.9)',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
       }}>
-        <div style={{ fontWeight: 600, color: mode === 'integrity' ? 'var(--primary)' : '#ef4444', marginBottom: '4px' }}>{data.subject}</div>
+        <div style={{ fontWeight: 600, color: mode === 'integrity' ? 'var(--primary)' : 'var(--danger)', marginBottom: '4px' }}>{data.subject}</div>
         <div style={{ fontWeight: 700, fontSize: '13px', marginBottom: '6px' }}>Score: {data.value}%</div>
-        <div style={{ fontFamily: 'monospace', color: '#f59e0b', marginBottom: '6px', fontSize: '10px' }}>{formula}</div>
+        <div style={{ fontFamily: 'monospace', color: 'var(--warning)', marginBottom: '6px', fontSize: '10px' }}>{formula}</div>
         <div style={{ color: 'rgba(255, 255, 255, 0.6)', lineHeight: '1.4' }}>{explanation}</div>
       </div>
     );
@@ -107,7 +107,7 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
   ];
 
   const data = mode === 'integrity' ? integrityData : riskData;
-  const activeColor = mode === 'integrity' ? 'var(--primary)' : '#ef4444';
+  const activeColor = mode === 'integrity' ? 'var(--primary)' : 'var(--danger)';
 
   if (!ais) {
     return <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No AIS reading yet for this agent.</div>;
@@ -121,7 +121,7 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
           onClick={() => setMode('integrity')}
           style={{
             padding: '4px 12px',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius)',
             border: `1px solid ${mode === 'integrity' ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`,
             background: mode === 'integrity' ? 'var(--primary-dim)' : 'transparent',
             color: mode === 'integrity' ? 'var(--primary)' : 'var(--text-muted)',
@@ -137,10 +137,10 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
           onClick={() => setMode('risk')}
           style={{
             padding: '4px 12px',
-            borderRadius: '6px',
-            border: `1px solid ${mode === 'risk' ? '#ef4444' : 'rgba(255,255,255,0.05)'}`,
-            background: mode === 'risk' ? 'rgba(239,68,68,0.1)' : 'transparent',
-            color: mode === 'risk' ? '#ef4444' : 'var(--text-muted)',
+            borderRadius: 'var(--radius)',
+            border: `1px solid ${mode === 'risk' ? 'var(--danger)' : 'rgba(255,255,255,0.05)'}`,
+            background: mode === 'risk' ? 'rgba(255, 107, 122, 0.1)' : 'transparent',
+            color: mode === 'risk' ? 'var(--danger)' : 'var(--text-muted)',
             fontSize: '0.65rem',
             fontWeight: 700,
             cursor: 'pointer',
@@ -183,7 +183,7 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
         padding: '16px',
         background: 'rgba(255, 255, 255, 0.02)',
         border: '1px solid rgba(255, 255, 255, 0.05)',
-        borderRadius: '12px',
+        borderRadius: 'var(--radius)',
         fontSize: '0.75rem',
       }}>
         <div style={{ fontWeight: 700, color: 'white', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -200,7 +200,7 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
             <div key={axis.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderBottom: '1px solid rgba(255, 255, 255, 0.03)', paddingBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontWeight: 600, color: 'var(--primary)' }}>{axis.name}</span>
-                <code style={{ fontSize: '0.65rem', color: '#f59e0b', background: 'rgba(0, 0, 0, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
+                <code style={{ fontSize: '0.65rem', color: 'var(--warning)', background: 'rgba(0, 0, 0, 0.2)', padding: '2px 6px', borderRadius: 'var(--radius)' }}>
                   {axis.formula}
                 </code>
               </div>
@@ -215,8 +215,8 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
           ].map((axis) => (
             <div key={axis.name} style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderBottom: '1px solid rgba(255, 255, 255, 0.03)', paddingBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 600, color: '#ef4444' }}>{axis.name}</span>
-                <code style={{ fontSize: '0.65rem', color: '#f59e0b', background: 'rgba(0, 0, 0, 0.2)', padding: '2px 6px', borderRadius: '4px' }}>
+                <span style={{ fontWeight: 600, color: 'var(--danger)' }}>{axis.name}</span>
+                <code style={{ fontSize: '0.65rem', color: 'var(--warning)', background: 'rgba(0, 0, 0, 0.2)', padding: '2px 6px', borderRadius: 'var(--radius)' }}>
                   {axis.formula}
                 </code>
               </div>

@@ -1,9 +1,10 @@
+import { palette, series } from '../../theme';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import ForceGraph2D, { type ForceGraphMethods, type LinkObject, type NodeObject } from 'react-force-graph-2d';
 import type { GraphEdge, GraphNode, GraphPayload } from '../../services/graphMemory';
 
-const NODE_COLOR: Record<string, string> = { memory: '#5b8def', entity: '#f59e0b' };
-const EDGE_COLOR: Record<string, string> = { relation: '#64748b', similarity: '#10b981', contradiction: '#ef4444' };
+const NODE_COLOR: Record<string, string> = { memory: series[0], entity: series[2] };
+const EDGE_COLOR: Record<string, string> = { relation: palette.inkDim, similarity: palette.success, contradiction: palette.danger };
 
 export type EvidenceGraph2DHandle = { zoomToFit: () => void };
 
@@ -45,9 +46,9 @@ export const EvidenceGraph2D = forwardRef<EvidenceGraph2DHandle, {
         nodeId="id"
         backgroundColor="rgba(0,0,0,0)"
         nodeRelSize={5}
-        nodeColor={(node) => node.id === selectedNodeId ? '#f8fafc' : NODE_COLOR[String((node as { type?: string }).type)] ?? '#94a3b8'}
+        nodeColor={(node) => node.id === selectedNodeId ? palette.ink : NODE_COLOR[String((node as { type?: string }).type)] ?? palette.inkMuted}
         nodeVal={(node) => node.id === selectedNodeId ? 2.2 : (node as { type?: string }).type === 'entity' ? 1.45 : 1}
-        linkColor={(link) => EDGE_COLOR[String((link as { type?: string }).type)] ?? '#475569'}
+        linkColor={(link) => EDGE_COLOR[String((link as { type?: string }).type)] ?? palette.inkDim}
         linkWidth={(link) => (link as { type?: string }).type === 'contradiction' ? 1.8 : 0.8}
         linkDirectionalArrowLength={3}
         linkDirectionalArrowRelPos={1}
@@ -63,13 +64,13 @@ export const EvidenceGraph2D = forwardRef<EvidenceGraph2DHandle, {
           const y = typeof node.y === 'number' ? node.y : 0;
           context.beginPath();
           context.arc(x, y, radius, 0, Math.PI * 2);
-          context.fillStyle = node.id === selectedNodeId ? '#f8fafc' : NODE_COLOR[String((node as { type?: string }).type)] ?? '#94a3b8';
+          context.fillStyle = node.id === selectedNodeId ? palette.ink : NODE_COLOR[String((node as { type?: string }).type)] ?? palette.inkMuted;
           context.fill();
           if (scale > 1.1 || node.id === selectedNodeId) {
-            context.font = `${fontSize}px Raleway, sans-serif`;
+            context.font = `${fontSize}px Inter, ui-sans-serif, system-ui, sans-serif`;
             context.textAlign = 'center';
             context.textBaseline = 'top';
-            context.fillStyle = '#cbd5e1';
+            context.fillStyle = palette.inkMuted;
             context.fillText(label.length > 34 ? `${label.slice(0, 31)}…` : label, x, y + radius + 3);
           }
         }}

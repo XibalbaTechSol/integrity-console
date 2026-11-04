@@ -34,11 +34,11 @@ function SpanDebugger({ span, onClose }: { span: SpanTreeNode, onClose: () => vo
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-          <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Duration</span>
             <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{span.duration_ms}ms</div>
           </div>
-          <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Status</span>
             <div style={{ fontSize: '1.1rem', fontWeight: 600 }}>{span.status_code || 'UNSET'}</div>
           </div>
@@ -46,7 +46,7 @@ function SpanDebugger({ span, onClose }: { span: SpanTreeNode, onClose: () => vo
 
         <div>
           <label style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Attributes</label>
-          <div style={{ padding: '1rem', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '0.85rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', fontSize: '0.85rem', fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
             {JSON.stringify(span.attributes ?? {}, null, 2)}
           </div>
         </div>
@@ -67,7 +67,7 @@ function SpanNodeComponent({ span, depth, selectedSpanId, onSelectSpan }: { span
         onClick={() => onSelectSpan(isSelected ? null : span.span_id)}
         style={{
           display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem',
-          borderRadius: '4px', cursor: 'pointer', marginBottom: '0.25rem',
+          borderRadius: 'var(--radius)', cursor: 'pointer', marginBottom: '0.25rem',
           background: isSelected ? 'var(--bg-color)' : 'transparent',
           border: `1px solid ${isSelected ? 'var(--text-primary)' : 'transparent'}`,
           transition: 'all 0.2s'
@@ -139,7 +139,7 @@ export function COTPlatform() {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '1.5rem', height: '500px', position: 'relative' }}>
-      <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>Trace Explorer</span>
         </div>
@@ -152,7 +152,7 @@ export function COTPlatform() {
               key={trace.trace_id}
               onClick={() => { setActiveTrace(trace); setSelectedSpanId(null); }}
               style={{
-                padding: '0.75rem', borderRadius: '4px', cursor: 'pointer', marginBottom: '0.5rem',
+                padding: '0.75rem', borderRadius: 'var(--radius)', cursor: 'pointer', marginBottom: '0.5rem',
                 background: activeTrace?.trace_id === trace.trace_id ? 'var(--bg-color)' : 'transparent',
                 border: `1px solid ${activeTrace?.trace_id === trace.trace_id ? 'var(--text-primary)' : 'var(--border-color)'}`
               }}
@@ -164,7 +164,7 @@ export function COTPlatform() {
         </div>
       </div>
 
-      <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '1.5rem', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface-color)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', padding: '1.5rem', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {activeTrace ? (
           <>
             <div style={{ marginBottom: '1.5rem' }}>

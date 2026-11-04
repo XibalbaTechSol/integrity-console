@@ -33,8 +33,8 @@ interface ActivityRow {
 type StepStatus = 'idle' | 'running' | 'passed' | 'failed';
 
 function StatusIcon({ status }: { status: StepStatus }) {
-  if (status === 'passed') return <CheckCircle2 size={18} color="var(--success, #30a46c)" />;
-  if (status === 'failed') return <XCircle size={18} color="var(--danger, #e5484d)" />;
+  if (status === 'passed') return <CheckCircle2 size={18} color="var(--success, var(--success))" />;
+  if (status === 'failed') return <XCircle size={18} color="var(--danger, var(--danger))" />;
   if (status === 'running') return <Loader2 size={18} className="spin" color="var(--primary)" />;
   return <Circle size={18} color="var(--text-muted)" opacity={0.5} />;
 }
@@ -78,7 +78,7 @@ function ActionStep({
     <Panel title={title} icon={icon} action={<StatusIcon status={status} />}>
       <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 var(--space-3)', overflowWrap: 'anywhere' }}>{description}</p>
       {disabledReason ? (
-        <div style={{ color: 'var(--danger, #e5484d)', fontSize: '0.8rem', marginBottom: 'var(--space-2)' }}>{disabledReason}</div>
+        <div style={{ color: 'var(--danger, var(--danger))', fontSize: '0.8rem', marginBottom: 'var(--space-2)' }}>{disabledReason}</div>
       ) : (
         <button
           type="button"
@@ -309,7 +309,7 @@ export function GuidedSystemTest() {
         {services
           .filter((s) => s.status === 'offline' && s.detail)
           .map((s) => (
-            <div key={s.key} style={{ color: 'var(--danger, #e5484d)', fontSize: '0.75rem', marginTop: 'var(--space-2)' }}>
+            <div key={s.key} style={{ color: 'var(--danger, var(--danger))', fontSize: '0.75rem', marginTop: 'var(--space-2)' }}>
               {s.detail}
             </div>
           ))}

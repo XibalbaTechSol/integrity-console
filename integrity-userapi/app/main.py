@@ -12,14 +12,15 @@ stores only a DID pointer, never a cache of full agent state.
 from __future__ import annotations
 
 import asyncio
+import os
 import secrets
+import subprocess
+from uuid import UUID
 
 import asyncpg
-from fastapi import Depends, FastAPI, HTTPException, Response, status, BackgroundTasks
+import httpx
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from uuid import UUID
-import subprocess
-import os
 
 from app import db, oracle_client
 from app.config import Settings, settings as default_settings
@@ -31,6 +32,7 @@ from app.schemas import (
     ApiKeyResponse,
     DemoRunResponse,
     DemoRunUpdateRequest,
+    GoogleAuthRequest,
     LoginRequest,
     OwnedAgentResponse,
     PolicyActivationRequest,
@@ -163,6 +165,158 @@ async def login(
         )
 
     login_rate_limiter.record_success(body.email)
+    token = create_access_token(user_id=str(row["id"]), settings=settings)
+    response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))
+    return TokenResponse(access_token=token)
+
+
+async def _verify_google_credential(body: GoogleAuthRequest, settings: Settings) -> tuple[str, str]:
+    """
+    Verifies a Google credential (either ID token or authorization code).
+    Returns (google_sub, email).
+    """
+    if body.id_token:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                "https://oauth2.googleapis.com/tokeninfo",
+                params={"id_token": body.id_token},
+            )
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid Google ID token",
+                )
+            data = resp.json()
+
+        aud = data.get("aud")
+        allowed_auds = {cid.strip() for cid in settings.google_client_id.split(",") if cid.strip()}
+        if allowed_auds and aud not in allowed_auds:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google ID token audience mismatch",
+            )
+
+        sub = data.get("sub")
+        email = data.get("email")
+        email_verified = data.get("email_verified")
+        if not sub or not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google token missing user identity",
+            )
+        if email_verified not in (True, "true", "True", 1):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google email not verified",
+            )
+        return str(sub), str(email).strip().lower()
+
+    elif body.code:
+        if not settings.google_client_secret:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Google client secret not configured on server",
+            )
+        token_data: dict[str, str] = {
+            "client_id": settings.google_client_id,
+            "client_secret": settings.google_client_secret,
+            "code": body.code,
+            "grant_type": "authorization_code",
+            "redirect_uri": body.redirect_uri or "postmessage",
+        }
+        if body.code_verifier:
+            token_data["code_verifier"] = body.code_verifier
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post("https://oauth2.googleapis.com/token", data=token_data)
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"Google token exchange failed: {resp.text}",
+                )
+            tokens = resp.json()
+            access_token = tokens.get("access_token")
+            if not access_token:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="No access token returned from Google",
+                )
+            user_resp = await client.get(
+                "https://openidconnect.googleapis.com/v1/userinfo",
+                headers={"Authorization": f"Bearer {access_token}"},
+            )
+            if user_resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Failed to retrieve Google user profile",
+                )
+            user_data = user_resp.json()
+
+        sub = user_data.get("sub")
+        email = user_data.get("email")
+        email_verified = user_data.get("email_verified")
+        if not sub or not email:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google profile missing user identity",
+            )
+        if email_verified not in (True, "true", "True", 1):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google email not verified",
+            )
+        return str(sub), str(email).strip().lower()
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either id_token or code must be provided",
+        )
+
+
+@app.post("/auth/google", response_model=TokenResponse)
+async def google_auth(
+    body: GoogleAuthRequest,
+    response: Response,
+    pool: asyncpg.Pool = Depends(get_pool),
+    settings: Settings = Depends(get_settings),
+) -> TokenResponse:
+    google_sub, email = await _verify_google_credential(body, settings)
+
+    # 1. Match by existing google_id
+    row = await pool.fetchrow(
+        "SELECT id, email FROM users WHERE google_id = $1", google_sub
+    )
+
+    if row is None:
+        # 2. Match by email (link existing registered account)
+        row = await pool.fetchrow(
+            "SELECT id, email, google_id FROM users WHERE email = $1", email
+        )
+        if row is not None:
+            await pool.execute(
+                "UPDATE users SET google_id = $1 WHERE id = $2", google_sub, row["id"]
+            )
+        else:
+            # 3. Create new user without password
+            row = await pool.fetchrow(
+                "INSERT INTO users (email, google_id) VALUES ($1, $2) RETURNING id",
+                email,
+                google_sub,
+            )
+            # Auto-provision app custodial wallet with dev faucet
+            app_wallet_address = "0x" + secrets.token_hex(20)
+            await pool.execute(
+                """
+                INSERT INTO user_wallets (user_id, app_wallet_address, itk_balance_wei)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (user_id) DO NOTHING
+                """,
+                row["id"],
+                app_wallet_address,
+                _DEV_FAUCET_WEI,
+            )
+
     token = create_access_token(user_id=str(row["id"]), settings=settings)
     response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))
     return TokenResponse(access_token=token)

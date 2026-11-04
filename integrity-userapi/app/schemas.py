@@ -22,6 +22,13 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class GoogleAuthRequest(BaseModel):
+    id_token: str | None = None
+    code: str | None = None
+    redirect_uri: str | None = None
+    code_verifier: str | None = None
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

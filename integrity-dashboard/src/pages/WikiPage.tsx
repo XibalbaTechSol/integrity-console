@@ -17,7 +17,7 @@ function loadMermaid() {
         securityLevel: 'strict',
         theme: 'dark',
         themeVariables: {
-          background: '#0b1723',
+          background: 'var(--surface)',
           primaryColor: '#172b3c',
           primaryTextColor: '#edf3f8',
           primaryBorderColor: '#c8a96b',

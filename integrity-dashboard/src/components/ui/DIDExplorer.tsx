@@ -118,7 +118,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
             <div style={{ padding: 'var(--space-6) var(--space-8)', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-surface-light)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                     <Fingerprint size={22} style={{ color: 'var(--theme-accent)' }} />
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'white', fontFamily: 'Playfair Display, serif' }}>Sovereign Identity Explorer</h3>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'white' }}>Sovereign Identity Explorer</h3>
                 </div>
 
                 <div style={{ display: 'flex', gap: 'var(--space-2)', background: 'rgba(0,0,0,0.3)', padding: '4px', borderRadius: 'var(--r-md)', marginTop: isMobile ? 'var(--space-4)' : 0 }}>
@@ -176,7 +176,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                                         <div style={{ padding: '24px', background: 'var(--glass-surface-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--emerald)' }}>
+                                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(66, 214, 139, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--emerald)' }}>
                                                     <Key size={16} />
                                                 </div>
                                                 <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Verification Method</span>
@@ -190,7 +190,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
 
                                         <div style={{ padding: '24px', background: 'var(--glass-surface-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(96, 165, 250, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                                                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(54, 167, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-hover)' }}>
                                                     <Globe size={16} />
                                                 </div>
                                                 <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Service Resolution</span>
@@ -204,17 +204,17 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                 </div>
 
                                 {/* Identity Schematic */}
-                                <div style={{ background: 'linear-gradient(225deg, rgba(201, 168, 76, 0.05) 0%, rgba(5, 13, 24, 0.8) 100%)', borderRadius: 'var(--r-lg)', padding: '40px', position: 'relative', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ background: 'linear-gradient(225deg, rgba(240, 180, 41, 0.05) 0%, rgba(8, 17, 27, 0.8) 100%)', borderRadius: 'var(--r-lg)', padding: '40px', position: 'relative', overflow: 'hidden', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                     <div style={{ position: 'absolute', top: '0', left: '0', width: '100%', height: '100%', opacity: 0.1, pointerEvents: 'none' }}>
                                         <div className="pulse-gold" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '200px', height: '200px', border: '1px solid var(--theme-accent)', borderRadius: '50%' }} />
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '300px', height: '300px', border: '1px dashed rgba(255,255,255,0.2)', borderRadius: '50%' }} />
                                     </div>
 
                                     <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', width: '100%' }}>
-                                        <div style={{ width: '100px', height: '100px', borderRadius: '24px', background: 'rgba(201, 168, 76, 0.15)', border: '2px solid var(--theme-accent)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', boxShadow: '0 0 40px rgba(201, 168, 76, 0.2)' }}>
+                                        <div style={{ width: '100px', height: '100px', borderRadius: 'var(--radius)', background: 'rgba(240, 180, 41, 0.15)', border: '2px solid var(--theme-accent)', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', boxShadow: '0 0 40px rgba(240, 180, 41, 0.2)' }}>
                                             <Fingerprint size={48} />
                                         </div>
-                                        <h4 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0 0 8px', fontFamily: 'Playfair Display, serif' }}>{agent.alias || "Sovereign Node"}</h4>
+                                        <h4 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 8px' }}>{agent.alias || "Sovereign Node"}</h4>
                                         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', background: 'var(--theme-accent-muted)', borderRadius: 'var(--r-xl)', border: '1px solid var(--border)', marginBottom: '32px' }}>
                                             <Shield size={12} style={{ color: 'var(--theme-accent)' }} />
                                             <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--theme-accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tier {agent.verification_tier} Guardian</span>
@@ -248,33 +248,33 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                         >
-                            <div className="enterprise-card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--navy-deep) 100%)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: 'var(--space-10)', borderRadius: 'var(--r-lg)' }}>
+                            <div className="enterprise-card" style={{ background: 'linear-gradient(135deg, rgba(66, 214, 139, 0.08) 0%, var(--navy-deep) 100%)', border: '1px solid rgba(66, 214, 139, 0.2)', padding: 'var(--space-10)', borderRadius: 'var(--r-lg)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--space-10)' }}>
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
                                             <ShieldCheck size={32} style={{ color: 'var(--emerald)' }} />
-                                            <h4 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, fontFamily: 'Playfair Display, serif' }}>Verifiable Reputation Credential</h4>
+                                            <h4 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Verifiable Reputation Credential</h4>
                                         </div>
                                         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Standardized W3C VC Data Model v1.1 // Integrity Protocol Profile</p>
                                     </div>
-                                    <div className="badge" style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--emerald)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '8px 16px', borderRadius: 'var(--r-xl)', fontSize: '0.65rem', fontWeight: 900 }}>ZK-SNARK PROVEN</div>
+                                    <div className="badge" style={{ background: 'rgba(66, 214, 139, 0.1)', color: 'var(--emerald)', border: '1px solid rgba(66, 214, 139, 0.2)', padding: '8px 16px', borderRadius: 'var(--r-xl)', fontSize: '0.65rem', fontWeight: 900 }}>ZK-SNARK PROVEN</div>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 'var(--space-6)', marginBottom: 'var(--space-10)' }}>
                                     {[
                                         { label: 'AIS_METRIC', value: vc?.credentialSubject?.ais_score || agent.current_ais, color: 'white' },
                                         { label: 'TRUST_TIER', value: vc?.credentialSubject?.trust_level || 'AAA', color: 'var(--theme-accent)' },
-                                        { label: 'SECURITY', value: `LEVEL_${agent.verification_tier}`, color: '#60a5fa' },
+                                        { label: 'SECURITY', value: `LEVEL_${agent.verification_tier}`, color: 'var(--accent-hover)' },
                                         { label: 'TTL', value: '2592000s', color: 'var(--text-muted)' },
                                     ].map((stat, i) => (
                                         <div key={i} style={{ padding: '20px', background: 'rgba(0,0,0,0.3)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
                                             <div style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '12px' }}>{stat.label}</div>
-                                            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: stat.color, fontFamily: 'Playfair Display, serif' }}>{stat.value}</div>
+                                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: stat.color, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div style={{ padding: '24px', background: 'rgba(5, 13, 24, 0.6)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)', marginBottom: 'var(--space-10)' }}>
+                                <div style={{ padding: '24px', background: 'rgba(8, 17, 27, 0.6)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)', marginBottom: 'var(--space-10)' }}>
                                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <Zap size={14} style={{ color: 'var(--theme-accent)' }} /> CRYPTOGRAPHIC PROOF STRING (JWS/EDDSA)
                                     </div>
@@ -312,7 +312,7 @@ export const DIDExplorer: React.FC<DIDExplorerProps> = ({ agent }) => {
                                     <Download size={14} /> Download DID File (.json)
                                 </button>
                             </div>
-                            <div style={{ background: 'rgba(5, 13, 24, 0.6)', padding: '32px', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', maxHeight: '500px', overflow: 'auto' }}>
+                            <div style={{ background: 'rgba(8, 17, 27, 0.6)', padding: '32px', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', maxHeight: '500px', overflow: 'auto' }}>
                                 <pre className="mono" style={{ margin: 0, fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8 }}>
                                     {JSON.stringify(didDoc || { error: "DID Document not resolved" }, null, 2)}
                                 </pre>
