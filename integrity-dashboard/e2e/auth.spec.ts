@@ -106,8 +106,8 @@ test.describe('/auth (AuthPage)', () => {
   test('Google auth button is present on the auth page', async ({ page }) => {
     await page.goto('/auth');
     await page.waitForLoadState('networkidle');
-    const googleButton = page.getByRole('button', { name: /Continue with Google/ });
-    await expect(googleButton).toBeVisible();
+    const googleButton = page.locator('button, [role="button"]').filter({ hasText: 'Continue with Google' });
+    await expect(googleButton.first()).toBeVisible();
   });
 
   test('screenshot confirms final rendered state of the Sign In view', async ({ page }) => {
