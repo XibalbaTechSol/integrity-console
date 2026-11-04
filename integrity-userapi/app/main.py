@@ -189,7 +189,8 @@ async def _verify_google_credential(body: GoogleAuthRequest, settings: Settings)
             data = resp.json()
 
         aud = data.get("aud")
-        if settings.google_client_id and aud != settings.google_client_id:
+        allowed_auds = {cid.strip() for cid in settings.google_client_id.split(",") if cid.strip()}
+        if allowed_auds and aud not in allowed_auds:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Google ID token audience mismatch",
