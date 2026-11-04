@@ -64,7 +64,11 @@ Three boundaries are deliberate and should not be "simplified" away:
 2. **The user API never touches a chain.** There is no `RPC_URL`, `CHAIN_ID` or deployments
    setting in `integrity-userapi/app/config.py`, by design. Its single cross-service knob is
    `oracle_url`, used only to proxy read-only HTTP reads (e.g. `GET /v1/agent/{id}`) when
-   serving `GET /me/agents`.
+   serving `GET /me/agents`. The `/me/wallet` endpoints are consistent with this: they are a
+   **custodial ITK ledger held in Postgres**, not a chain wallet. A row is created on first read
+   with a development faucet balance and a randomly generated address, and a transfer debits the
+   sender and credits the recipient only if the recipient is another custodial app wallet — an
+   external `0x` address is a debit only. No transaction is ever broadcast.
 3. **Shield and Cortex credentials never enter the browser bundle.** `vite.config.ts` reads
    their token files on the Node side and attaches `Authorization` to proxied requests only,
    replacing (never forwarding) whatever the browser sent. Any `VITE_*` value, by contrast, is
@@ -113,7 +117,7 @@ Canonical routes (`integrity-dashboard/src/App.tsx`):
 | `/ais` | `AisPage` | AIS radar, simulator, telemetry, derivation math — display only; scoring is the oracle's |
 | `/evidence` | `CorrelationPage` | Evidence ledger |
 | `/treasury` | `TreasuryControlPage` | Wallets, transactions, markets |
-| `/health` | `HealthPage` | Integrity Health vertical surface |
+| `/health` | `HealthPage` | Integrity Health vertical: Smart BAA authoring and EHR-gate compliance. Not service health — that lives in `services/health.ts`, used by the header and the guided system test |
 | `/system` | `SystemControlPage` | Operations |
 | `/settings` | `SettingsPage` | Operator settings |
 | `/wiki` | `WikiPage` | Lazy-loaded, read-only generated wiki projection |
@@ -149,12 +153,12 @@ CORS runs with `allow_credentials=True` against an explicit origin allow-list in
 | `POST` | `/auth/login` | Log in |
 | `POST` | `/auth/logout` | Revoke the session (JWT revocation table) |
 | `GET` | `/me` | Current user |
-| `GET` | `/me/wallet` | Wallet pointer for the user |
-| `POST` | `/me/wallet/transfer` | Initiate a transfer |
+| `GET` | `/me/wallet` | The user's custodial app wallet, created on first read with a development faucet balance |
+| `POST` | `/me/wallet/transfer` | Move ITK between custodial balances, inside one Postgres transaction |
 | `GET` | `/me/agents` | Owned agents, enriched via read-only oracle reads |
 | `POST` | `/me/agents` | Attach an agent to the account |
 | `GET` | `/api-keys` | List developer API keys |
-| `POST` | `/api-keys` | Issue a key (returns the secret once) |
+| `POST` | `/api-keys` | Issue a key. Only the hash is stored, so the raw key is returned exactly once |
 | `DELETE` | `/api-keys/{key_id}` | Revoke a key |
 | `GET` | `/me/policy-packs` | List policy packs |
 | `POST` | `/me/policy-packs` | Create a pack |
@@ -164,8 +168,12 @@ CORS runs with `allow_credentials=True` against an explicit origin allow-list in
 | `GET` | `/demo/runs` | List demo runs |
 | `PATCH` | `/demo/runs/{run_id}` | Update a run |
 
-Policy-pack storage here is **parked**, not current architecture: under the ecosystem plan packs
-are signed files, so only this UI surface is intended for reuse.
+A word on policy packs, because the state is easy to misread. The endpoints above are **live on
+`main`** — `park/policy-packs-2026-09-26` has been merged, and migration `0004_policy_packs`
+ships with the schema. But storing packs in the user API is *not* the target architecture: under
+the ecosystem plan packs are signed files, and only this UI surface is intended for reuse.
+`PolicyPacksPage.tsx` is correspondingly unrouted. Treat the endpoints as a reachable but
+superseded surface, not as the pack system.
 
 Migrations are plain SQL in `integrity-userapi/migrations/`, applied in order:
 `0001_init`, `0002_jwt_revocation`, `0003_user_wallets`, `0004_policy_packs`.
@@ -226,7 +234,15 @@ integrity-core is a prerequisite — it serves the oracle and BCC middleware thi
 The compose `dashboard` service runs the Vite **dev** server (`npm run dev --host 0.0.0.0`), so
 its `VITE_*` values take effect when the container starts. Those values are browser-facing by
 design: they name host ports, because the code using them runs in the operator's browser, not in
-the container. It reaches the oracle, BCC, Shield and Cortex through the host.
+the container. The browser reaches the oracle, BCC and the user API through the host this way.
+
+One limit to know about compose: **the token-attaching proxies do not work in the container.**
+Compose sets `VITE_SHIELD_BACKEND_URL` explicitly, so Shield calls go straight from the browser
+with no token attached, bypassing `/api/shield` entirely. `VITE_GRAPH_MEMORY_URL` is unset, so
+Cortex falls back to the same-origin `/cortex-api` proxy — which runs *inside* the container,
+where `127.0.0.1:8420` is the container's own loopback and the `~/.hermes/...` token file is not
+present. If you need authenticated Shield or Cortex panels, run the dashboard on the host with
+`npm run dev` or `npm run preview`.
 
 Per package, without compose:
 
@@ -239,10 +255,17 @@ cd integrity-dashboard/demo && uv sync && uv run integrity-demo      # needs FUN
 `docker compose up userapi-postgres` alone is enough to run the user API test suite, which
 expects that instance on `:5435` and otherwise fails with a connection error.
 
-The demo ships three entry points: `integrity-demo` (scenario run), `integrity-heartbeat`
-(periodic liveness), `integrity-seed-audit` (seed audit data). It depends on `integrity-sdk`
-pinned to integrity-core's `main` branch until the `integrity-sdk-v0.1.0` tag exists; then it
-pins that tag.
+The demo ships three entry points, and the difference between them matters:
+
+| Entry point | What it does |
+|---|---|
+| `integrity-demo` | Runs the demo scenario |
+| `integrity-heartbeat` | Continuous activity generator for the demo personas. Every event goes through the real signed pipelines — Ed25519-signed telemetry verified by the oracle, and signed BCC commitments evaluated by the middleware's OPA engine. The task text is scripted; the signatures and policy decisions are genuine, and it writes to no database directly |
+| `integrity-seed-audit` | A **labeled test harness** that writes backdated rows directly into integrity-oracle's Postgres, so a full UI audit has deep history immediately. It reuses real registered testnet identities, but it bypasses ingestion — never point it at anything you would call production data |
+
+It depends on `integrity-sdk` pinned to integrity-core's `main` branch until the
+`integrity-sdk-v0.1.0` tag exists; then it pins that tag. Because that is a git dependency on a
+private repository, `uv sync` here needs GitHub read access to integrity-core.
 
 ## Dashboard commands
 
@@ -257,15 +280,25 @@ pins that tag.
 | `npm run test:e2e:validation:headed` | The same, in a visible browser |
 | `npm run test:e2e:validation:all-browsers` | The same, across every configured browser |
 | `npm run test:e2e:validation:report` | Open the last validation HTML report |
-| `npm run sync-wiki` | Regenerate `src/generated/wiki-data.json` from canonical Markdown |
-| `npm run sync-chain-bytecode` | Refresh `src/chain/bytecode.ts` |
+| `npm run sync-wiki` | Regenerate `src/generated/wiki-data.json`. Needs `INTEGRITY_WIKI_SOURCE` after the split — see below |
+| `npm run sync-chain-bytecode` | Rewrite `src/chain/bytecode.ts` from Foundry artifacts. Does not work in this repo as-is — see below |
+
+Both sync scripts predate the A1 split and still resolve paths as if this were the old
+monorepo:
+
+- `sync-wiki.mjs` defaults its source to `<repo>/docs/wiki`, which does not exist here. Point it
+  at an integrity-core checkout with `INTEGRITY_WIKI_SOURCE=/path/to/integrity-core/docs/wiki`.
+  `INTEGRITY_WIKI_COMMIT` and `INTEGRITY_WIKI_UPDATED_AT` override the recorded provenance.
+- `sync-chain-bytecode.mjs` reads `<repo>/contracts/out/<Name>.sol/<Name>.json`. This repo has no
+  `contracts/` directory and the script takes no override, so it cannot run here without being
+  changed. The contracts live in integrity-core.
 
 ## Testing
 
 | Suite | Command | Needs |
 |---|---|---|
 | User API | `uv run pytest` in `integrity-userapi` | Postgres on `:5435` |
-| Demo | `uv run pytest` in `integrity-dashboard/demo` | Nothing external |
+| Demo | `uv run pytest` in `integrity-dashboard/demo` | GitHub read access to integrity-core, for the `integrity-sdk` git dependency |
 | Dashboard build + lint | `npm run build`, `npm run lint` | Nothing external |
 | Dashboard end-to-end | `npm run test-e2e` | A real backend stack |
 
@@ -289,11 +322,13 @@ CI (`.github/workflows/ci.yml`) runs on pushes and pull requests to `main`, in t
 
 `deploy/systemd/integrity-dashboard.service` serves whatever `npm run build` last produced, via
 `vite preview` on `127.0.0.1:4173`, from the **base checkout** at
-`~/Projects/integrity-console/integrity-dashboard`. Rebuild, then restart the unit.
+`~/Projects/integrity-console/integrity-dashboard`.
 
-This is exactly why that base checkout is treated as read-only: a live service reads it, so
-editing it is an accidental deploy. Feature work belongs in a worktree — see
-`~/.hermes/WORKFLOW.md` and the `xb-wt` helper.
+Because a live service reads that checkout, it is a read-only base: editing it is an accidental
+deploy. Feature work belongs in a worktree — see `~/.hermes/WORKFLOW.md` and the `xb-wt` helper.
+Building there is the deploy step itself, not routine development: land the change through a
+worktree and a pull request first, then fast-forward the base and rebuild, and restart the unit
+to serve the new `dist/`.
 
 ## Known caveats
 
@@ -306,12 +341,16 @@ Verified against the current tree, and worth knowing before you trust a surface:
 - `src/pages/KernelPage.tsx` and `src/pages/PolicyPacksPage.tsx` exist but are not routed in
   `App.tsx`; they are unreachable in the running app.
 - `integrity-userapi/app/config.py` declares `jwt_secret` twice (and imports `Field` twice). The
-  second declaration wins, which makes the accompanying insecure-secret validator warning
-  unreachable. The documented behaviour above still holds: no `JWT_SECRET` means sessions do not
-  survive a restart.
+  second declaration wins, so the named `_generate_jwt_secret()` helper and its explicit warning
+  are dead code, replaced by a bare lambda. The documented behaviour above is unaffected: with
+  no `JWT_SECRET`, a fresh secret is generated per process and sessions do not survive a
+  restart.
 - About thirty one-off `fix_*.py` / `patch_*.py` / `strip_*.py` / `rewrite_*.py` scripts sit at
   the root of `integrity-dashboard/`. They are historical single-use codemods, not tooling to
   run.
+- `integrity-dashboard/Dockerfile` runs a plain `npm ci`, while every documented host workflow
+  uses `npm ci --legacy-peer-deps`. Whether the image build trips on peer dependencies has not
+  been verified here, but the two install paths differ.
 - The dashboard's Vite build warns about large chunks (Mermaid, KaTeX, three.js, graph and chart
   dependencies). It is a performance target, not a build failure.
 - The `/wiki` route is a read-only projection of `integrity-core/docs/wiki`. Edits made to the
@@ -322,8 +361,8 @@ Verified against the current tree, and worth knowing before you trust a surface:
 Commits up to the import are integrity-core's own, filtered to these directories with
 `git filter-repo`, so `git log` and `git blame` keep their original authors and dates. The
 unmerged dashboard work from integrity-core came across as branches:
-`feat/cortex-operations-dashboard`, since merged into `main`, and
-`park/policy-packs-2026-09-26`, still open on the remote (packs stored in the user API, parked
-because packs are signed files under the plan; only its UI is to be reused).
+`feat/cortex-operations-dashboard` and `park/policy-packs-2026-09-26`. Both have since been
+merged into `main`; the pack branch's ref still exists on the remote, which is why its status is
+worth stating explicitly above rather than inferring from the branch list.
 
 Licensed under the MIT License (see `LICENSE`).
