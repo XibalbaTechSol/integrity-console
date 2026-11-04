@@ -98,6 +98,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5189",
         "http://localhost:5193",
         "http://127.0.0.1:5193",
+        "https://integrity-console-test.onrender.com",
     ]
 
 
