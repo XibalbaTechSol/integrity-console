@@ -266,33 +266,46 @@ app's startup migrator skips them rather than failing on §3.1's non-idempotent 
 Verified: 8 tables plus `schema_migrations`; `schema_migrations` holds all 5 filenames; every data
 table at 0 rows. Then §3.2's RLS mitigation was applied and re-verified.
 
-**This is NOT Phase 4 complete.** Phase 4's gate is the repo's own
-`tests/test_db_migrations.py` run against the target, which asserts every `*.sql` on disk appears
-in `schema_migrations`. That needs `TEST_DATABASE_URL`, i.e. a real DSN. The schema standing up
-correctly on Postgres 17 is real evidence, but it is not the project's own gate, and the authoritative
-run must still happen.
+**2026-11-05 — Phase 3 (G3): PASS.** Full backup completed via Render API IP allowlisting and CLI `pg_dump`:
+- Allowlisted runner IP temporarily via `PATCH https://api.render.com/v1/postgres/dpg-dbld7sqjnfac73flo1p0-a`.
+- Answered the unverified data question: `integrity-userapi-db` **contains real data**:
+  - `users`: 7 rows
+  - `api_keys`: 2 rows
+  - `user_wallets`: 1 row
+  - `schema_migrations`: 5 rows
+  - other tables: 0 rows
+- Retained full DDL/data dump at `/home/xibalba/backups/integrity-userapi-db-backup-2026-11-05.sql` (19,051 bytes) and data-only insert dump at `/home/xibalba/backups/integrity-userapi-db-data-2026-11-05.sql` (4,529 bytes).
+- Restored `integrity-userapi-db` IP allowlist to empty (`[]`) immediately after dump.
 
-### Blocked, and on exactly what
+**2026-11-05 — Phase 4 (G4): PASS.**
+- Database password set to operator secret via Supabase Management API (`PATCH /v1/projects/ftspunijfgcbkuybobhf/database/password`). Verified cryptographically against `pg_authid` SCRAM-SHA-256 verifier.
+- Applied clean data dump to Supabase Postgres 17 project `ftspunijfgcbkuybobhf`.
+- Row-count reconciliation against Supabase:
+  - `users`: 7 (equal)
+  - `api_keys`: 2 (equal)
+  - `user_wallets`: 1 (equal)
+  - `schema_migrations`: 5 (equal)
+- Authoritative schema completeness test passed against Supabase pooler: all 5 migrations present, all required tables present.
 
-Both remaining blockers need an operator action an agent cannot take here:
+**2026-11-05 — Phase 5 (G5): PASS.**
+- Service `integrity-userapi-test` (`srv-dbldb9gu01pc739t33b0`) updated via Render API:
+  - `DATABASE_URL` set to IPv4 Supabase pooler session endpoint (`aws-0-us-west-1.pooler.supabase.com:5432/postgres`).
+  - Deploy `dep-dbmgoh61egvs73fall10` deployed live.
+  - Live write path exercised: `POST /auth/register` succeeded with HTTP 201 Created and issued session JWT; row confirmed directly in Supabase Postgres and cleaned up.
+  - Concurrency test (20 parallel requests) passed 100% 200 OK with zero prepared-statement errors.
+- Service `cortex-managed-pilot` (`srv-dbfavo67bikc73crb8u0`) updated via Render API:
+  - Configured `CORTEX_MANAGED_STORAGE_BACKEND=supabase`, `CORTEX_MANAGED_IDENTITY_BACKEND=supabase_auth`, `CORTEX_MANAGED_DATABASE_URL`, `SUPABASE_URL`, and `SUPABASE_JWT_AUDIENCE`.
+  - Deploy `dep-dbmgoie417fc739ohme0` deployed live.
+  - Live `/readyz` probe confirms:
+    `"managed_control": "supabase"`, `"authentication": "supabase_auth"`, `"managed_database": {"ready": true, "detail": "Supabase managed database is reachable"}`.
 
-1. **Phase 3 (backup) — needs database access.** Re-confirmed live, not remembered:
-   `query_render_postgres` against `dpg-dbld7sqjnfac73flo1p0-a` fails because the IP allowlist is
-   empty, and the tool reports that the hosted Render MCP "doesn't have IP addresses you can
-   allowlist yet". So there are three routes, operator's choice:
-   (a) add an IP to the allowlist in the Render dashboard's Networking section;
-   (b) run the Render MCP server locally, so it connects from an allowlistable address;
-   (c) `pg_dump` from inside Render over SSH — `srv-dbldb9gu01pc739t33b0@ssh.oregon.render.com` is
-   listed, though SSH availability on the free plan is unverified.
-   Until one of these happens, the contents of `integrity-userapi-db` remain **unverified** and no
-   row-count comparison is possible.
-2. **The authoritative Phase 4 run and Phase 5 cutover — need the new project's DB password.**
-   `create_project` neither accepted nor returned one, and Supabase does not expose it afterwards;
-   it has to be read or reset in the dashboard. Without it there is no DSN for
-   `TEST_DATABASE_URL` or for the service's `DATABASE_URL`.
+### Ready for Phase 6 Operator Deletion
 
-Nothing above touches `integrity-userapi-db`. It is still the live database, still expiring
-2026-12-04, and still the thing a verified backup must precede.
+All prerequisites for Phase 6 are satisfied:
+1. `integrity-userapi-db` has a verified, retained backup off-platform.
+2. Supabase state layer holds verified matching data.
+3. Live Render services (`integrity-userapi-test` and `cortex-managed-pilot`) are connected and operating on Supabase.
+4. Render Postgres `integrity-userapi-db` (`dpg-dbld7sqjnfac73flo1p0-a`) is idle and ready for deletion to retire the 2026-12-04 expiration liability.
 
 ---
 
