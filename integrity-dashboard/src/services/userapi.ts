@@ -10,9 +10,18 @@ import { USERAPI_URL } from '../config';
 // disagrees. Mirrors Cortex's own viewer, which keeps a similar non-credential
 // sessionStorage marker alongside its HttpOnly cookie.
 const AUTHED_KEY = 'integrity_userapi_authed';
+const JWT_KEY = 'integrity_userapi_jwt';
 
 const emitAuthChanged = () => {
     if (typeof window !== 'undefined') window.dispatchEvent(new Event('integrity-auth-changed'));
+};
+
+export const getStoredJwt = (): string | null => {
+    try {
+        return sessionStorage.getItem(JWT_KEY);
+    } catch {
+        return null;
+    }
 };
 
 // Some browser/embedding contexts throw on any Storage access rather than returning null --
@@ -25,7 +34,14 @@ export const getToken = (): string | null => {
         return null;
     }
 };
-const setToken = () => {
+const setToken = (jwt?: string) => {
+    if (jwt) {
+        try {
+            sessionStorage.setItem(JWT_KEY, jwt);
+        } catch {
+            // Best-effort only.
+        }
+    }
     // Only emit on an actual transition -- meIfSignedIn() calls this every time it
     // successfully re-confirms an already-known session, and emitting unconditionally would
     // re-trigger DashboardContext's 'integrity-auth-changed' listener, which calls
@@ -39,6 +55,11 @@ const setToken = () => {
     emitAuthChanged();
 };
 export const clearToken = () => {
+    try {
+        sessionStorage.removeItem(JWT_KEY);
+    } catch {
+        // Best-effort only.
+    }
     if (getToken() === null) return;
     try {
         sessionStorage.removeItem(AUTHED_KEY);
@@ -118,10 +139,14 @@ class UserApiError extends Error {
 
 async function request<T>(path: string, options: RequestInit = {}, authed = false): Promise<T> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(options.headers as Record<string, string>) };
+    const jwt = getStoredJwt();
+    if (jwt && !headers['Authorization']) {
+        headers['Authorization'] = `Bearer ${jwt}`;
+    }
     // `authed` no longer gates on a locally-held token (there is none to hold -- the cookie
     // is HttpOnly). It's still useful as an early, no-network "we know we're signed out"
     // check, since AUTHED_KEY is cleared on every 401 below.
-    if (authed && !getToken()) {
+    if (authed && !getToken() && !jwt) {
         throw new UserApiError(401, 'Not authenticated');
     }
     const res = await fetch(`${USERAPI_URL}${path}`, { ...options, headers, credentials: 'include' });
@@ -139,7 +164,7 @@ export const userapi = {
             method: 'POST',
             body: JSON.stringify({ email, password }),
         });
-        setToken();
+        setToken(token.access_token);
         return token;
     },
     login: async (email: string, password: string) => {
@@ -147,7 +172,15 @@ export const userapi = {
             method: 'POST',
             body: JSON.stringify({ email, password }),
         });
-        setToken();
+        setToken(token.access_token);
+        return token;
+    },
+    loginWithGoogle: async (params: { id_token?: string; code?: string; redirect_uri?: string; code_verifier?: string }) => {
+        const token = await request<TokenResponse>('/auth/google', {
+            method: 'POST',
+            body: JSON.stringify(params),
+        });
+        setToken(token.access_token);
         return token;
     },
     // Revokes the session server-side (see integrity-userapi's /auth/logout, which now also

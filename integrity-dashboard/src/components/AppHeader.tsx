@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
+import { NAVIGATION_ITEMS } from '../navigation';
 
 const short = (value?: string | null, start = 10, end = 8) => {
   if (!value) return 'Unavailable';
@@ -12,26 +13,15 @@ export function AppHeader() {
   const location = useLocation();
   const { agents, selectedAgent, setSelectedAgent, agentsLoading } = useDashboard();
 
-  const tabTitles: Record<string, string> = {
-    'dashboard': 'Command center',
-    'agents': 'Agent registry',
-    'ais': 'AIS intelligence',
-    'identity': 'Agent registry',
-    'contracts': 'Evidence ledger',
-    'treasury': 'Treasury',
-    'financials': 'Treasury',
-    'evidence': 'Evidence ledger',
-    'security': 'Overview',
-    'health': 'Operations',
-    'system': 'Operations',
-    'wiki': 'Operations',
-    'docs': 'Operations',
-    'kernel': 'Operations',
-    'kernel-intent': 'Operations',
-    'licence': 'Operations',
-    'developer': 'Operations',
-    'settings': 'Workspace settings'
-  };
+  // Derived from NAVIGATION_ITEMS so the title in the chrome and the label in
+  // the sidebar cannot drift apart. The hand-written map this replaces had gone
+  // stale in exactly that way: it titled /security "Overview", a name that
+  // appears nowhere in the navigation and on a route that redirects away.
+  const tabTitles: Record<string, string> = Object.fromEntries([
+    ...NAVIGATION_ITEMS.flatMap(item =>
+      [item.to, ...(item.aliases ?? [])].map(path => [path.slice(1), item.label] as const)),
+    ['settings', 'Workspace settings'],
+  ]);
 
   const routeTab = location.pathname.slice(1) || 'dashboard';
 

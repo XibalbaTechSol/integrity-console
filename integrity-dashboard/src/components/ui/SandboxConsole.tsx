@@ -64,7 +64,7 @@ export const SandboxConsole = () => {
                 <Code color="var(--text-secondary)" size={24} />
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Protocol Sandbox</h2>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                    <span style={{ padding: '0.25rem 0.75rem', background: 'var(--text-primary)', color: 'var(--bg-color)', borderRadius: '16px', fontSize: '0.75rem', fontWeight: 700 }}>v8.3 TRI-METRIC</span>
+                    <span style={{ padding: '0.25rem 0.75rem', background: 'var(--text-primary)', color: 'var(--bg-color)', borderRadius: 'var(--radius)', fontSize: '0.75rem', fontWeight: 700 }}>v8.3 TRI-METRIC</span>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@ export const SandboxConsole = () => {
                             type="number" 
                             value={gpuHours} 
                             onChange={(e) => setGpuHours(parseInt(e.target.value))} 
-                            style={{ padding: '0.5rem', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                            style={{ padding: '0.5rem', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)' }}
                         />
                     </div>
 
@@ -109,7 +109,7 @@ export const SandboxConsole = () => {
                         <select aria-label="Identity verification tier"
                             value={tier} 
                             onChange={(e) => setTier(parseInt(e.target.value))}
-                            style={{ padding: '0.5rem', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                            style={{ padding: '0.5rem', background: 'var(--bg-color)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)' }}
                         >
                             <option value={1}>Tier 1: Sovereign (600 Max)</option>
                             <option value={2}>Tier 2: Linked (850 Max)</option>
@@ -118,7 +118,7 @@ export const SandboxConsole = () => {
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--surface-color)', borderRadius: '8px', padding: '2rem', border: '1px solid var(--border-color)' }}>
+                <div style={{ background: 'var(--surface-color)', borderRadius: 'var(--radius)', padding: '2rem', border: '1px solid var(--border-color)' }}>
                     <h3 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '2rem', margin: 0 }}>Real-Time AIS Result</h3>
                     
                     <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
@@ -149,8 +149,8 @@ export const SandboxConsole = () => {
                         </div>
                     </div>
 
-                    <div style={{ marginTop: '2.5rem', padding: '1rem', background: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                        <Zap size={14} style={{ marginRight: '8px', verticalAlign: 'middle', color: '#f59e0b' }} />
+                    <div style={{ marginTop: '2.5rem', padding: '1rem', background: 'var(--bg-color)', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                        <Zap size={14} style={{ marginRight: '8px', verticalAlign: 'middle', color: 'var(--warning)' }} />
                         <strong>Dev Tip:</strong> Increasing <strong>Grounding</strong> by 0.1 provides a 2% boost to the final AIS, while high <strong>Variance</strong> exponentially drags the score down.
                     </div>
                 </div>

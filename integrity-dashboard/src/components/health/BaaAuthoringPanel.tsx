@@ -156,7 +156,7 @@ export function BaaAuthoringPanel({ walletAddress, selectedAgent, addToast, onDe
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'var(--space-3)', marginTop: 'var(--space-6)', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--glass-border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: canDeploy ? '#10b981' : 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem', color: canDeploy ? 'var(--success)' : 'var(--text-muted)' }}>
           <ShieldCheck size={14} /> {canDeploy ? 'Ready to deploy' : 'Complete the fields above'}
         </div>
         <button className="primary-button" disabled={!canDeploy} onClick={handleDeploy} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

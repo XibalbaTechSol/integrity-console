@@ -78,6 +78,10 @@ class Settings(BaseSettings):
     # --- App ---
     app_name: str = "integrity-userapi"
 
+    # --- Google OAuth / GIS ---
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
     # --- CORS ---
     # 4173 is the local Vite preview port and 5173 is `npm run dev`'s default;
     # 5174 is the isolated validation port; 5190 covers an
@@ -98,6 +102,7 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5189",
         "http://localhost:5193",
         "http://127.0.0.1:5193",
+        "https://integrity-console-test.onrender.com",
     ]
 
 

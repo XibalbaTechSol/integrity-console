@@ -23,6 +23,7 @@ COPY migrations ./migrations
 ENV DATABASE_URL=postgres://integrity:integrity_dev_only@userapi-postgres:5432/integrity_userapi \
     ORACLE_URL=http://oracle-backend:8080
 
+ENV PORT=8090
 EXPOSE 8090
 
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8090"]
+CMD ["sh", "-c", "uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

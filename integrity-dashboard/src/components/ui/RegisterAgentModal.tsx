@@ -484,7 +484,7 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
               />
               <small id="ra-handle-help" className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 {handleStatus === 'checking' && 'Checking availability…'}
-                {handleStatus === 'available' && <span style={{ color: 'var(--success, #10b981)' }}>Available -- this agent will be identified by this handle everywhere.</span>}
+                {handleStatus === 'available' && <span style={{ color: 'var(--success, var(--success))' }}>Available -- this agent will be identified by this handle everywhere.</span>}
                 {handleStatus === 'taken' && <span style={{ color: 'var(--danger)' }}>Taken. Pick another, or one of the suggestions below.</span>}
                 {handleStatus === 'invalid' && <span style={{ color: 'var(--danger)' }}>3-32 chars, lowercase letters/digits/./-/_, starting with a letter.</span>}
                 {handleStatus === 'idle' && 'Unique across the whole ecosystem, chosen like a chat-app username. Agents without one are shown by DID.'}

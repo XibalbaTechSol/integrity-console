@@ -144,7 +144,7 @@ export function VerificationPanel() {
                                         </tr>
                                     ))}
                                     {data.verifications.length === 0 && (
-                                        <tr><td colSpan={6} className="text-muted" style={{ textAlign: 'center', padding: '2rem' }}>
+                                        <tr><td colSpan={6} className="empty-state">
                                             No verification evidence on record yet.
                                         </td></tr>
                                     )}

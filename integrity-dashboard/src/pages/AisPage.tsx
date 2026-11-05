@@ -83,15 +83,10 @@ const FormulaCard = ({ title, description, formula, icon, accent = 'var(--primar
         background: 'var(--bg-card)',
         borderRadius: 'var(--radius-sm)',
         border: '1px dashed var(--glass-border)',
-        display: 'flex',
-        alignItems: 'center',
-        // overflow: hidden clipped BOTH edges of formulas wider than the card (centered
-        // content clips symmetrically) — "AIS = (...)" rendered as "[S = (...)" with the
-        // leading "A" and "I" cut away. justify-content: flex-start keeps the formula's
-        // start flush left and fully visible; only genuine excess width scrolls, and the
-        // slim .thin-scrollbar-x styling keeps that scroll affordance from reading as a
-        // stray, unfinished widget in a small card.
-        justifyContent: 'flex-start',
+        display: 'block',
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         overflowX: 'auto',
         overflowY: 'hidden',
       }}
@@ -150,8 +145,12 @@ export function AisPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: 'var(--space-6)',
-          padding: 'var(--space-6)',
+          padding: isMobile ? 'var(--space-3)' : 'var(--space-6)',
           minHeight: '100%',
+          minWidth: 0,
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          overflowX: 'hidden',
         }}
       >
 
@@ -179,28 +178,28 @@ export function AisPage() {
               description={<span>Gaussian-style decay over reported task-performance variance <InlineMath math="v" />. Small variance barely moves the score; unbounded variance saturates toward 0.</span>}
               formula="S_{\text{entropy}}(v) = 1000 \cdot e^{-1.5 v^2}"
               icon={<Sigma size={20} />}
-              accent="#2196f3"
+              accent="var(--accent, var(--accent))"
             />
             <FormulaCard
               title="Grounding (Human Oversight)"
               description={<span>Linear in the Human Grounding Index <InlineMath math="h \in [0,1]" /> -- the fraction of the agent's actions in the period checked against real human-in-the-loop feedback.</span>}
               formula="S_{\text{grounding}}(h) = 1000 \cdot \text{clamp}(h, 0, 1)"
               icon={<CheckCircle2 size={20} />}
-              accent="#4caf50"
+              accent="var(--success, var(--success))"
             />
             <FormulaCard
               title="Sacrifice (Compute Commitment)"
               description={<span>Log-scale over the oracle's re-derived verified compute-hours proxy <InlineMath math="g" />, saturating at 1000 hours so a whale can't simply out-spend a trust signal.</span>}
               formula="S_{\text{sacrifice}}(g) = 1000 \cdot \min\!\left(\frac{\log_{10}(g+1)}{3}, 1\right)"
               icon={<Clock size={20} />}
-              accent="#f59e0b"
+              accent="var(--warning, var(--warning))"
             />
             <FormulaCard
               title="Compliance"
               description={<span>Linear inverse of the policy-flagged action ratio <InlineMath math="p \in [0,1]" /> from the BCC/OPA pipeline -- 0 flags scores 1000, every action flagged scores 0.</span>}
               formula="S_{\text{compliance}}(p) = 1000 \cdot (1 - p)"
               icon={<Zap size={20} />}
-              accent="#8b5cf6"
+              accent="var(--accent, var(--accent))"
             />
             <FormulaCard
               span
@@ -321,7 +320,7 @@ export function AisPage() {
                     padding: '6px 12px',
                     borderRadius: 'var(--radius-sm)',
                     border: `1px solid ${field.active ? 'var(--theme-accent)' : 'var(--glass-border)'}`,
-                    background: field.active ? 'rgba(212, 175, 55, 0.1)' : 'transparent',
+                    background: field.active ? 'rgba(240, 180, 41, 0.1)' : 'transparent',
                     color: field.active ? 'var(--theme-accent)' : 'var(--text-muted)',
                     fontSize: '0.7rem',
                     fontWeight: 700,

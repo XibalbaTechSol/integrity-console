@@ -45,7 +45,7 @@ const Block: React.FC<BlockProps> = ({ x, y = 90, w, title, sub, accent }) => (
       y={y}
       width={w}
       height={BOX_H}
-      rx={8}
+      rx={4}
       fill="var(--surface-color)"
       stroke={accent ?? 'var(--border-color)'}
       strokeWidth={accent ? 1.75 : 1}

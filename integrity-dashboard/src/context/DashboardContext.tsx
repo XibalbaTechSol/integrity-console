@@ -181,7 +181,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const selectedAgent = agents.find(a => (a.namespace_key || a.id) === selectedAgentId) || null;
   const [layoutMode, setLayoutMode] = useState<'sidebar' | 'header'>('sidebar');
   const [theme, setTheme] = useState<'dark' | 'light' | 'cyber'>('dark');
-  const [fontFamily, setFontFamily] = useState<string>('Raleway');
+  const [fontFamily, setFontFamily] = useState<string>('Inter');
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [walletAddress, setWalletAddress] = useState<string | null>(() => safeLocalStorageGet(WALLET_KEY));

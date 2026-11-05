@@ -21,8 +21,9 @@ function safeLocalStorageSet(key: string, value: string): void {
   }
 }
 
-export type Theme = 'light' | 'dark' | 'cyber' | 'xibalba';
-export type Font = 'Inter' | 'Roboto' | 'Fira Code' | 'Playfair Display' | 'System Default';
+// Dark-only by operator decision (2026-11-03). See src/index.css.
+export type Theme = 'dark';
+export type Font = 'Inter' | 'System Default';
 
 // Mirrors userapi's real ApiKeyResponse — there is no per-key name/permissions/expiry
 // on the backend, only an AIS trust ceiling and revocation state. `rawKey` is present
@@ -54,7 +55,7 @@ interface SettingsContextType extends SettingsState {
 
 const defaultSettings: Omit<SettingsState, 'apiKeys'> = {
   theme: 'dark',
-  font: 'System Default',
+  font: 'Inter',
   fontSize: 16,
   appName: 'Integrity Console', // matches index.html's static <title> so applying it on mount is a no-op, not a flash
   headerStyle: 'solid',

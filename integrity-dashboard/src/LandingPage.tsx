@@ -60,10 +60,10 @@ const FAQItem = ({ question, answer }: { question: string; answer: React.ReactNo
 
 /** Status chips. Deliberately four distinct states — "open" must not read as "nearly done". */
 const PHASE_CHIP: Record<PhaseState, { label: string; color: string; icon: React.ReactNode }> = {
-  complete: { label: 'Complete', color: '#10b981', icon: <Check size={13} /> },
-  'in-progress': { label: 'In progress', color: '#f59e0b', icon: <Minus size={13} /> },
+  complete: { label: 'Complete', color: 'var(--success)', icon: <Check size={13} /> },
+  'in-progress': { label: 'In progress', color: 'var(--warning)', icon: <Minus size={13} /> },
   'not-started': { label: 'Not started', color: 'var(--text-secondary)', icon: <CircleDashed size={13} /> },
-  'not-claimed': { label: 'Not claimed', color: '#f43f5e', icon: <XCircle size={13} /> },
+  'not-claimed': { label: 'Not claimed', color: 'var(--danger)', icon: <XCircle size={13} /> },
 };
 
 const PhaseChip: React.FC<{ state: PhaseState }> = ({ state }) => {
@@ -75,7 +75,7 @@ const PhaseChip: React.FC<{ state: PhaseState }> = ({ state }) => {
         alignItems: 'center',
         gap: '0.35rem',
         padding: '0.2rem 0.6rem',
-        borderRadius: '999px',
+        borderRadius: 'var(--radius)',
         border: `1px solid ${chip.color}`,
         color: chip.color,
         fontSize: '0.75rem',
@@ -245,9 +245,9 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #ef4444' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--danger)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: '#ef4444' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--danger-wash)', borderRadius: 'var(--radius)', color: 'var(--danger)' }}>
                   <Radio size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No state estimate</h3>
@@ -259,9 +259,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #f59e0b' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--warning)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px', color: '#f59e0b' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--warning-wash)', borderRadius: 'var(--radius)', color: 'var(--warning)' }}>
                   <SlidersHorizontal size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No bounded actuator</h3>
@@ -273,9 +273,9 @@ export default function LandingPage() {
               </p>
             </motion.div>
 
-            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid #3b82f6' }}>
+            <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--accent)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', color: '#3b82f6' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--accent-wash)', borderRadius: 'var(--radius)', color: 'var(--accent)' }}>
                   <Database size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No flight recorder</h3>
@@ -374,7 +374,7 @@ export default function LandingPage() {
               {'gap' in row && row.gap && (
                 <div
                   data-testid="hook-deployment-gap"
-                  style={{ marginTop: '1rem', paddingLeft: '0.85rem', borderLeft: '3px solid #f59e0b' }}
+                  style={{ marginTop: '1rem', paddingLeft: '0.85rem', borderLeft: '3px solid var(--warning)' }}
                 >
                   <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.88rem' }}>
                     <strong style={{ color: 'var(--text-primary)' }}>Deployed vs. specified:</strong> {row.gap}
@@ -401,7 +401,7 @@ export default function LandingPage() {
           <div className="landing-ais-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '3rem', alignItems: 'start' }}>
             <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ padding: '2.5rem' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.3rem' }}>A weighted geometric mean</h3>
-              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={aisFormula} />
               </div>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
@@ -413,9 +413,9 @@ export default function LandingPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {[
                   ['Entropy', 'Predictability and drift bounds', 'var(--theme-accent)'],
-                  ['Grounding', 'Retrieval support for what was asserted', '#4caf50'],
-                  ['Sacrifice', 'Collateral at risk, with validator or TEE evidence', '#f59e0b'],
-                  ['Compliance', 'Policy adherence against an independently readable gate', '#2196f3'],
+                  ['Grounding', 'Retrieval support for what was asserted', 'var(--success)'],
+                  ['Sacrifice', 'Collateral at risk, with validator or TEE evidence', 'var(--warning)'],
+                  ['Compliance', 'Policy adherence against an independently readable gate', 'var(--accent)'],
                 ].map(([name, meaning, color]) => (
                   <div key={name} style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', borderBottom: '1px dashed var(--border-color)', paddingBottom: '0.5rem' }}>
                     <strong style={{ color, whiteSpace: 'nowrap' }}>{name}</strong>
@@ -450,7 +450,7 @@ export default function LandingPage() {
                 confidence, standard controls, narrowed quotas or step-up when reduced, and quarantine with a required
                 human on integrity failure. That is a gain schedule, not a permission system.
               </p>
-              <div className="card" style={{ borderLeft: '3px solid #f59e0b', background: 'transparent' }}>
+              <div className="card" style={{ borderLeft: '3px solid var(--warning)', background: 'transparent' }}>
                 <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.65, fontSize: '0.92rem' }}>
                   <strong style={{ color: 'var(--text-primary)' }}>Current state, stated plainly:</strong> the live
                   formula, component-floor evaluation, the pre-boost normalised constraint score and the tier clamp
@@ -477,7 +477,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: '10px', background: 'var(--surface-color)', maxWidth: '760px' }}>
+            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', background: 'var(--surface-color)', maxWidth: '760px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>
                 {PROGRESS_NOTE}
               </span>
@@ -566,7 +566,7 @@ export default function LandingPage() {
             {CONSOLE_SURFACES.map(({ route, name, icon: Icon, body }) => (
               <motion.div variants={fadeInUp} key={route} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
-                  <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
+                  <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
                     <Icon size={22} color="var(--theme-accent)" />
                   </div>
                   <div>
@@ -706,20 +706,20 @@ export default function LandingPage() {
             <div className="landing-form-row" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Full Name</label>
-                <input id="contact-name" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
+                <input id="contact-name" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
               </div>
               <div style={{ flex: 1, minWidth: '200px' }}>
                 <label htmlFor="contact-organization" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Organization</label>
-                <input id="contact-organization" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Corp" />
+                <input id="contact-organization" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Corp" />
               </div>
             </div>
             <div>
               <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Work Email</label>
-              <input id="contact-email" type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
+              <input id="contact-email" type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
             </div>
             <div>
               <label htmlFor="contact-use-case" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Where you'd start</label>
-              <select id="contact-use-case" style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
+              <select id="contact-use-case" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
                 <option>Record only — signed evidence and anchoring (L0)</option>
                 <option>Constrain and record — hook plus pack (L1)</option>
                 <option>Integrity Health pack, synthetic data</option>
@@ -729,7 +729,7 @@ export default function LandingPage() {
             </div>
             <div>
               <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Message</label>
-              <textarea id="contact-message" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What are you trying to put inside a loop?"></textarea>
+              <textarea id="contact-message" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What are you trying to put inside a loop?"></textarea>
             </div>
             <button type="button" className="primary-button" style={{ padding: '1rem', fontSize: '1rem', fontWeight: 600 }}>Submit Inquiry</button>
           </form>

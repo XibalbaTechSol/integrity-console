@@ -43,14 +43,24 @@ SESSION_COOKIE_NAME = "userapi_session"
 # `Secure` is omitted only for plain-HTTP local dev. Any real deployment terminates TLS in
 # front of this service, where `Secure` must be set or the browser silently drops the cookie.
 _INSECURE_COOKIES = os.environ.get("USERAPI_INSECURE_COOKIES") == "1"
+_COOKIE_SAMESITE = os.environ.get("USERAPI_COOKIE_SAMESITE", "Strict")
 
 
 def session_cookie_header(token: str, *, max_age: int) -> str:
     """Serialize the operator session cookie. `SameSite=Strict` is what makes HttpOnly safe
-    without a separate CSRF token: the browser will not attach it to any cross-site request."""
-    parts = [f"{SESSION_COOKIE_NAME}={token}", "Path=/", "HttpOnly", "SameSite=Strict", f"Max-Age={max_age}"]
-    if not _INSECURE_COOKIES:
+    without a separate CSRF token: the browser will not attach it to any cross-site request.
+    `USERAPI_COOKIE_SAMESITE=None` can be configured for cross-domain deployments."""
+    parts = [
+        f"{SESSION_COOKIE_NAME}={token}",
+        "Path=/",
+        "HttpOnly",
+        f"SameSite={_COOKIE_SAMESITE}",
+        f"Max-Age={max_age}",
+    ]
+    if not _INSECURE_COOKIES or _COOKIE_SAMESITE.lower() == "none":
         parts.append("Secure")
+        if _COOKIE_SAMESITE.lower() == "none":
+            parts.append("Partitioned")
     return "; ".join(parts)
 
 
@@ -58,7 +68,9 @@ def hash_password(password: str) -> str:
     return _pwd_context.hash(password)
 
 
-def verify_password(password: str, hashed: str) -> bool:
+def verify_password(password: str, hashed: str | None) -> bool:
+    if not hashed:
+        return False
     return _pwd_context.verify(password, hashed)
 
 

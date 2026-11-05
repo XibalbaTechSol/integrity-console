@@ -23,7 +23,7 @@ const cardStyle = {
 
 const buttonStyle = {
   border: '1px solid var(--border-color)',
-  borderRadius: 6,
+  borderRadius: 'var(--radius)',
   background: 'var(--bg-color)',
   color: 'var(--text-primary)',
   padding: '0.65rem 0.9rem',
@@ -130,29 +130,29 @@ export default function CortexOperationsTab() {
       </header>
 
       {offline.length > 0 ? (
-        <div role="status" style={{ ...cardStyle, borderColor: '#f59e0b', color: '#f59e0b', display: 'flex', gap: 10 }}>
+        <div role="status" style={{ ...cardStyle, borderColor: 'var(--warning)', color: 'var(--warning)', display: 'flex', gap: 10 }}>
           <ShieldAlert size={18} /> Partial view: Cortex APIs unavailable for {offline.join(', ')}. No placeholder records are shown.
         </div>
       ) : (
-        <div role="status" style={{ color: '#10b981', fontSize: '.85rem' }}>Cortex operator APIs online.</div>
+        <div role="status" style={{ color: 'var(--success)', fontSize: '.85rem' }}>Cortex operator APIs online.</div>
       )}
-      {!isLoopbackHost && <div role="alert" style={{ ...cardStyle, borderColor: '#f59e0b', color: '#f59e0b' }}>Cortex write controls are disabled outside a loopback dashboard until operator authentication is enforced.</div>}
+      {!isLoopbackHost && <div role="alert" style={{ ...cardStyle, borderColor: 'var(--warning)', color: 'var(--warning)' }}>Cortex write controls are disabled outside a loopback dashboard until operator authentication is enforced.</div>}
       {notice && <div role="alert" style={{ ...cardStyle, padding: '0.85rem 1rem' }}>{notice}</div>}
 
       <section style={cardStyle}>
         <h2 style={{ marginTop: 0, fontSize: '1.1rem' }}>Evidence-backed retrieval</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>Rank fusion may degrade when vector or graph evidence is unavailable; channel state and the persisted trace remain visible.</p>
         <form onSubmit={runRetrieval} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <input aria-label="Cortex retrieval query" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search canonical memory" style={{ flex: '1 1 280px', minWidth: 0, padding: '.75rem', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} />
+          <input aria-label="Cortex retrieval query" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search canonical memory" style={{ flex: '1 1 280px', minWidth: 0, padding: '.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} />
           <button disabled={busy === 'retrieval' || !query.trim()} style={buttonStyle}><Search size={16} /> {busy === 'retrieval' ? 'Tracing…' : 'Retrieve'}</button>
         </form>
         {retrieval && (
           <div style={{ marginTop: 18 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: '.75rem', color: 'var(--text-secondary)' }}>
-              {Object.entries(retrieval.channel_status).map(([channel, status]) => <span key={channel} style={{ padding: '4px 8px', border: '1px solid var(--border-color)', borderRadius: 999 }}>{channel}: {status}</span>)}
+              {Object.entries(retrieval.channel_status).map(([channel, status]) => <span key={channel} style={{ padding: '4px 8px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)' }}>{channel}: {status}</span>)}
             </div>
             <p style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>Trace {shortHash(retrieval.trace_id)} · root {shortHash(retrieval.root_hash)}{trace?.checkpoint_id ? ` · checkpoint ${shortHash(trace.checkpoint_id)}` : ' · no projection checkpoint linked'}</p>
-            {proof && <p style={{ fontSize: '.75rem', color: '#10b981' }}>Rank 1 inclusion proof: {proof.siblings.length} sibling hashes · root {shortHash(proof.root)}</p>}
+            {proof && <p style={{ fontSize: '.75rem', color: 'var(--success)' }}>Rank 1 inclusion proof: {proof.siblings.length} sibling hashes · root {shortHash(proof.root)}</p>}
             <div style={{ display: 'grid', gap: 10 }}>
               {retrieval.results.map((memory, index) => (
                 <article key={memory.id} style={{ borderTop: '1px solid var(--border-color)', paddingTop: 12, contentVisibility: 'auto' }}>
@@ -180,8 +180,8 @@ export default function CortexOperationsTab() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>{proposal.evidence_quote || 'No evidence quote supplied.'}</p>
                 <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '.72rem', color: 'var(--text-muted)' }}>{JSON.stringify(proposal.payload, null, 2)}</pre>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button disabled={busy === proposal.id || !isLoopbackHost} onClick={() => void decide(proposal, 'accept')} style={{ ...buttonStyle, color: '#10b981' }}><Check size={15} /> Accept</button>
-                  <button disabled={busy === proposal.id || !isLoopbackHost} onClick={() => void decide(proposal, 'dismiss')} style={{ ...buttonStyle, color: '#f43f5e' }}><X size={15} /> Dismiss</button>
+                  <button disabled={busy === proposal.id || !isLoopbackHost} onClick={() => void decide(proposal, 'accept')} style={{ ...buttonStyle, color: 'var(--success)' }}><Check size={15} /> Accept</button>
+                  <button disabled={busy === proposal.id || !isLoopbackHost} onClick={() => void decide(proposal, 'dismiss')} style={{ ...buttonStyle, color: 'var(--danger)' }}><X size={15} /> Dismiss</button>
                 </div>
               </article>
             ))}
@@ -211,9 +211,9 @@ export default function CortexOperationsTab() {
           <button disabled={Boolean(busy) || !isLoopbackHost} onClick={() => void runProjectionAction('reconcile')} style={buttonStyle}>Reconcile</button>
           <button disabled={Boolean(busy) || !isLoopbackHost} onClick={() => void runProjectionAction('rebuild')} style={buttonStyle}><Database size={15} /> Rebuild & verify</button>
         </div>
-        {reconciliation && <p style={{ color: reconciliation.equal ? '#10b981' : '#f59e0b' }}>Last reconciliation: {reconciliation.equal ? 'canonical root matches' : `${reconciliation.action}; ${reconciliation.missing.length} missing, ${reconciliation.extra.length} extra`}.</p>}
+        {reconciliation && <p style={{ color: reconciliation.equal ? 'var(--success)' : 'var(--warning)' }}>Last reconciliation: {reconciliation.equal ? 'canonical root matches' : `${reconciliation.action}; ${reconciliation.missing.length} missing, ${reconciliation.extra.length} extra`}.</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-          {checkpoints.slice(0, 6).map(checkpoint => <article key={checkpoint.id} style={{ border: '1px solid var(--border-color)', borderRadius: 6, padding: 12 }}><strong>{checkpoint.leaf_count} leaves</strong><small style={{ display: 'block', color: checkpoint.status === 'active' ? '#10b981' : '#f59e0b' }}>{checkpoint.status}</small><code style={{ fontSize: '.68rem' }}>{shortHash(checkpoint.root_hash)}</code></article>)}
+          {checkpoints.slice(0, 6).map(checkpoint => <article key={checkpoint.id} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', padding: 12 }}><strong>{checkpoint.leaf_count} leaves</strong><small style={{ display: 'block', color: checkpoint.status === 'active' ? 'var(--success)' : 'var(--warning)' }}>{checkpoint.status}</small><code style={{ fontSize: '.68rem' }}>{shortHash(checkpoint.root_hash)}</code></article>)}
           {checkpoints.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No checkpoints recorded for this projection.</p>}
         </div>
       </section>

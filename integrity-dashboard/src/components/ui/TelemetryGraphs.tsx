@@ -94,9 +94,9 @@ export const TelemetryGraphs = () => {
 
   // Real telemetry metrics reported by the oracle (TelemetryEventDetailDto).
   const METRICS = [
-    { id: 'performance_variance', label: 'Performance Variance', color: '#f43f5e' },
-    { id: 'hgi_raw', label: 'Grounding Index (HGI)', color: '#10b981' },
-    { id: 'gpu_hours_verified', label: 'GPU Hours Verified', color: '#d4af37' }
+    { id: 'performance_variance', label: 'Performance Variance', color: 'var(--danger)' },
+    { id: 'hgi_raw', label: 'Grounding Index (HGI)', color: 'var(--success)' },
+    { id: 'gpu_hours_verified', label: 'GPU Hours Verified', color: 'var(--warning)' }
   ];
 
   const toggleMetric = (id: string) => {
@@ -144,7 +144,7 @@ export const TelemetryGraphs = () => {
   // Generate distinct colors & lines for each selected agent & metric combination
   const activeSeries = useMemo(() => {
     const series: { id: string; label: string; color: string; dataKey: string }[] = [];
-    const colors = ['#f43f5e', '#10b981', '#d4af37', '#8b5cf6', '#ec4899', '#0ea5e9', '#f59e0b', '#3b82f6'];
+    const colors = ['var(--danger)', 'var(--success)', 'var(--warning)', '#8b5cf6', '#ec4899', 'var(--accent)', 'var(--warning)', 'var(--accent)'];
     
     selectedAgents.forEach((agent, agentIdx) => {
       activeMetrics.forEach((metric, metricIdx) => {
@@ -161,10 +161,10 @@ export const TelemetryGraphs = () => {
   }, [selectedAgents, activeMetrics]);
 
   return (
-    <div className="enterprise-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '40px', borderRadius: '16px', overflow: 'hidden' }}>
+    <div className="enterprise-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '40px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
       <div className="card-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: isMobile ? '16px' : '24px 32px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: 'rgba(66, 214, 139, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)', boxShadow: '0 0 20px rgba(66, 214, 139, 0.2)' }}>
             <Activity size={20} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -185,12 +185,12 @@ export const TelemetryGraphs = () => {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '6px', 
-                  background: isChecked ? 'rgba(16, 185, 129, 0.08)' : 'rgba(255,255,255,0.02)', 
-                  border: `1px solid ${isChecked ? '#10b981' : 'rgba(255,255,255,0.1)'}`,
+                  background: isChecked ? 'rgba(66, 214, 139, 0.08)' : 'rgba(255,255,255,0.02)', 
+                  border: `1px solid ${isChecked ? 'var(--success)' : 'rgba(255,255,255,0.1)'}`,
                   padding: '4px 10px', 
-                  borderRadius: '6px', 
+                  borderRadius: 'var(--radius)', 
                   fontSize: '0.7rem', 
-                  color: isChecked ? '#10b981' : 'rgba(255,255,255,0.5)', 
+                  color: isChecked ? 'var(--success)' : 'rgba(255,255,255,0.5)', 
                   cursor: 'pointer',
                   fontWeight: 600,
                   transition: 'all 0.15s'
@@ -230,7 +230,7 @@ export const TelemetryGraphs = () => {
                   border: `1px solid ${isActive ? m.color : 'rgba(255,255,255,0.1)'}`,
                   color: isActive ? '#fff' : 'rgba(255,255,255,0.5)',
                   padding: '6px 14px',
-                  borderRadius: '20px',
+                  borderRadius: 'var(--radius)',
                   fontSize: '0.7rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -251,7 +251,7 @@ export const TelemetryGraphs = () => {
         {/* Main Area Chart */}
         <div style={{ width: '100%', height: '400px', position: 'relative' }}>
           {loading && data.length === 0 ? (
-            <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: '12px' }} />
+            <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius)' }} />
           ) : selectedAgents.length > 0 && activeSeries.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={formattedChartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
@@ -277,7 +277,7 @@ export const TelemetryGraphs = () => {
                 <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} />
                 <Tooltip
                   labelFormatter={(ts) => fmtTimeFull(ts as number)}
-                  contentStyle={{ background: 'rgba(5, 13, 24, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+                  contentStyle={{ background: 'rgba(8, 17, 27, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
                   itemStyle={{ fontSize: '0.8rem', fontWeight: 600 }}
                   labelStyle={{ color: 'rgba(255,255,255,0.5)', marginBottom: '8px', fontSize: '0.7rem' }}
                 />
@@ -304,7 +304,7 @@ export const TelemetryGraphs = () => {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px dashed rgba(255,255,255,0.1)' }}>
               Select at least one agent node to render telemetry streams.
             </div>
           )}
