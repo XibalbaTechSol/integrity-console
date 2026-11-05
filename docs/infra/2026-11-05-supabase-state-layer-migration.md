@@ -52,6 +52,10 @@ production notes already require ("tenant-bound membership, short-lived scoped s
 - **Schema it holds** (`integrity-userapi/migrations/`): `users`, `api_keys`, `user_agents`,
   `demo_runs`, `revoked_tokens`, `user_wallets`, `policy_packs`, `policy_revisions`. This includes
   account data, API keys and wallets — treat as production-sensitive until proven otherwise.
+  **Correction (2026-11-05): there are FIVE migration files, not four.** This document first listed
+  `0001`–`0004`; `0005_google_oauth.sql` also exists (adds `users.google_id`, drops the
+  `hashed_password` NOT NULL for social login, indexes `google_id`). Listing the directory rather
+  than trusting the earlier list is what caught it.
 - **Supabase:** org `Jacob` (`iexukzgrkyrfoynqmcwp`), plan **free** (`tier_free`). Three projects,
   **all INACTIVE/paused**: `DustInTime` (us-east-1), `app` (us-west-2), `CognitoFlow` (us-east-1).
 - **Cortex:** `cortex-managed-pilot` has **no database at all** — it is absent from the Postgres
@@ -97,6 +101,44 @@ Two things follow, and both are migration-blocking:
 Also: `max_size=10` per instance is generous against free-tier connection limits and should come
 down, and `init=_register_jsonb_codec` runs per connection — fine with pooling, but it must stay,
 or `demo_runs.result_summary` silently round-trips as text instead of dict.
+
+### 3.1 Correction: "idempotent" is true of the tracker, not the SQL
+
+This document originally called `run_migrations` idempotent without qualification. That is
+misleading in a way that matters for any re-run. `run_migrations` is idempotent at the **tracking**
+level: it reads `schema_migrations` and skips files already recorded. The SQL itself is **not**
+re-runnable — `0001_init.sql` opens with a bare `CREATE TABLE users (`, and only `0005` uses
+`IF NOT EXISTS`. So applying the DDL by any route that does not also write the matching
+`schema_migrations` rows leaves a database where the app's next startup tries `0001` again and dies
+on "relation already exists". The tracking table is the whole safety mechanism; the SQL has none.
+
+The tracking contract, read from `app/db.py`, is exactly:
+`schema_migrations(filename TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
+with each migration applied inside its own transaction followed by
+`INSERT INTO schema_migrations (filename) VALUES ($1)` using the file's basename.
+
+### 3.2 The risk this migration CREATES: PostgREST exposure
+
+This document originally treated the move as risk-reducing. It is not, in one specific way, and the
+original plan missed it entirely.
+
+Supabase serves the `public` schema over PostgREST. A table there with RLS disabled is readable
+with the project's anon key. Render Postgres has no public REST layer at all, so this exposure is
+**created by the migration**, not inherited from the current setup. On a first application of the
+schema, Supabase's own linter reported `rls_disabled_in_public` at level **ERROR**, facing
+**EXTERNAL**, across all 9 tables — including `users`, `api_keys` and `user_wallets`.
+
+Mitigation applied: RLS enabled on all 9 tables with **no policies**, which denies PostgREST's
+`anon` and `authenticated` roles everything. `integrity-userapi` is unaffected because it connects
+over direct Postgres as the table owner, and an owner bypasses RLS. `FORCE ROW LEVEL SECURITY` is
+deliberately **not** used — it would apply to the owner too and break the application.
+
+After the change the linter drops to `rls_enabled_no_policy` at level **INFO**, which is the
+intended end state for tables whose only legitimate client is the application itself, not
+PostgREST.
+
+**Standing rule for every future table in a Supabase project here:** enabling RLS is part of
+creating the table, not a follow-up. Re-run `get_advisors(type="security")` after any DDL.
 
 ---
 
@@ -193,6 +235,64 @@ Record "Render = compute + static, Supabase = state" as the ecosystem standard, 
 
 This document lives in `integrity-console` because the first migration does. Once Phase 5 proves the
 pattern, promote §1 to `integrity-core`'s `docs/ecosystem/` as the cross-repo standard.
+
+---
+
+## 5A. Execution log
+
+**2026-11-05 — Phase 0 (G0): PASS, with no deletions.** The probe was ordered before the deletions
+precisely so this could happen: `create_project` **succeeded with all three paused projects still
+in place**, so Supabase's free limit counts active projects and paused ones do not block creation.
+The authorization to delete all inactive projects (§4) was therefore never exercised, and three
+irreversible deletions that would have bought nothing were avoided. The three paused projects
+remain untouched.
+
+Also discovered: the Supabase MCP surface has `create_project`, `pause_project` and
+`restore_project` but **no project delete tool**, so had deletions been required they would have
+been a dashboard action, not something an agent could do here.
+
+**2026-11-05 — Phase 1 (G1): PASS.** Project `integrity-userapi`, ref `ftspunijfgcbkuybobhf`,
+status `ACTIVE_HEALTHY`, Postgres 17. No cost confirmation was requested, confirming free tier.
+
+*Deviation:* the plan specified **us-west-2** to pair with Render's `oregon`. The provisioning
+tool's region enum does not offer `us-west-2` (it has `us-west-1`, `us-east-1`, `us-east-2`, …),
+even though an existing project in this org sits in us-west-2. Used **us-west-1** — still US West,
+so the cross-region penalty against Render `oregon` is small, but it is a real deviation and not
+the pairing the plan called for.
+
+**2026-11-05 — schema applied.** All five migrations replayed in filename order in one atomic
+migration, plus the five `schema_migrations` rows written exactly as `run_migrations` would, so the
+app's startup migrator skips them rather than failing on §3.1's non-idempotent DDL.
+Verified: 8 tables plus `schema_migrations`; `schema_migrations` holds all 5 filenames; every data
+table at 0 rows. Then §3.2's RLS mitigation was applied and re-verified.
+
+**This is NOT Phase 4 complete.** Phase 4's gate is the repo's own
+`tests/test_db_migrations.py` run against the target, which asserts every `*.sql` on disk appears
+in `schema_migrations`. That needs `TEST_DATABASE_URL`, i.e. a real DSN. The schema standing up
+correctly on Postgres 17 is real evidence, but it is not the project's own gate, and the authoritative
+run must still happen.
+
+### Blocked, and on exactly what
+
+Both remaining blockers need an operator action an agent cannot take here:
+
+1. **Phase 3 (backup) — needs database access.** Re-confirmed live, not remembered:
+   `query_render_postgres` against `dpg-dbld7sqjnfac73flo1p0-a` fails because the IP allowlist is
+   empty, and the tool reports that the hosted Render MCP "doesn't have IP addresses you can
+   allowlist yet". So there are three routes, operator's choice:
+   (a) add an IP to the allowlist in the Render dashboard's Networking section;
+   (b) run the Render MCP server locally, so it connects from an allowlistable address;
+   (c) `pg_dump` from inside Render over SSH — `srv-dbldb9gu01pc739t33b0@ssh.oregon.render.com` is
+   listed, though SSH availability on the free plan is unverified.
+   Until one of these happens, the contents of `integrity-userapi-db` remain **unverified** and no
+   row-count comparison is possible.
+2. **The authoritative Phase 4 run and Phase 5 cutover — need the new project's DB password.**
+   `create_project` neither accepted nor returned one, and Supabase does not expose it afterwards;
+   it has to be read or reset in the dashboard. Without it there is no DSN for
+   `TEST_DATABASE_URL` or for the service's `DATABASE_URL`.
+
+Nothing above touches `integrity-userapi-db`. It is still the live database, still expiring
+2026-12-04, and still the thing a verified backup must precede.
 
 ---
 
