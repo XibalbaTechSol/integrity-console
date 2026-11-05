@@ -32,9 +32,35 @@ async def _register_jsonb_codec(conn: asyncpg.Connection) -> None:
     )
 
 
-async def create_pool(database_url: str) -> asyncpg.Pool:
+async def create_pool(
+    database_url: str,
+    *,
+    min_size: int = 1,
+    max_size: int = 5,
+    statement_cache_size: int = 0,
+) -> asyncpg.Pool:
+    """Open the connection pool.
+
+    `statement_cache_size=0` by default, and that default is load-bearing rather than cautious.
+    asyncpg uses prepared statements; a TRANSACTION-mode pooler (Supabase's port 6543, pgbouncer
+    in transaction mode) does not support them, because consecutive statements from one client can
+    land on different upstream sessions. The failure is not a clean error at startup -- it is an
+    intermittent `prepared statement "__asyncpg_stmt_N__" does not exist` that only appears under
+    concurrency, which is the worst way to discover a configuration problem. Disabling the cache
+    costs a re-parse per query and makes the pool safe behind either pooling mode.
+
+    Pass a non-zero `statement_cache_size` when connecting through a SESSION-mode pooler or
+    directly, where prepared statements work and the cache is worth having.
+
+    `max_size` is 5, not the 10 this used to hardcode: a free-tier Postgres connection cap is
+    shared with migrations, any other client and every other instance of this service.
+    """
     return await asyncpg.create_pool(
-        dsn=database_url, min_size=1, max_size=10, init=_register_jsonb_codec
+        dsn=database_url,
+        min_size=min_size,
+        max_size=max_size,
+        statement_cache_size=statement_cache_size,
+        init=_register_jsonb_codec,
     )
 
 
