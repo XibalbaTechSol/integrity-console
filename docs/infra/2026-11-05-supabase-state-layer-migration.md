@@ -12,7 +12,8 @@ Postgres is **deleted** at expiry, so this has a dated deadline independent of a
 > **Render runs the code. Supabase holds the state.**
 
 - **Render** — compute (the long-lived Python services) and static frontends.
-- **Supabase** — Postgres, auth, storage.
+- **Supabase** — Postgres and storage. *Not* auth: who issues identity is an open question (§6),
+  and naming Supabase Auth here would prejudge it. This migration moves Postgres only.
 
 ### 1.1 Why not "Supabase for all backend"
 
@@ -63,9 +64,13 @@ production notes already require ("tenant-bound membership, short-lived scoped s
 1. **Two active Supabase projects per free org.** Three exist, all paused. Separate-project-per-
    product (the chosen option) therefore needs slots — see Phase 0, where the limit is tested
    rather than assumed, since a paused project may not count against the active limit.
-2. **Supabase free pauses a project after ~1 week idle.** Acceptable for userapi and console data.
+2. **Supabase free pauses a project after ~1 week idle.** Tolerable for userapi and console data
+   *while userapi serves one frontend* — a pause locks out the console only.
    **Not** acceptable for Shield's eventual control plane: a paused control plane means the
    remote-contain channel is dead. Shield's control plane remains a paid-tier item.
+   **And not acceptable at all if userapi ever becomes the shared identity issuer** (§6): one
+   paused project would then lock every product's login simultaneously. That single sentence is
+   why §6 is a proposal with its own gate rather than part of this migration.
 3. **Region pairing matters.** Pair Supabase region to the Render service region to avoid adding
    cross-region latency to every query: `oregon` → `us-west-2`, `ohio` → `us-east-1`.
 
@@ -191,7 +196,97 @@ pattern, promote §1 to `integrity-core`'s `docs/ecosystem/` as the cross-repo s
 
 ---
 
-## 6. Open questions
+## 6. Proposed direction: one identity issuer for all three products
+
+**Status: PROPOSED, not accepted.** Nothing in §5 depends on it. Recorded here so the migration
+does not quietly foreclose it.
+
+**Review provenance:** the Devil's Advocate engine was unavailable (`ENGINE_NOT_IN_PLAN` —
+the account's grant does not include `devil-advocate`), so the adversarial pass below was run by
+the reviewer model plus self-review, not by that engine's six perspectives. Treat this section as
+non-authoritative until it has its own spec and acceptance.
+
+### 6.1 The question
+
+Should one backend own user accounts for Shield, Cortex and the console, so one login works across
+all three?
+
+### 6.2 Verified current state
+
+- **The console already does this.** `integrity-dashboard/src/services/userapi.ts` authenticates
+  entirely against userapi: `/auth/register`, `/auth/login`, `/auth/google`, `/auth/logout`, `/me`,
+  over an httpOnly cookie (`credentials: 'include'`) plus an optional Bearer header.
+- **Cortex has no user accounts at all.** The console reads it read-only; the pilot uses
+  operator-provisioned bearer tokens. So nothing carries *from* Cortex — the direction is *to* it.
+- **Shield has its own independent Google OAuth** (PKCE S256 + HMAC-signed state), its own
+  `SameSite=Strict` session cookie, and a SQLite store on an ephemeral disk.
+- **userapi's schema has already drifted ecosystem-wide** without a decision: `policy_packs` and
+  `policy_revisions` (Shield concepts) and `user_agents` (a Cortex concept) sit beside `users`,
+  `api_keys`, `revoked_tokens` and `user_wallets`.
+
+### 6.3 Correction to an earlier claim
+
+This was first described as "already half-built." That overstated it, and the overstatement
+flattered the proposal. userapi is an **auth API for a single client**, not an identity provider:
+a grep for `.well-known`, `jwks`, `/authorize` and `openid` across `integrity-userapi/app` returns
+only Google's own userinfo URL — userapi as a *client* of Google, never as a provider. There is no
+issuer surface at all. The work is building an IdP, not finishing one.
+
+### 6.4 Findings — acceptance criteria for a future identity spec
+
+Not tasks in this migration. Each is a gate that spec must clear.
+
+1. **HS256 with a shared symmetric secret is a showstopper for the naive version.**
+   `app/config.py:47` sets `jwt_algorithm = "HS256"` and `app/security.py:90` signs with
+   `settings.jwt_secret`. Validating userapi's tokens in Shield and Cortex would mean handing them
+   that same secret — and a symmetric secret verifies by *signing*, so any one compromised product
+   could forge sessions for all three. Requirement: asymmetric signing (RS256/ES256) published via
+   JWKS with a `kid` for rotation, and strict `aud` validation in every consumer.
+   Named test: *a token minted for the console's audience is rejected by Shield.*
+2. **A hand-rolled OIDC provider is where these bugs live.** If userapi becomes the issuer, the
+   spec must pin: exact-match `redirect_uri` allowlisting, enforced PKCE, a required `nonce`, and
+   single-use authorization codes. Each needs a test that fails without the guard.
+3. **The issuer is a single point of failure and must not be on a pausing free tier** (§2.1).
+   Separately, **Shield must keep an independent break-glass admin login** — its existing Google
+   OAuth path — that works when userapi is down. An incident is precisely when Shield's console is
+   needed. This extends the enforcement-path rule to the *operator* path.
+4. **An alternative is unevaluated: Supabase Auth as the issuer** instead of hand-rolling one.
+   It would supply JWKS-verifiable tokens and a Google provider without building finding 2. Its
+   suitability as an issuer for three first-party relying parties is *not* confirmed here. Open
+   evaluation, not a recommendation.
+5. **Moving `user_wallets` out is deferred.** Credentials and wallet data sharing one blast radius
+   is a real concern, but splitting them means another database, another Supabase slot and a schema
+   change. It does not belong in a deadline migration.
+6. **Cleanup, found while checking finding 1:** `jwt_secret` is defined twice in
+   `app/config.py:45-46`. The later lambda shadows the first, making `_generate_jwt_secret()` (and
+   its "sessions will not persist" warning) unreachable. The validator at `:51` still catches the
+   insecure default, so no warning is lost — but it is a duplicate field definition in the exact
+   file identity work would touch.
+
+### 6.5 The hard constraint, restated
+
+Shield enforces on a 200–700ms budget and must work with the cloud unreachable. Shared accounts may
+govern **who logs into Shield's admin console** and must never touch **device identity or Tier-1
+policy decisions**. Conflating those is how an authentication outage becomes a security outage on
+every protected endpoint — the exact failure the product exists to prevent. Same reasoning that
+keeps Tier 3 out of the blocking path.
+
+On cookies: `SameSite=Strict` cannot be shared across origins, so a shared *cookie* is off the
+table and the design is OIDC with per-product local sessions. This is not new risk — Shield already
+completes a cross-site redirect from Google — it only rules out the shortcut of one parent domain
+with `Domain=.xibalba.tld` and a downgrade to `Lax`.
+
+### 6.6 Why this is not part of the migration
+
+An identity redesign must not be driven by the 2026-12-04 deletion deadline — deadline pressure is
+when architecture gets committed carelessly. The migration is **invariant** to the outcome:
+userapi's database has to leave Render either way, and Phases 1–6 (provision, pooler-safe pool,
+dump, schema, cutover, release) read identically whether or not userapi later becomes an issuer.
+Shared identity would only *ease* Phase 0, by needing fewer projects than one per product.
+
+---
+
+## 7. Open questions
 
 1. ~~Which Supabase projects are expendable~~ — answered 2026-11-05: all inactive ones (§4).
    What remains is mechanical: whether a `create_project` succeeds with three paused projects in
@@ -203,3 +298,5 @@ pattern, promote §1 to `integrity-core`'s `docs/ecosystem/` as the cross-repo s
    before being treated as the thing worth migrating.
 4. Whether the console's own backend needs for the Shield/Cortex consoles change this allocation —
    deferred until Shield's control-plane spec exists.
+5. Whether to pursue §6 at all, and if so whether the issuer is userapi or Supabase Auth
+   (§6.4, finding 4). This needs its own spec; it is not decided by this document.
