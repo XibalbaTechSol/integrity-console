@@ -56,7 +56,7 @@ const defaultSettings: Omit<SettingsState, 'apiKeys'> = {
   theme: 'dark',
   font: 'System Default',
   fontSize: 16,
-  appName: 'Integrity MVP', // matches index.html's static <title> so applying it on mount is a no-op, not a flash
+  appName: 'Integrity Console', // matches index.html's static <title> so applying it on mount is a no-op, not a flash
   headerStyle: 'solid',
   animationsEnabled: true,
 };
@@ -66,7 +66,14 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Omit<SettingsState, 'apiKeys'>>(() => {
     const saved = safeLocalStorageGet('appSettings');
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    if (!saved) return defaultSettings;
+    const merged = { ...defaultSettings, ...JSON.parse(saved) };
+    // The MVP -> Console rename: `appName` is persisted, so a returning operator who never
+    // touched the setting would otherwise keep seeing the superseded name in their tab title
+    // forever. Migrate the *old default* only -- a name they actually chose is theirs to keep.
+    // The storage key itself is deliberately unchanged, so nobody's theme/font resets.
+    if (merged.appName === 'Integrity MVP') merged.appName = defaultSettings.appName;
+    return merged;
   });
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
 
@@ -79,7 +86,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.style.setProperty('--base-font-size', `${settings.fontSize}px`);
     // SettingsPage's own caption claims "This title appears in headers and notifications" --
     // that was never true (appName was stored but nothing read it back). Actually apply it.
-    document.title = settings.appName || 'Xibalba MVP';
+    document.title = settings.appName || 'Integrity Console';
   }, [settings]);
 
   const refreshApiKeys = useCallback(() => {

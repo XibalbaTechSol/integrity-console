@@ -64,7 +64,7 @@ test.describe('/health (HealthPage)', () => {
     await page.goto('/health');
     await expect(page.getByText('HIPAA Gateway Concept & Safeguards')).toBeVisible();
     await expect(page.getByText('Clinical Allowlist (BCC Runtime Policy)')).toBeVisible();
-    await expect(page.getByText('NHI Access Governance (Current MVP Identity View)')).toBeVisible();
+    await expect(page.getByText('NHI Access Governance (Current Console Identity View)')).toBeVisible();
   });
 
   test('Patient Consent Contracts (EHR Gates): real table or honest empty state', async ({ page }) => {

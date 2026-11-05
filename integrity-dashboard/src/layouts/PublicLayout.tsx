@@ -14,7 +14,7 @@ const PublicLayout: React.FC = () => {
         </div>
         <div>
           <Link to="/auth" className="primary-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem' }}>
-            Launch MVP <ArrowRight size={16} />
+            Launch Console <ArrowRight size={16} />
           </Link>
         </div>
       </header>

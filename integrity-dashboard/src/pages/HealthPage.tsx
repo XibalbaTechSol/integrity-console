@@ -670,7 +670,7 @@ export default function HealthPage() {
               </Panel>
 
               {/* NHI Access Governance */}
-              <Panel title="NHI Access Governance (Current MVP Identity View)" icon={<Users size={18} color="var(--theme-accent)" />}>
+              <Panel title="NHI Access Governance (Current Console Identity View)" icon={<Users size={18} color="var(--theme-accent)" />}>
                 <div className="flex-col gap-4">
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span className="text-muted" style={{ fontSize: '0.85rem' }}>Registered Oracle Agents.</span>

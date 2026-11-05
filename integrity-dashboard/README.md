@@ -119,7 +119,7 @@ Still dependent on running backend services:
 
 ## Wiki synchronization
 
-`integrity-core/docs/wiki/` is the sole authoring source of truth. The MVP `/wiki` route is a read-only generated projection, and the GitHub Wiki is another downstream mirror. Direct edits to either rendered surface are not reconciled upstream and may be overwritten.
+`integrity-core/docs/wiki/` is the sole authoring source of truth. The Console `/wiki` route is a read-only generated projection, and the GitHub Wiki is another downstream mirror. Direct edits to either rendered surface are not reconciled upstream and may be overwritten.
 
 Run:
 
@@ -163,7 +163,7 @@ Near-term:
 
 Longer-term:
 
-- Make the MVP a production operator console for protocol users, Shield security teams, healthcare/Integrity Health buyers, and investor demos.
+- Make the Console a production operator console for protocol users, Shield security teams, healthcare/Integrity Health buyers, and investor demos.
 - Add deployment automation only after backend service availability and environment contracts are stable.
 - Split large Vite chunks where it materially improves user-perceived page load.
 

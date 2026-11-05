@@ -18,7 +18,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Integrity MVP
+      - name: Check out Integrity Console
         uses: actions/checkout@v4
 
       - name: Check out canonical Integrity wiki

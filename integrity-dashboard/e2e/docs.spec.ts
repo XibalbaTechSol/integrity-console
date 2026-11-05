@@ -13,11 +13,11 @@ test.describe('/docs (DocsPage)', () => {
     expect(errors, `Uncaught errors: ${errors.map(e => e.message).join('; ')}`).toEqual([]);
   });
 
-  test('PublicLayout header: logo links home, Launch MVP links to /auth', async ({ page }) => {
+  test('PublicLayout header: logo links home, Launch Console links to /auth', async ({ page }) => {
     await page.goto('/docs');
     const header = page.locator('header');
     await expect(header.getByRole('link', { name: 'Xibalba Solutions' })).toHaveAttribute('href', '/');
-    await expect(header.getByRole('link', { name: /Launch MVP/ })).toHaveAttribute('href', '/auth');
+    await expect(header.getByRole('link', { name: /Launch Console/ })).toHaveAttribute('href', '/auth');
   });
 
   test('main content renders the Documentation heading and both sections', async ({ page }) => {

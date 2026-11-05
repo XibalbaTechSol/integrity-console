@@ -11,7 +11,7 @@ logger = logging.getLogger("integrity_demo.agent_loop")
 
 class IntegrityAgent:
     """
-    Simplified Xibalba-style Agent Loop tailored for the Integrity MVP demo.
+    Simplified Xibalba-style Agent Loop tailored for the Integrity Console demo.
     Handles conversation, tool execution, and state management.
     """
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MVP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECTS_ROOT="$(cd "$MVP_ROOT/.." && pwd)"
+CONSOLE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECTS_ROOT="$(cd "$CONSOLE_ROOT/.." && pwd)"
 INTEGRITY_ROOT="${INTEGRITY_ROOT:-$PROJECTS_ROOT/integrity-core}"
 GRAPH_ROOT="${GRAPH_ROOT:-$PROJECTS_ROOT/xibalba-cortex}"
 SHIELD_ROOT="${SHIELD_ROOT:-$PROJECTS_ROOT/xibalba-shield}"
@@ -10,13 +10,13 @@ GRAPH_HOME="${XIBALBA_CORTEX_HOME:-$HOME/.hermes/xibalba-cortex}"
 GRAPH_PORT="${GRAPH_PORT:-8420}"
 SHIELD_PORT="${SHIELD_PORT:-8765}"
 SHIELD_TOKEN="${SHIELD_BACKEND_TOKEN:-dev-shield-admin}"
-MVP_ORIGIN="${MVP_ORIGIN:-http://localhost:5174}"
+CONSOLE_ORIGIN="${CONSOLE_ORIGIN:-http://localhost:5174}"
 GRAPH_PID=""
 SHIELD_PID=""
-MVP_PID=""
+CONSOLE_PID=""
 
 cleanup() {
-  for pid_var in GRAPH_PID SHIELD_PID MVP_PID; do
+  for pid_var in GRAPH_PID SHIELD_PID CONSOLE_PID; do
     pid="${!pid_var}"
     if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
       kill "$pid" 2>/dev/null || true
@@ -39,7 +39,7 @@ if ! curl --silent --fail "http://localhost:${GRAPH_PORT}/api/status" >/dev/null
       --home "$GRAPH_HOME" \
       --host localhost \
       --port "$GRAPH_PORT" \
-      --allowed-origin "$MVP_ORIGIN"
+      --allowed-origin "$CONSOLE_ORIGIN"
   ) &
   GRAPH_PID=$!
 else
@@ -65,13 +65,13 @@ else
   printf '🛡️ Using existing xibalba-shield backend on port %s\n' "$SHIELD_PORT"
 fi
 
-# --- 👁️ Human Control Center (MVP) ---
-printf '👁️ Starting integrity-mvp frontend on %s\n' "$MVP_ORIGIN"
+# --- 👁️ Human Control Center (Console) ---
+printf '👁️ Starting integrity-console dashboard on %s\n' "$CONSOLE_ORIGIN"
 (
-  cd "$MVP_ROOT"
+  cd "$CONSOLE_ROOT"
   exec npm run dev
 ) &
-MVP_PID=$!
+CONSOLE_PID=$!
 
 # --- 🦴 Oracle + BCC Middleware ---
 printf '🦴 Starting Integrity Oracle and BCC middleware via %s\n' "$INTEGRITY_ROOT/docker-compose.yml"

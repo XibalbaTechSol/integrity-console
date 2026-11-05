@@ -16,7 +16,7 @@ security evidence.
 
 # Local Stack
 
-The MVP can run against the real local Integrity services and the graph-memory
+The Console can run against the real local Integrity services and the graph-memory
 viewer API. From this repository, start the stack with:
 
 ```bash
@@ -26,7 +26,7 @@ viewer API. From this repository, start the stack with:
 The script starts `xibalba-cortex` on `http://localhost:8420`, then runs
 the `oracle-backend` and `bcc-middleware` services from the sibling
 `integrity-core/docker-compose.yml`. Docker Compose starts their Postgres,
-Redis, and OPA dependencies as needed. In a second terminal, run the MVP:
+Redis, and OPA dependencies as needed. In a second terminal, run the Console:
 
 ```bash
 npm run dev -- --port 5174
