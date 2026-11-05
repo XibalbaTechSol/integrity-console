@@ -47,7 +47,7 @@ flowchart LR
 
 ## 4. Application Boundary
 
-The MVP may read integrity-core Oracle, User API, BCC, contract metadata, generated wiki data, Shield status/evidence, and graph-memory service data through configured interfaces. It must not fabricate live trust claims, locally compute AIS as authoritative protocol truth, or imply that a visual panel proves backend/chain production readiness.
+The Console may read integrity-core Oracle, User API, BCC, contract metadata, generated wiki data, Shield status/evidence, and graph-memory service data through configured interfaces. It must not fabricate live trust claims, locally compute AIS as authoritative protocol truth, or imply that a visual panel proves backend/chain production readiness.
 
 ## 5. Route Specification
 

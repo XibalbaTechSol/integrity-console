@@ -67,7 +67,14 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Omit<SettingsState, 'apiKeys'>>(() => {
     const saved = safeLocalStorageGet('appSettings');
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    if (!saved) return defaultSettings;
+    const merged = { ...defaultSettings, ...JSON.parse(saved) };
+    // The MVP -> Console rename: `appName` is persisted, so a returning operator who never
+    // touched the setting would otherwise keep seeing the superseded name in their tab title
+    // forever. Migrate the *old default* only -- a name they actually chose is theirs to keep.
+    // The storage key itself is deliberately unchanged, so nobody's theme/font resets.
+    if (merged.appName === 'Integrity MVP') merged.appName = defaultSettings.appName;
+    return merged;
   });
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
 

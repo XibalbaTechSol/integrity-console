@@ -1,4 +1,4 @@
-# integrity-mvp: Production Gap Analysis
+# Integrity Console: Production Gap Analysis
 
 > **Current audit pointer — 2026-08-06:** [`docs/audits/2026-08-06-status.md`](docs/audits/2026-08-06-status.md) records the clean-branch build, test, dependency, lint, and integration-verification status. Historical gap entries below remain evidence records and are not silently rewritten.
 

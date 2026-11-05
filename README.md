@@ -334,8 +334,7 @@ to serve the new `dist/`.
 
 Verified against the current tree, and worth knowing before you trust a surface:
 
-- `integrity-dashboard/package.json` is still named `integrity-mvp`, from the repository's
-  earlier identity. The nested `integrity-dashboard/README.md` is **stale**: it documents
+- The nested `integrity-dashboard/README.md` is **stale**: it documents
   Identity, Shield, Financials, Intelligence and Memory pages that are now redirects, and its
   relative links predate the A1 split. Treat this file as the current description.
 - `src/pages/KernelPage.tsx` and `src/pages/PolicyPacksPage.tsx` exist but are not routed in
