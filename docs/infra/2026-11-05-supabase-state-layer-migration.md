@@ -299,13 +299,16 @@ table at 0 rows. Then §3.2's RLS mitigation was applied and re-verified.
   - Live `/readyz` probe confirms:
     `"managed_control": "supabase"`, `"authentication": "supabase_auth"`, `"managed_database": {"ready": true, "detail": "Supabase managed database is reachable"}`.
 
-### Ready for Phase 6 Operator Deletion
-
-All prerequisites for Phase 6 are satisfied:
-1. `integrity-userapi-db` has a verified, retained backup off-platform.
-2. Supabase state layer holds verified matching data.
-3. Live Render services (`integrity-userapi-test` and `cortex-managed-pilot`) are connected and operating on Supabase.
-4. Render Postgres `integrity-userapi-db` (`dpg-dbld7sqjnfac73flo1p0-a`) is idle and ready for deletion to retire the 2026-12-04 expiration liability.
+**2026-11-05 — Phase 6 (G6): PASS.**
+- Render Postgres database `integrity-userapi-db` (`dpg-dbld7sqjnfac73flo1p0-a`) permanently deleted via Render API (`DELETE https://api.render.com/v1/postgres/dpg-dbld7sqjnfac73flo1p0-a` -> HTTP 204 No Content).
+- Verified via `render services`: `integrity-userapi-db` is completely removed from the Render workspace; 30-day expiration liability (2026-12-04) eliminated.
+- DDL and data backups retained off-platform in `/home/xibalba/backups/integrity-userapi-db-backup-2026-11-05.sql` (19,051 bytes) and `/home/xibalba/backups/integrity-userapi-db-data-2026-11-05.sql` (4,529 bytes).
+- Post-deletion end-to-end ecosystem validation completed:
+  - `integrity-userapi-test` (`srv-dbldb9gu01pc739t33b0`): HTTP 200 `{"status":"online","service":"integrity-userapi"}`.
+  - Live write path verified post-deletion: `POST /auth/register` returned HTTP 201 Created and issued JWT; user record confirmed written in Supabase Postgres 17 (`ftspunijfgcbkuybobhf`) and cleaned up.
+  - `cortex-managed-pilot` (`srv-dbfavo67bikc73crb8u0`): HTTP 200 `/readyz` confirms `"managed_control": "supabase"`, `"authentication": "supabase_auth"`, and `"managed_database": {"ready": true}`.
+  - `integrity-console-test` (`srv-dbld3d0u01pc739sdpr0`): HTTP 200 OK.
+  - `xibalba-shield` (`srv-dblrusui0phs738847vg`): HTTP 200 OK `{"ok": true, "service": "xibalba-shield-backend"}`.
 
 ---
 
