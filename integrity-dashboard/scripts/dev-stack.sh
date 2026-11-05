@@ -10,7 +10,9 @@ GRAPH_HOME="${XIBALBA_CORTEX_HOME:-$HOME/.hermes/xibalba-cortex}"
 GRAPH_PORT="${GRAPH_PORT:-8420}"
 SHIELD_PORT="${SHIELD_PORT:-8765}"
 SHIELD_TOKEN="${SHIELD_BACKEND_TOKEN:-dev-shield-admin}"
-CONSOLE_ORIGIN="${CONSOLE_ORIGIN:-http://localhost:5174}"
+# MVP_ORIGIN is the superseded name, still honoured so an existing external override
+# keeps working after the Console rename.
+CONSOLE_ORIGIN="${CONSOLE_ORIGIN:-${MVP_ORIGIN:-http://localhost:5174}}"
 GRAPH_PID=""
 SHIELD_PID=""
 CONSOLE_PID=""

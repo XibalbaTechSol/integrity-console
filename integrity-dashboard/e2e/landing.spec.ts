@@ -24,14 +24,17 @@ import { collectPageErrors } from './test-utils';
 //      /financials that are now bare redirects. Those are asserted *absent*, so a future
 //      copy edit cannot quietly reintroduce them.
 
-import { AS_OF, PLAN_PROGRESS, MISSION_PHASES, MANDATED_SELF_DESCRIPTION } from '../src/landing/protocolStatus';
+import { AS_OF, AS_OF_COMMIT, MISSION_PHASES, MANDATED_SELF_DESCRIPTION } from '../src/landing/protocolStatus';
 
-// Pinned, independent expectations. Re-run `python3 scripts/plan_progress.py` in
-// integrity-core before changing these, and update protocolStatus.ts in the same commit.
-const EXPECTED_PROGRESS = '134/232 (57%)';
+// Pinned, independent expectations. Before changing these, confirm the current execution
+// authority in integrity-core `docs/DOCUMENT_STATUS.yaml` — it moved on 2026-11-03 from
+// `docs/EXECUTION_PLAN.md` (now a redirect stub) to
+// `docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md`, and the old plan's checkbox count went
+// with it. Update protocolStatus.ts in the same commit.
 const EXPECTED_AS_OF = '2026-11-04';
+const EXPECTED_AS_OF_COMMIT = '5626041b';
 const EXPECTED_STAGES = [
-  'Integrated and static-fired',
+  'Integration and static fire',
   'First flight, synthetic propellant',
   'Crewed flight: real PHI, real funds',
   'Orbit',
@@ -95,6 +98,22 @@ test.describe('/ (LandingPage)', () => {
     await expect(page.locator('#loop figure ol')).toContainText('never turn a deny into an allow');
   });
 
+  test('hook card discloses the deployed-vs-specified enforcement gap', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#loop').scrollIntoViewIfNeeded();
+    const gap = page.getByTestId('hook-deployment-gap');
+    await expect(gap).toBeVisible();
+    // SPEC.md calls this "Deployed-vs-live gap, disclosed, not glossed over". The page
+    // sells a fail-closed gate, so the three ways that is not yet universally true must
+    // travel with the claim rather than being left to the reader to discover.
+    await expect(gap).toContainText('executionPolicy() reverts');
+    await expect(gap).toContainText('Gate C');
+    await expect(gap).toContainText('fails open');
+    // And the hero must not promise unconditional fail-closed behaviour.
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('body')).not.toContainText('measures the post-state and fails closed');
+  });
+
   test('AIS formula renders as real KaTeX markup, not raw LaTeX text', async ({ page }) => {
     await page.goto('/');
     await page.locator('#ais').scrollIntoViewIfNeeded();
@@ -131,23 +150,35 @@ test.describe('/ (LandingPage)', () => {
     await status.scrollIntoViewIfNeeded();
 
     // Rendered page vs. pinned literals — the assertion that actually catches drift.
-    await expect(status).toContainText(EXPECTED_PROGRESS);
     await expect(status).toContainText(EXPECTED_AS_OF);
+    await expect(status).toContainText(EXPECTED_AS_OF_COMMIT);
 
     // And the source module must agree with those literals, so the module and this spec
     // cannot diverge without one of them failing.
-    expect(`${PLAN_PROGRESS.done}/${PLAN_PROGRESS.total} (${PLAN_PROGRESS.percent}%)`).toBe(EXPECTED_PROGRESS);
     expect(AS_OF).toBe(EXPECTED_AS_OF);
+    expect(AS_OF_COMMIT).toBe(EXPECTED_AS_OF_COMMIT);
     expect(MISSION_PHASES.map(p => p.stage)).toEqual(EXPECTED_STAGES);
 
     for (const stage of EXPECTED_STAGES) {
       await expect(status.getByRole('heading', { name: stage })).toBeVisible();
     }
-    // Two gates open and one explicitly unclaimed is the honest shape of the campaign.
+    // The honest shape of the campaign: the first stage is still open, two have not
+    // started, and the last is not claimed. Nothing is complete yet.
     await expect(status.getByText('In progress', { exact: true })).toHaveCount(1);
-    await expect(status.getByText('Not started', { exact: true })).toHaveCount(1);
+    await expect(status.getByText('Not started', { exact: true })).toHaveCount(2);
     await expect(status.getByText('Not claimed', { exact: true })).toHaveCount(1);
-    await expect(status).toContainText('Mainnet');
+    await expect(status.getByText('Complete', { exact: true })).toHaveCount(0);
+
+    // No percentage may reappear: the current authority has no checkbox count, so any
+    // "NN%" in this section would be recovered from the superseded plan.
+    await expect(status).not.toContainText('%');
+    await expect(status).not.toContainText('plan_progress.py');
+
+    // Each stage publishes its open requirements, not just a chip.
+    for (const phase of MISSION_PHASES) {
+      expect(phase.open.length).toBeGreaterThan(0);
+      await expect(status).toContainText(phase.open[0]);
+    }
   });
 
   test('console section links only to routes that are real pages, not redirects', async ({ page }) => {

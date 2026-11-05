@@ -23,11 +23,12 @@ import ControlLoopDiagram, { CONTROL_LOOP_STEPS } from './landing/ControlLoopDia
 import {
   AS_OF,
   AS_OF_COMMIT,
-  PLAN_PROGRESS,
+  PROGRESS_NOTE,
   MISSION_PHASES,
   CONFORMANCE_LEVELS,
   CONFORMANCE_TARGET,
   MANDATED_SELF_DESCRIPTION,
+  HOOK_DEPLOYMENT_GAP,
   DOCUMENT_AUTHORITY,
   type PhaseState,
 } from './landing/protocolStatus';
@@ -112,7 +113,10 @@ const CONSOLE_SURFACES = [
     route: '/evidence',
     name: 'Evidence and correlation',
     icon: Activity,
-    body: 'Signed receipts, epochs and anchored roots, correlated into a replayable account of what an agent did and why it was admitted.',
+    // Verified against src/pages/CorrelationPage.tsx: its four columns are exactly
+    // Runtime, Shield / policy, Signed intent, Outcome. An earlier draft claimed
+    // "receipts, epochs and anchored roots" here, which the component does not render.
+    body: 'Correlates runtime activity, the Shield policy decision, the signed intent and the outcome into one row, so "what did it do, and why was it admitted" is a single read rather than a reconstruction.',
   },
   {
     route: '/system',
@@ -124,7 +128,11 @@ const CONSOLE_SURFACES = [
     route: '/health',
     name: 'Integrity Health',
     icon: ShieldAlert,
-    body: 'The first pack: on-device access governance over synthetic FHIR data. Gate B-local scope — synthetic only, and not a HIPAA certification.',
+    // Verified against src/pages/HealthPage.tsx panel titles: Smart BAA registry, HIPAA
+    // gateway concept and safeguards, clinical allowlist, patient consent contracts,
+    // record interaction logs, agent circuit breakers. "Synthetic FHIR" was not among
+    // them, so the earlier wording is corrected rather than repeated.
+    body: 'The first pack, as a working concept: a SmartBAA registry, a clinical allowlist, patient consent gates, interaction logs and agent circuit breakers. A concept and safeguard model over non-production data — explicitly not a HIPAA certification.',
   },
 ] as const;
 
@@ -207,8 +215,8 @@ export default function LandingPage() {
           </p>
           <p style={{ fontSize: '1.3rem', color: 'var(--text-primary)', maxWidth: '820px', margin: '0 auto 3rem auto', lineHeight: 1.6, fontWeight: 500 }}>
             AI agents are aimed and released. Integrity Protocol closes the loop: a signed trajectory, a gate that
-            measures the post-state and fails closed, tamper-evident evidence of what actually happened, and feedback
-            whose authority is bounded by construction.
+            measures the post-state and is specified to fail closed, tamper-evident evidence of what actually
+            happened, and feedback whose authority is bounded by construction.
           </p>
           <div className="landing-hero-actions" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/auth" className="primary-button" style={{ padding: '1.25rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -316,14 +324,15 @@ export default function LandingPage() {
         <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginTop: '3rem' }}>
           {[
             {
+              control: 'Controller + comparator',
+              component: 'The hook',
+              body: 'An account hook evaluates the constraint vector on the post-state and reverts on violation. Missing, malformed, unknown and incompatible decisions are all defined as fail-closed: the loop’s specified default is to stop the vehicle, not to wave it through.',
+              gap: HOOK_DEPLOYMENT_GAP,
+            },
+            {
               control: 'Reference / setpoint',
               component: 'Signed policy pack',
               body: 'The constraint vector the agent is committed to, distributed as a signed file. Pack loading verifies the trusted signature before enforcement uses the pack, so the setpoint itself cannot be edited out from under the loop. A pack declares its own no-match behaviour.',
-            },
-            {
-              control: 'Controller + comparator',
-              component: 'The hook',
-              body: 'An account hook evaluates the constraint vector on the post-state and reverts on violation. Missing, malformed, unknown and incompatible decisions are all defined as fail-closed: the loop’s default is to stop the vehicle, not to wave it through.',
             },
             {
               control: 'Sensors',
@@ -362,6 +371,16 @@ export default function LandingPage() {
               </p>
               <h3 style={{ margin: '0 0 0.75rem', fontSize: '1.2rem' }}>{row.component}</h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0 }}>{row.body}</p>
+              {'gap' in row && row.gap && (
+                <div
+                  data-testid="hook-deployment-gap"
+                  style={{ marginTop: '1rem', paddingLeft: '0.85rem', borderLeft: '3px solid #f59e0b' }}
+                >
+                  <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.88rem' }}>
+                    <strong style={{ color: 'var(--text-primary)' }}>Deployed vs. specified:</strong> {row.gap}
+                  </p>
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>
@@ -452,26 +471,21 @@ export default function LandingPage() {
             <h2 style={{ fontSize: 'clamp(1.9rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>Where the vehicle actually is</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
               A control company that misreported its own state would be an unusually poor advertisement for its
-              product. So here is the test campaign, with two stages open and one explicitly not claimed.
+              product. So here is the test campaign: the first stage still open, the next two not started, and
+              orbit not claimed at all.
             </p>
           </motion.div>
 
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: '10px', background: 'var(--surface-color)' }}>
-              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                Execution plan progress{' '}
-                <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                  {PLAN_PROGRESS.done}/{PLAN_PROGRESS.total} ({PLAN_PROGRESS.percent}%)
-                </strong>
+            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: '10px', background: 'var(--surface-color)', maxWidth: '760px' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                {PROGRESS_NOTE}
               </span>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                As of <strong style={{ color: 'var(--text-primary)' }}>{AS_OF}</strong> at{' '}
-                <code style={{ fontSize: '0.85rem' }}>{AS_OF_COMMIT}</code>
+                Reconciled <strong style={{ color: 'var(--text-primary)' }}>{AS_OF}</strong> against
+                integrity-core <code style={{ fontSize: '0.85rem' }}>{AS_OF_COMMIT}</code>
               </span>
             </div>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginTop: '0.85rem', marginBottom: 0 }}>
-              Counted by <code>scripts/plan_progress.py</code>, not maintained by hand.
-            </p>
           </motion.div>
 
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -500,10 +514,17 @@ export default function LandingPage() {
                     <PhaseChip state={phase.state} />
                     <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontFamily: 'monospace' }}>
                       {phase.gate}
-                      {phase.count ? ` · ${phase.count}` : ''}
                     </span>
                   </div>
-                  <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '0 0 0.6rem' }}>{phase.detail}</p>
+                  <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: '0 0 0.9rem' }}>{phase.detail}</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: '0.82rem', fontWeight: 600, margin: '0 0 0.5rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    {phase.state === 'not-claimed' ? 'Boundary' : 'Still required'}
+                  </p>
+                  <ul style={{ margin: '0 0 0.9rem', paddingLeft: '1.1rem', color: 'var(--text-secondary)', lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    {phase.open.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', margin: 0, opacity: 0.8 }}>
                     Source: <code>{phase.source}</code>
                   </p>
@@ -659,12 +680,13 @@ export default function LandingPage() {
               question="What is still missing?"
               answer={
                 <p>
-                  The largest unstarted block is SaaS productization: tenancy, roles, device enrolment, entitlements
-                  and retention. Telemetry content-boundary negative tests, a reproducible pilot package and
-                  compliance exports are not started. Testnet deployment of the evidence anchor awaits owner approval.
-                  All of Phase C — kernel mediation, forgery-resistant registration, verified memory, human oversight,
-                  cutover — is not started. Mainnet is not claimed at all. The status section above links each of
-                  these to the file that tracks it.
+                  Phase A itself is not closed: the SDK contracts still need publishing, Shield and BCC still need to
+                  prove pack-hash and deny-by-default conformance, Cortex still needs to prove authenticated
+                  ingestion and tenant isolation, and signed DID-file rotation with a universal fail-closed fallback
+                  is still to be defined. SaaS productization — tenancy, device enrolment, entitlements, retention,
+                  purge, export — has not started, and neither has Gate C's kernel mediation and forgery-resistant
+                  registration. Testnet anchoring, hosted scale, billing and real-PHI operation are separate gates or
+                  deferred. The status section above carries each list with the file it came from.
                 </p>
               }
             />
