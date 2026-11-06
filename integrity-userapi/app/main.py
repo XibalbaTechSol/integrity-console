@@ -20,12 +20,14 @@ from uuid import UUID
 import asyncpg
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Response, status
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import db, oracle_client
 from app.config import Settings, settings as default_settings
 from app.deps import get_current_token, get_current_user_id, get_pool, get_settings
 from app.login_limiter import LoginRateLimiter
+from app.supabase_auth import SupabaseAuthVerifier
 from app.schemas import (
     AddAgentRequest,
     ApiKeyCreateResponse,
@@ -34,6 +36,7 @@ from app.schemas import (
     DemoRunUpdateRequest,
     GoogleAuthRequest,
     LoginRequest,
+    OAuthProvidersResponse,
     OwnedAgentResponse,
     PolicyActivationRequest,
     PolicyPackCreateRequest,
@@ -41,6 +44,7 @@ from app.schemas import (
     PolicyRevisionCreateRequest,
     PolicyRevisionResponse,
     RegisterRequest,
+    SupabaseAuthRequest,
     TokenResponse,
     TransferRequest,
     TransferResponse,
@@ -168,6 +172,7 @@ async def login(
     token = create_access_token(user_id=str(row["id"]), settings=settings)
     response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))
     return TokenResponse(access_token=token)
+
 
 
 async def _verify_google_credential(body: GoogleAuthRequest, settings: Settings) -> tuple[str, str]:
@@ -316,6 +321,87 @@ async def google_auth(
                 app_wallet_address,
                 _DEV_FAUCET_WEI,
             )
+
+    token = create_access_token(user_id=str(row["id"]), settings=settings)
+    response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))
+    return TokenResponse(access_token=token)
+
+
+@app.get("/auth/oauth/providers", response_model=OAuthProvidersResponse)
+async def oauth_providers(settings: Settings = Depends(get_settings)) -> OAuthProvidersResponse:
+    providers = []
+    if settings.supabase_url:
+        providers.extend([
+            {"id": "google", "name": "Google"},
+            {"id": "github", "name": "GitHub"},
+        ])
+    return OAuthProvidersResponse(providers=providers)
+
+
+@app.get("/auth/oauth/{provider}/authorize")
+async def oauth_authorize(
+    provider: str,
+    redirect_to: str | None = None,
+    settings: Settings = Depends(get_settings),
+):
+    provider_name = provider.lower()
+    if provider_name not in {"google", "github"}:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unsupported OAuth provider: {provider}",
+        )
+    target_redirect = redirect_to or "https://integrity-console-test.onrender.com/auth"
+    auth_url = f"{settings.supabase_url.rstrip('/')}/auth/v1/authorize?provider={provider_name}&redirect_to={target_redirect}"
+    return RedirectResponse(auth_url, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/auth/supabase", response_model=TokenResponse)
+async def supabase_auth(
+    body: SupabaseAuthRequest,
+    response: Response,
+    pool: asyncpg.Pool = Depends(get_pool),
+    settings: Settings = Depends(get_settings),
+) -> TokenResponse:
+    try:
+        verifier = SupabaseAuthVerifier(settings.supabase_url, audience=settings.supabase_jwt_audience)
+        claims = verifier.verify(body.access_token)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Supabase access token is invalid: {exc}",
+        ) from exc
+
+    email = claims.get("email")
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Supabase token does not contain an email claim",
+        )
+    normalized_email = str(email).strip().lower()
+
+    # 1. Match by email
+    row = await pool.fetchrow(
+        "SELECT id, email FROM users WHERE email = $1", normalized_email
+    )
+
+    if row is None:
+        # 2. Create new user without password
+        row = await pool.fetchrow(
+            "INSERT INTO users (email) VALUES ($1) RETURNING id",
+            normalized_email,
+        )
+        # Auto-provision app custodial wallet with dev faucet
+        app_wallet_address = "0x" + secrets.token_hex(20)
+        await pool.execute(
+            """
+            INSERT INTO user_wallets (user_id, app_wallet_address, itk_balance_wei)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (user_id) DO NOTHING
+            """,
+            row["id"],
+            app_wallet_address,
+            _DEV_FAUCET_WEI,
+        )
 
     token = create_access_token(user_id=str(row["id"]), settings=settings)
     response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))

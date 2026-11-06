@@ -16,7 +16,23 @@ const AuthPage: React.FC = () => {
   const gsiInitialized = useRef(false);
 
   useEffect(() => {
-    // 1. Check if URL has ?code= from an OAuth redirect
+    // 1. Check if URL has access_token in hash (from Supabase OAuth redirect)
+    if (window.location.hash) {
+      const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+      const hashParams = new URLSearchParams(rawHash);
+      const accessToken = hashParams.get('access_token');
+      if (accessToken) {
+        setLoading(true);
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        userapi.loginWithSupabase(accessToken)
+          .then(() => navigate('/dashboard'))
+          .catch((err: any) => setError(err?.message || 'Failed to authenticate with Supabase OAuth'))
+          .finally(() => setLoading(false));
+        return;
+      }
+    }
+
+    // 2. Check if URL has ?code= from an OAuth redirect
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     if (code) {
@@ -111,47 +127,14 @@ const AuthPage: React.FC = () => {
     if (connected) navigate('/dashboard');
   };
 
-  const handleGoogleAuth = () => {
+  const handleOAuth = (provider: 'google' | 'github') => {
     setError(null);
-    const google = (window as any).google;
-    if (google?.accounts?.oauth2) {
-      const client = google.accounts.oauth2.initCodeClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'openid email profile',
-        ux_mode: 'popup',
-        callback: async (resp: { code?: string; error?: string }) => {
-          if (resp.code) {
-            setLoading(true);
-            try {
-              await userapi.loginWithGoogle({ code: resp.code, redirect_uri: 'postmessage' });
-              navigate('/dashboard');
-            } catch (err: any) {
-              setError(err?.message || 'Google authentication failed');
-            } finally {
-              setLoading(false);
-            }
-          } else if (resp.error) {
-            setError(`Google sign-in canceled: ${resp.error}`);
-          }
-        },
-      });
-      client.requestCode();
-      return;
-    }
-    if (google?.accounts?.id) {
-      google.accounts.id.prompt();
-      return;
-    }
-    // Fallback: full redirect to Google OAuth
-    const redirectUri = window.location.origin + '/auth';
-    const params = new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: redirectUri,
-      response_type: 'code',
-      scope: 'openid email profile',
-      prompt: 'select_account',
-    });
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    const redirectUri = encodeURIComponent(window.location.origin + '/auth');
+    window.location.href = `https://ftspunijfgcbkuybobhf.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${redirectUri}`;
+  };
+
+  const handleGoogleAuth = () => {
+    handleOAuth('google');
   };
 
   return (
@@ -207,6 +190,32 @@ const AuthPage: React.FC = () => {
                 <span>Continue with Google</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={() => handleOAuth('github')}
+              disabled={loading}
+              className="secondary-button"
+              style={{
+                width: '100%',
+                padding: '0.85rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.75rem',
+                background: '#222',
+                color: '#fff',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius)',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontWeight: 600,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+              </svg>
+              <span>Continue with GitHub</span>
+            </button>
 
             <button
               type="button"

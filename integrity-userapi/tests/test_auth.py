@@ -297,3 +297,71 @@ async def test_google_auth_rejects_unverified_email(
 async def test_google_auth_requires_credentials(client: httpx.AsyncClient) -> None:
     resp = await client.post("/auth/google", json={})
     assert resp.status_code == 400
+
+
+async def test_oauth_providers(client: httpx.AsyncClient) -> None:
+    resp = await client.get("/auth/oauth/providers")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "providers" in data
+    provider_ids = [p["id"] for p in data["providers"]]
+    assert "google" in provider_ids
+    assert "github" in provider_ids
+
+
+async def test_oauth_authorize(client: httpx.AsyncClient) -> None:
+    resp = await client.get("/auth/oauth/google/authorize", follow_redirects=False)
+    assert resp.status_code == 303
+    assert "auth/v1/authorize" in resp.headers["location"]
+    assert "provider=google" in resp.headers["location"]
+
+    resp_bad = await client.get("/auth/oauth/unsupported/authorize", follow_redirects=False)
+    assert resp_bad.status_code == 404
+
+
+async def test_supabase_auth_creates_and_authenticates_user(
+    client: httpx.AsyncClient, db_pool, monkeypatch
+) -> None:
+    import uuid
+    from app.supabase_auth import SupabaseAuthVerifier
+
+    email = "supabase_user@example.com"
+    sub_uuid = str(uuid.uuid4())
+
+    def mock_verify(self, token: str) -> dict:
+        if token != "valid-supabase-token":
+            raise ValueError("invalid token")
+        return {
+            "sub": sub_uuid,
+            "email": email,
+            "role": "authenticated",
+            "aud": "authenticated",
+            "exp": 9999999999,
+            "iat": 1000000000,
+            "iss": "https://test.supabase.co/auth/v1",
+        }
+
+    monkeypatch.setattr(SupabaseAuthVerifier, "verify", mock_verify)
+
+    # 1. First auth creates user and wallet
+    resp = await client.post("/auth/supabase", json={"access_token": "valid-supabase-token"})
+    assert resp.status_code == 200
+    token = resp.json()["access_token"]
+    assert token
+
+    user_row = await db_pool.fetchrow("SELECT id, email FROM users WHERE email = $1", email)
+    assert user_row is not None
+    assert user_row["email"] == email
+
+    wallet_row = await db_pool.fetchrow("SELECT app_wallet_address FROM user_wallets WHERE user_id = $1", user_row["id"])
+    assert wallet_row is not None
+    assert wallet_row["app_wallet_address"].startswith("0x")
+
+    # 2. Second auth re-uses existing user
+    resp2 = await client.post("/auth/supabase", json={"access_token": "valid-supabase-token"})
+    assert resp2.status_code == 200
+
+    # 3. Invalid token returns 401
+    resp_invalid = await client.post("/auth/supabase", json={"access_token": "bad-token"})
+    assert resp_invalid.status_code == 401
+
