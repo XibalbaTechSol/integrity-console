@@ -728,38 +728,94 @@ async def cortex_bridge_stats(pool: asyncpg.Pool = Depends(get_pool)) -> dict[st
     return await cortex_bridge_status(pool=pool)
 
 
-@router.get("/cortex-api/api/agents")
-async def cortex_bridge_agents(pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
-    snap = await _load_sqlite_snapshot(pool, "cortex", "tenants/t-97030dfbcc624f369fea981d252855da/graph-memory.sqlite3")
-    if snap is None:
-        return {"agents": [], "oracle_reachable": True}
-    conn = sqlite3.connect(str(snap))
+_CORTEX_TENANT_ID = "t-97030dfbcc624f369fea981d252855da"
+
+
+def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
+    return conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)).fetchone() is not None
+
+
+def cortex_agent_roster(graph_db: Path, tokens_db: Path | None, tenant_id: str = _CORTEX_TENANT_ID) -> list[dict[str, Any]]:
+    """Every agent Cortex knows for the tenant -- the same union Cortex's own roster serves.
+
+    The bridge used to list only agents owning an *active/confirmed* memory, so an agent that
+    was device-paired, had sessions, only held candidate memories, or had been issued an ingest
+    token but not written yet was visible in Cortex and absent from Console. Sources, in order:
+    memory-bearing agents (any status), sessions, device pairs, and managed-api ingest tokens.
+    """
+    roster: dict[str, dict[str, Any]] = {}
+
+    def entry(agent_id: str) -> dict[str, Any]:
+        return roster.setdefault(agent_id, {
+            "agent_id": agent_id, "store_id": tenant_id, "profile_id": tenant_id,
+            "memories": 0, "sessions": 0, "last_seen_at": None, "writable": True,
+            "store_access": "writable", "agent_name": None, "device_name": None,
+        })
+
+    conn = sqlite3.connect(str(graph_db))
     conn.row_factory = sqlite3.Row
     try:
-        rows = conn.execute("""
-            SELECT s.agent_id,
-                   COUNT(DISTINCT m.id) AS memories,
-                   COUNT(DISTINCT s.session_id) AS sessions,
-                   MAX(m.created_at) AS last_seen_at
-            FROM memories m JOIN sources s ON s.id = m.source_id
-            WHERE s.agent_id IS NOT NULL AND m.status IN ('active', 'confirmed')
+        for r in conn.execute("""
+            SELECT s.agent_id, COUNT(DISTINCT m.id) AS memories,
+                   COUNT(DISTINCT s.session_id) AS sessions, MAX(m.created_at) AS last_seen_at
+            FROM sources s LEFT JOIN memories m ON m.source_id = s.id
+            WHERE s.agent_id IS NOT NULL AND s.agent_id != ''
             GROUP BY s.agent_id
-        """).fetchall()
-        agents = [
-            {
-                "agent_id": r["agent_id"],
-                "store_id": "t-97030dfbcc624f369fea981d252855da",
-                "profile_id": "t-97030dfbcc624f369fea981d252855da",
-                "memories": int(r["memories"]),
-                "sessions": int(r["sessions"]),
-                "last_seen_at": r["last_seen_at"],
-                "writable": True,
-            }
-            for r in rows
-        ]
-        return {"agents": agents, "oracle_reachable": True, "primary_profile_id": "t-97030dfbcc624f369fea981d252855da"}
+        """):
+            e = entry(str(r["agent_id"]))
+            e.update(memories=int(r["memories"] or 0), sessions=int(r["sessions"] or 0), last_seen_at=r["last_seen_at"])
+        if _table_exists(conn, "sessions"):
+            for r in conn.execute("SELECT agent_id, COUNT(*) AS n FROM sessions WHERE agent_id IS NOT NULL AND agent_id != '' GROUP BY agent_id"):
+                e = entry(str(r["agent_id"]))
+                e["sessions"] = max(e["sessions"], int(r["n"] or 0))
+        if _table_exists(conn, "agent_devices"):
+            for r in conn.execute("SELECT agent_id, display_name FROM agent_devices ORDER BY updated_at DESC"):
+                e = entry(str(r["agent_id"]))
+                e["device_name"] = e["device_name"] or r["display_name"]
     finally:
         conn.close()
+
+    if tokens_db is not None:
+        tc = sqlite3.connect(str(tokens_db))
+        tc.row_factory = sqlite3.Row
+        try:
+            if _table_exists(tc, "ingest_tokens"):
+                for tr in tc.execute(
+                    "SELECT label, agent_id, agent_ids_json FROM ingest_tokens "
+                    "WHERE profile_id = ? AND label LIKE 'managed-api:%' AND revoked_at IS NULL",
+                    (tenant_id,),
+                ):
+                    label = str(tr["label"]).replace("managed-api:", "")
+                    name = label.split("@")[0] if "@" in label else label
+                    ids: list[Any] = []
+                    if tr["agent_ids_json"]:
+                        try:
+                            ids = json.loads(tr["agent_ids_json"])
+                        except ValueError:
+                            ids = []
+                    if not ids and tr["agent_id"]:
+                        ids = [tr["agent_id"]]
+                    for did in ids:
+                        did = str(did).strip()
+                        if did:
+                            entry(did)["agent_name"] = name
+        finally:
+            tc.close()
+
+    return sorted(roster.values(), key=lambda a: (a["last_seen_at"] or "", a["agent_id"]), reverse=True)
+
+
+@router.get("/cortex-api/api/agents")
+async def cortex_bridge_agents(pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
+    snap = await _load_sqlite_snapshot(pool, "cortex", f"tenants/{_CORTEX_TENANT_ID}/graph-memory.sqlite3")
+    if snap is None:
+        return {"agents": [], "oracle_reachable": True}
+    try:
+        tokens = await _load_sqlite_snapshot(pool, "cortex", "identity/ingest_tokens.sqlite3")
+    except Exception:
+        tokens = None  # identity snapshot is additive; the roster still serves without it
+    agents = cortex_agent_roster(snap, tokens)
+    return {"agents": agents, "oracle_reachable": True, "primary_profile_id": _CORTEX_TENANT_ID}
 
 
 @router.get("/cortex-api/api/agent/{agent_id}/summary")
