@@ -24,17 +24,29 @@ class AgentLookupResult:
     error: str | None
 
 
-async def fetch_agent(agent_did: str, settings: Settings) -> AgentLookupResult:
+async def fetch_agent(
+    agent_did: str, settings: Settings, pool: Any | None = None
+) -> AgentLookupResult:
     url = f"{settings.oracle_url.rstrip('/')}/v1/agent/{agent_did}"
     try:
         async with httpx.AsyncClient(timeout=settings.oracle_timeout_seconds) as client:
             resp = await client.get(url)
     except httpx.HTTPError as exc:
+        if pool is not None:
+            from app.oracle_routes import build_agent_response_from_db
+            local_data = await build_agent_response_from_db(pool, agent_did)
+            if local_data is not None:
+                return AgentLookupResult(live_data=local_data, error=None)
         # Oracle unreachable / timed out / connection refused -- infra
         # failure, not "this DID doesn't exist". Never fabricate live_data.
         return AgentLookupResult(live_data=None, error=f"oracle unreachable: {exc}")
 
     if resp.status_code == 404:
+        if pool is not None:
+            from app.oracle_routes import build_agent_response_from_db
+            local_data = await build_agent_response_from_db(pool, agent_did)
+            if local_data is not None:
+                return AgentLookupResult(live_data=local_data, error=None)
         return AgentLookupResult(live_data=None, error="agent not found on oracle")
     if resp.status_code != 200:
         return AgentLookupResult(

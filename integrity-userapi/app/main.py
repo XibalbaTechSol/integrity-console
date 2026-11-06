@@ -23,7 +23,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Response, 
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import db, oracle_client
+from app import db, oracle_client, oracle_routes
 from app.config import Settings, settings as default_settings
 from app.deps import get_current_token, get_current_user_id, get_pool, get_settings
 from app.login_limiter import LoginRateLimiter
@@ -61,6 +61,7 @@ from app.security import (
 )
 
 app = FastAPI(title="integrity-userapi", version="0.1.0")
+app.include_router(oracle_routes.router)
 
 # integrity-dashboard (the browser dashboard, task #21) is a cross-origin caller by
 # construction -- it's served by Vite on its own port (5173 dev / 5190 e2e),
@@ -609,7 +610,7 @@ async def list_my_agents(
         UUID(user_id),
     )
     lookups = await asyncio.gather(
-        *(oracle_client.fetch_agent(row["agent_did"], settings) for row in rows)
+        *(oracle_client.fetch_agent(row["agent_did"], settings, pool=pool) for row in rows)
     )
 
     results: list[OwnedAgentResponse] = []
@@ -643,7 +644,7 @@ async def add_my_agent(
         UUID(user_id),
         body.agent_did,
     )
-    lookup = await oracle_client.fetch_agent(row["agent_did"], settings)
+    lookup = await oracle_client.fetch_agent(row["agent_did"], settings, pool=pool)
     return OwnedAgentResponse(
         agent_did=row["agent_did"],
         added_at=row["added_at"],

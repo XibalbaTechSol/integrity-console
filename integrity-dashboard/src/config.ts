@@ -1,7 +1,8 @@
-export const ORACLE_URL = import.meta.env.VITE_ORACLE_URL || 'http://localhost:8080';
 export const USERAPI_URL = import.meta.env.VITE_USERAPI_URL || 'http://localhost:8090';
+const IS_HOSTED_USERAPI = !USERAPI_URL.includes('localhost') && !USERAPI_URL.includes('127.0.0.1');
+export const ORACLE_URL = import.meta.env.VITE_ORACLE_URL || (IS_HOSTED_USERAPI ? USERAPI_URL : 'http://localhost:8080');
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '209789763691-lu1kmbqgbr21b35j0gcve5g6caskv5k2.apps.googleusercontent.com';
-export const BCC_MIDDLEWARE_URL = import.meta.env.VITE_BCC_MIDDLEWARE_URL || 'http://localhost:8000';
+export const BCC_MIDDLEWARE_URL = import.meta.env.VITE_BCC_MIDDLEWARE_URL || (IS_HOSTED_USERAPI ? USERAPI_URL : 'http://localhost:8000');
 export const CHAIN_ID = Number(import.meta.env.VITE_CHAIN_ID) || 84532;
 // A global Oracle directory is useful for an explicitly enabled operator/dev view,
 // but it is not an authorization boundary. Production agent selection must come from
@@ -15,7 +16,7 @@ export const ALLOW_UNSCOPED_AGENT_DIRECTORY = import.meta.env.VITE_ALLOW_UNSCOPE
 // by the three browser UIs. Production may override this with an explicit API origin.
 // The same-origin /cortex-api proxy (vite.config.ts) is served by both the dev server and
 // `vite preview`, and attaches the bearer token server-side.
-export const GRAPH_MEMORY_URL = import.meta.env.VITE_GRAPH_MEMORY_URL || '/cortex-api';
+export const GRAPH_MEMORY_URL = import.meta.env.VITE_GRAPH_MEMORY_URL || (IS_HOSTED_USERAPI ? `${USERAPI_URL}/cortex-api` : '/cortex-api');
 // Cortex local_api requires an explicit bearer token. Keep this opt-in so a
 // production dashboard never silently sends a development credential.
 export const GRAPH_MEMORY_TOKEN = import.meta.env.VITE_GRAPH_MEMORY_TOKEN || '';
@@ -23,17 +24,17 @@ export const GRAPH_MEMORY_TOKEN = import.meta.env.VITE_GRAPH_MEMORY_TOKEN || '';
 // vite.config.ts `/api/shield` proxy forwards to the canonical control plane on
 // 127.0.0.1:8435 and attaches the admin token server-side, so no Shield credential is
 // compiled into this bundle. An explicit VITE_SHIELD_BACKEND_URL/TOKEN still overrides.
-export const SHIELD_BACKEND_URL = import.meta.env.VITE_SHIELD_BACKEND_URL || '';
+export const SHIELD_BACKEND_URL = import.meta.env.VITE_SHIELD_BACKEND_URL || (IS_HOSTED_USERAPI ? USERAPI_URL : '');
 export const SHIELD_BACKEND_TOKEN = import.meta.env.VITE_SHIELD_BACKEND_TOKEN || '';
 // Shield's and Cortex's own operator UIs (not their backend API origins above) -- used for
 // "open console" deep links from the dashboard's summary cards. Each is a fully separate
 // app with its own cookie-authenticated login; the dashboard never proxies their UI.
-export const SHIELD_UI_URL = import.meta.env.VITE_SHIELD_UI_URL || 'https://localhost:9444';
-export const CORTEX_UI_URL = import.meta.env.VITE_CORTEX_UI_URL || 'https://localhost:9443';
+export const SHIELD_UI_URL = import.meta.env.VITE_SHIELD_UI_URL || (IS_HOSTED_USERAPI ? 'https://xibalba-shield.onrender.com' : 'https://localhost:9444');
+export const CORTEX_UI_URL = import.meta.env.VITE_CORTEX_UI_URL || (IS_HOSTED_USERAPI ? 'https://cortex-managed-pilot.onrender.com' : 'https://localhost:9443');
 // Shield tenants are control-plane namespaces, not agent DIDs. Keep the mapping
 // deployment-configurable; falling back to the selected agent remains useful for
 // isolated demo tenants but must never be mistaken for production identity mapping.
-export const SHIELD_TENANT_ID = import.meta.env.VITE_SHIELD_TENANT_ID || '';
+export const SHIELD_TENANT_ID = import.meta.env.VITE_SHIELD_TENANT_ID || (IS_HOSTED_USERAPI ? 'jacob-v-universe-org' : '');
 
 // Cross-UI agent handoff contract. Browser storage is origin-scoped, so the
 // Dashboard, Cortex, and Shield dev UIs cannot share their selected agent via
