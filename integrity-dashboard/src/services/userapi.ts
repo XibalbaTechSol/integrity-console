@@ -22,7 +22,11 @@ export const getStoredJwt = (): string | null => {
         if (local !== null && local !== undefined) return local;
         const session = window.sessionStorage?.getItem(JWT_KEY);
         if (session !== null && session !== undefined) {
-            try { window.localStorage?.setItem(JWT_KEY, session); } catch {}
+            try {
+                window.localStorage?.setItem(JWT_KEY, session);
+            } catch {
+                // Best-effort only.
+            }
             return session;
         }
         return null;
@@ -40,7 +44,11 @@ export const getToken = (): string | null => {
         if (local !== null && local !== undefined) return local;
         const session = window.sessionStorage?.getItem(AUTHED_KEY);
         if (session !== null && session !== undefined) {
-            try { window.localStorage?.setItem(AUTHED_KEY, session); } catch {}
+            try {
+                window.localStorage?.setItem(AUTHED_KEY, session);
+            } catch {
+                // Best-effort only.
+            }
             return session;
         }
         return null;
