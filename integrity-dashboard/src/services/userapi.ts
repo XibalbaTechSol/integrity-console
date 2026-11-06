@@ -18,7 +18,18 @@ const emitAuthChanged = () => {
 
 export const getStoredJwt = (): string | null => {
     try {
-        return sessionStorage.getItem(JWT_KEY);
+        const local = window.localStorage?.getItem(JWT_KEY);
+        if (local !== null && local !== undefined) return local;
+        const session = window.sessionStorage?.getItem(JWT_KEY);
+        if (session !== null && session !== undefined) {
+            try {
+                window.localStorage?.setItem(JWT_KEY, session);
+            } catch {
+                // Best-effort only.
+            }
+            return session;
+        }
+        return null;
     } catch {
         return null;
     }
@@ -29,7 +40,18 @@ export const getStoredJwt = (): string | null => {
 // unguarded throw here takes down every route that provider wraps, not just an auth check.
 export const getToken = (): string | null => {
     try {
-        return sessionStorage.getItem(AUTHED_KEY);
+        const local = window.localStorage?.getItem(AUTHED_KEY);
+        if (local !== null && local !== undefined) return local;
+        const session = window.sessionStorage?.getItem(AUTHED_KEY);
+        if (session !== null && session !== undefined) {
+            try {
+                window.localStorage?.setItem(AUTHED_KEY, session);
+            } catch {
+                // Best-effort only.
+            }
+            return session;
+        }
+        return null;
     } catch {
         return null;
     }
@@ -37,7 +59,8 @@ export const getToken = (): string | null => {
 const setToken = (jwt?: string) => {
     if (jwt) {
         try {
-            sessionStorage.setItem(JWT_KEY, jwt);
+            window.localStorage?.setItem(JWT_KEY, jwt);
+            window.sessionStorage?.setItem(JWT_KEY, jwt);
         } catch {
             // Best-effort only.
         }
@@ -48,7 +71,8 @@ const setToken = (jwt?: string) => {
     // meIfSignedIn() again, forever.
     if (getToken() === '1') return;
     try {
-        sessionStorage.setItem(AUTHED_KEY, '1');
+        window.localStorage?.setItem(AUTHED_KEY, '1');
+        window.sessionStorage?.setItem(AUTHED_KEY, '1');
     } catch {
         // Best-effort only -- see getToken's comment.
     }
@@ -56,13 +80,15 @@ const setToken = (jwt?: string) => {
 };
 export const clearToken = () => {
     try {
-        sessionStorage.removeItem(JWT_KEY);
+        window.localStorage?.removeItem(JWT_KEY);
+        window.sessionStorage?.removeItem(JWT_KEY);
     } catch {
         // Best-effort only.
     }
     if (getToken() === null) return;
     try {
-        sessionStorage.removeItem(AUTHED_KEY);
+        window.localStorage?.removeItem(AUTHED_KEY);
+        window.sessionStorage?.removeItem(AUTHED_KEY);
     } catch {
         // Best-effort only -- see getToken's comment.
     }
