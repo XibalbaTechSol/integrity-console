@@ -82,6 +82,10 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     google_client_secret: str = ""
 
+    # --- Supabase Auth integration ---
+    supabase_url: str = "https://ftspunijfgcbkuybobhf.supabase.co"
+    supabase_jwt_audience: str = "authenticated"
+
     # --- CORS ---
     # 4173 is the local Vite preview port and 5173 is `npm run dev`'s default;
     # 5174 is the isolated validation port; 5190 covers an

@@ -29,6 +29,19 @@ class GoogleAuthRequest(BaseModel):
     code_verifier: str | None = None
 
 
+class SupabaseAuthRequest(BaseModel):
+    access_token: str
+
+
+class OAuthProvider(BaseModel):
+    id: str
+    name: str
+
+
+class OAuthProvidersResponse(BaseModel):
+    providers: list[OAuthProvider]
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
