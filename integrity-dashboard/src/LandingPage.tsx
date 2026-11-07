@@ -153,6 +153,7 @@ export default function LandingPage() {
     transition: { staggerChildren: 0.2, delayChildren: 0.1 },
   };
 
+  const rewardFormula = `R_{\\text{total}} = R_{\\text{task}} + \\lambda \\cdot \\text{AIS}`;
   const aisFormula = `\\text{AIS}_{\\text{raw}} = S_{\\text{entropy}}^{0.30} \\cdot S_{\\text{grounding}}^{0.30} \\cdot S_{\\text{sacrifice}}^{0.20} \\cdot S_{\\text{compliance}}^{0.20}`;
 
   return (
@@ -214,9 +215,7 @@ export default function LandingPage() {
             to, and corrects — with authority bounded by hardware that can end the flight.
           </p>
           <p style={{ fontSize: '1.3rem', color: 'var(--text-primary)', maxWidth: '820px', margin: '0 auto 3rem auto', lineHeight: 1.6, fontWeight: 500 }}>
-            AI agents are aimed and released. Integrity Protocol closes the loop: a signed trajectory, a gate that
-            measures the post-state and is specified to fail closed, tamper-evident evidence of what actually
-            happened, and feedback whose authority is bounded by construction.
+            Guardrails are artificial thermodynamic friction; RL agents mathematically optimize around them. Integrity Protocol establishes the Autonomous Integrity Score (AIS) as the native reward function and anchors verifiable geometric graph navigation across the machine economy.
           </p>
           <div className="landing-hero-actions" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/auth" className="primary-button" style={{ padding: '1.25rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -400,8 +399,15 @@ export default function LandingPage() {
 
           <div className="landing-ais-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '3rem', alignItems: 'start' }}>
             <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ padding: '2.5rem' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.3rem' }}>A weighted geometric mean</h3>
-              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.3rem' }}>The Native Reward Function</h3>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1rem', fontSize: '0.95rem' }}>
+                Guardrails are artificial thermodynamic friction. Reinforcement learning agents optimize around external barriers. Integrity Protocol defines AIS as the native reward function:
+              </p>
+              <div className="landing-formula" role="region" aria-label="Total reward formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+                <BlockMath math={rewardFormula} />
+              </div>
+              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.2rem' }}>A weighted geometric mean</h3>
+              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={aisFormula} />
               </div>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1.5rem' }}>

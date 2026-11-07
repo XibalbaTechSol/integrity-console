@@ -1,29 +1,56 @@
 # integrity-console
 
-The operator console for the Integrity Protocol: the web dashboard agents are registered and
-monitored through, the user-account API behind it, and the demo scenario engine.
+> **The Universal Verifiable Operator Window**
 
-The cross-product execution authority is maintained in [integrity-core/docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md](https://github.com/XibalbaTechSol/integrity-core/blob/main/docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md). Console documentation defines UI and API implementation only; the console holds no authority over Integrity identity, packs, receipts, Shield enforcement, or Cortex content.
+Autonomous software agents traversing geometric knowledge graphs, executing containment actions within cryptographic boundaries, and earning deterministic rewards need a verifiable, unified operator plane. Conventional agent dashboards are ungrounded reporting layers that display simulated metrics and unverified status logs.
 
-It was split out of [integrity-core](https://github.com/XibalbaTechSol/integrity-core) with its
-full history (integrity-core `docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md`, Phase A1). The console is a *client* of
-the protocol: it reads the oracle's HTTP API and the chain, and talks to Shield and Cortex. It
-holds no protocol logic of its own.
+**`integrity-console` is the Universal Verifiable Operator Window for the machine economy.**
+
+It renders live geometric graph navigation trajectories from `xibalba-cortex`, verifies multi-agent DID credentials and Autonomous Integrity Scores (AIS as the native reward function $R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS}$) from `integrity-core`, surfaces real-time enterprise EDR and agent response approval queues from `xibalba-shield`, and enables operators to inspect tamper-evident cryptographic Merkle proofs—all while strictly holding zero protocol authority.
+
+---
+
+## The Four-Repository Ecosystem Topology
+
+The Integrity Ecosystem aligns autonomous machine behavior with cryptographic and thermodynamic reality across four specialized repositories:
+
+| Repository | Role | Paradigm & Function |
+|---|---|---|
+| **`integrity-console`** (this repo) | **👁️ The Universal Verifiable Operator Window** | Unified presentation and account layer. Visualizes agent graph navigation trajectories, multi-agent DID credentials, AIS score distributions, real-time response approval queues, and cryptographic Merkle verification. |
+| **`integrity-core`** | **🦴 The Physics Engine of the Machine Economy** | Implements the Autonomous Integrity Score (AIS) as the deterministic reward function ($R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS}$). Governs on-chain DIDs, Behavioral Commitment Chains (BCC), Merkle state anchors, cryptographic state verification, and the on-chain execution firewall. |
+| **`xibalba-cortex`** | **🧠 The Navigational Engine** | Neuro-symbolic knowledge graph and active inference engine. Replaces probabilistic text generation with geometric graph traversal (R-GCN + TKGE/TransE), dynamic logit masking, temporal event reification, and domain connectors (Biomedical/MIMIC-IV, FHIR live-feeds, ChEMBL, CMS economic cost friction $\lambda C(e)$). |
+| **`xibalba-shield`** | **🛡️ Cryptographic Topology & Response Governance** | Enforces topological boundary gating, zero-probability unauthorized state spaces, and vendor-neutral response governance across enterprise EDRs (CrowdStrike, Defender) and AI agents (MCP, SOAR). *"The EDR detects and acts; Shield proves who authorized it."* Produces tamper-evident audit ledgers and HIPAA assurance packets. |
+
+```mermaid
+flowchart LR
+    subgraph Agents["Autonomous AI Agents & Runtimes"]
+        A["Agent / Researcher / LLM"] -->|"1. Geometric Graph Traversal<br/>(R-GCN + dynamic logit masking)"| C["🧠 xibalba-cortex<br/>(The Navigational Terrain)"]
+        A -->|"2. Response Intent<br/>(hash-bound authorization)"| S["🛡️ xibalba-shield<br/>(Boundary Gating)"]
+    end
+    subgraph Data["Knowledge Ingestion & Live Connectors"]
+        D1["Biomedical / Clinical<br/>MIMIC-IV · FHIR live-feeds"] --> C
+        D2["Chemistry & Genetics<br/>ChEMBL · PubChem · ClinVar"] --> C
+        D3["Health Economics<br/>CMS pricing friction"] --> C
+    end
+    subgraph Core["Integrity Protocol"]
+        C -->|"Session Merkle roots &<br/>state verification"| P["🦴 integrity-core<br/>(AIS Reward Engine & Physics)"]
+        S -->|"Signed action receipts &<br/>audit ledgers"| P
+        P -.->|"AIS feedback loop<br/>R = R_task + λ·AIS"| A
+    end
+    subgraph Console["Auditor & Operator Surface (This Repo)"]
+        P -->|"Verified AIS & chain state"| O["👁️ integrity-console<br/>(Graph trajectories & ledger)"]
+    end
+```
+
+---
 
 ## What this repository is, and is not
 
-**It is** the presentation and account layer: a React operator UI, a FastAPI service for user
-accounts and developer API keys, and a Python scenario runner used for demos and seeding.
+**It is** the presentation and account layer: a React operator UI, a FastAPI service for user accounts and developer API keys, and a Python scenario runner used for demos and seeding.
 
-**It is not** a trust backend. Nothing here computes an Agent Integrity Score, anchors a
-Behavioral Commitment Chain, defines a Merkle convention, enforces a policy, or owns a chain
-schema. Those live in `integrity-core` (protocol, oracle, BCC, contracts), `xibalba-shield`
-(endpoint enforcement) and `xibalba-cortex` (memory and provenance). When those services are not
-running, the UI is meant to show an honest unavailable state rather than invent data.
+**It is not** a trust backend. Nothing here computes an Agent Integrity Score, anchors a Behavioral Commitment Chain, defines a Merkle convention, enforces a policy, or owns a chain schema. Those live in `integrity-core` (protocol, oracle, BCC, contracts), `xibalba-shield` (endpoint enforcement) and `xibalba-cortex` (memory and provenance). When those services are not running, the UI is meant to show an honest unavailable state rather than invent data.
 
-A consequence worth stating plainly: **the console cannot be the source of truth for anything it
-displays.** If a number here disagrees with the oracle or the chain, the oracle or the chain is
-right and this is a rendering bug.
+A consequence worth stating plainly: **the console cannot be the source of truth for anything it displays.** If a number here disagrees with the oracle or the chain, the oracle or the chain is right and this is a rendering bug.
 
 ## Repository layout
 
