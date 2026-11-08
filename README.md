@@ -166,6 +166,10 @@ legacy aliases so an aliased URL still highlights the right nav entry.
 Service clients live in `src/services/` — `oracle.ts`, `userapi.ts`, `bccMiddleware.ts`,
 `shieldBackend.ts`, `graphMemory.ts`, `aisProfile.ts`, `health.ts`, `testResults.ts` — and chain
 reads in `src/chain/` (`agent`, `kernel`, `licence`, `shield`, `xns`, `bytecode`, `retry`).
+Zero-authority presentation helpers for Oracle-verified `ais/v1-geometric-1` 4-axis telemetry,
+closed-loop control zones (`GREEN` / `YELLOW` / `RED`), signed policy pack digests, and step/epoch
+reward decomposition ($R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS} + \Delta\Phi - \text{Penalty}$)
+live in `src/integrity/aisRewardTelemetry.ts` and `src/components/AISClosedLoopRewardCard.tsx`.
 
 ## User API reference
 
