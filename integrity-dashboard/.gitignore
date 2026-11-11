@@ -39,3 +39,10 @@ dist-ssr
 
 # ad-hoc debug screenshots, not real assets
 /shield_*.png
+
+# Auth0 credentials
+.env.local
+
+.auth0-mcp-state.json
+
+.auth0-mcp-writes.log

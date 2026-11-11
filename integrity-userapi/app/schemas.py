@@ -33,6 +33,11 @@ class SupabaseAuthRequest(BaseModel):
     access_token: str
 
 
+class Auth0AuthRequest(BaseModel):
+    id_token: str | None = None
+    access_token: str | None = None
+
+
 class OAuthProvider(BaseModel):
     id: str
     name: str
