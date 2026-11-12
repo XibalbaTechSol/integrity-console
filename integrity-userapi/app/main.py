@@ -28,10 +28,12 @@ from app.config import Settings, settings as default_settings
 from app.deps import get_current_token, get_current_user_id, get_pool, get_settings
 from app.login_limiter import LoginRateLimiter
 from app.supabase_auth import SupabaseAuthVerifier
+from app.auth0_auth import Auth0Verifier
 from app.schemas import (
     AddAgentRequest,
     ApiKeyCreateResponse,
     ApiKeyResponse,
+    Auth0AuthRequest,
     DemoRunResponse,
     DemoRunUpdateRequest,
     GoogleAuthRequest,
@@ -392,6 +394,70 @@ async def supabase_auth(
             normalized_email,
         )
         # Auto-provision app custodial wallet with dev faucet
+        app_wallet_address = "0x" + secrets.token_hex(20)
+        await pool.execute(
+            """
+            INSERT INTO user_wallets (user_id, app_wallet_address, itk_balance_wei)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (user_id) DO NOTHING
+            """,
+            row["id"],
+            app_wallet_address,
+            _DEV_FAUCET_WEI,
+        )
+
+    token = create_access_token(user_id=str(row["id"]), settings=settings)
+    response.headers.append("Set-Cookie", session_cookie_header(token, max_age=settings.jwt_expiry_minutes * 60))
+    return TokenResponse(access_token=token)
+
+
+@app.post("/auth/auth0", response_model=TokenResponse)
+async def auth0_auth(
+    body: Auth0AuthRequest,
+    response: Response,
+    pool: asyncpg.Pool = Depends(get_pool),
+    settings: Settings = Depends(get_settings),
+) -> TokenResponse:
+    presented_token = body.id_token or body.access_token
+    if not presented_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either id_token or access_token must be provided",
+        )
+    try:
+        verifier = Auth0Verifier(
+            settings.auth0_domain,
+            client_id=settings.auth0_client_id,
+            audience=settings.auth0_audience or None,
+        )
+        claims = verifier.verify(presented_token)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Auth0 token is invalid: {exc}",
+        ) from exc
+
+    email = claims.get("email")
+    if not email:
+        sub = claims.get("sub", "")
+        if sub:
+            email = f"{sub.replace('|', '.')}@auth0.local"
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Auth0 token does not contain an email or sub claim",
+            )
+    normalized_email = str(email).strip().lower()
+
+    row = await pool.fetchrow(
+        "SELECT id, email FROM users WHERE email = $1", normalized_email
+    )
+
+    if row is None:
+        row = await pool.fetchrow(
+            "INSERT INTO users (email) VALUES ($1) RETURNING id",
+            normalized_email,
+        )
         app_wallet_address = "0x" + secrets.token_hex(20)
         await pool.execute(
             """

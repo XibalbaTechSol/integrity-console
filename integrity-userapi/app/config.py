@@ -86,6 +86,11 @@ class Settings(BaseSettings):
     supabase_url: str = "https://ftspunijfgcbkuybobhf.supabase.co"
     supabase_jwt_audience: str = "authenticated"
 
+    # --- Auth0 integration ---
+    auth0_domain: str = "dev-2acdt0dlqgi0pqcu.us.auth0.com"
+    auth0_client_id: str = "Yj3RdbTXctEWUQPYc2gLvQ7OTQkL5t6u"
+    auth0_audience: str = ""
+
     # --- CORS ---
     # 4173 is the local Vite preview port and 5173 is `npm run dev`'s default;
     # 5174 is the isolated validation port; 5190 covers an

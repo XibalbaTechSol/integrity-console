@@ -217,6 +217,14 @@ export const userapi = {
         setToken(token.access_token);
         return token;
     },
+    loginWithAuth0: async (params: { id_token?: string; access_token?: string }) => {
+        const token = await request<TokenResponse>('/auth/auth0', {
+            method: 'POST',
+            body: JSON.stringify(params),
+        });
+        setToken(token.access_token);
+        return token;
+    },
     // Revokes the session server-side (see integrity-userapi's /auth/logout, which now also
     // clears the cookie) before dropping the local marker -- previously this only cleared
     // local state and never told the server, so the JWT stayed valid until it expired.
