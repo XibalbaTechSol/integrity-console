@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import type { Agent } from '../../context/DashboardContext';
+import { radarValue } from '../../services/aisDisplay';
 import { oracle, type AisResponse } from '../../services/oracle';
 
 interface IntegrityRadarProps {
@@ -86,7 +87,7 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
   const entropy = ais ? Math.round(ais.components.entropy / 10) : 0;
   const grounding = ais ? Math.round(ais.components.grounding / 10) : 0;
   const sacrifice = ais ? Math.round(ais.components.sacrifice / 10) : 0;
-  const compliance = ais ? Math.round(ais.components.compliance / 10) : 0;
+  const compliance = ais ? radarValue(ais.components.compliance) : 0;
   // The assurance tier is a ceiling, not a fifth AIS component. Displaying the
   // ceiling on the same 0-100 radar scale makes that distinction visible without
   // reintroducing a retired linear identity score.
@@ -97,7 +98,8 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
     { subject: 'Grounding', value: grounding },
     { subject: 'Sacrifice', value: sacrifice },
     { subject: 'Tier ceiling', value: identity },
-    { subject: 'Compliance', value: compliance },
+    // Unobserved compliance is omitted, never plotted as 0.
+    ...(compliance == null ? [] : [{ subject: 'Compliance', value: compliance }]),
   ];
 
   const riskData = [
@@ -174,6 +176,12 @@ export function IntegrityRadar({ agent }: IntegrityRadarProps) {
           </RadarChart>
         </ResponsiveContainer>
       </div>
+
+      {mode === 'integrity' && compliance == null && (
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.7rem' }} title="Not observed">
+          Compliance: Not observed (no evidence in this window; axis omitted)
+        </div>
+      )}
 
       {/* Description Listings explaining the mathematical components */}
       <div style={{

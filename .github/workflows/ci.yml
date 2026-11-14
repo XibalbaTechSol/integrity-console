@@ -68,6 +68,8 @@ jobs:
         working-directory: integrity-dashboard
       - run: npm run lint
         working-directory: integrity-dashboard
+      - run: npm test
+        working-directory: integrity-dashboard
       - run: uv run pytest
         working-directory: integrity-dashboard/demo
 

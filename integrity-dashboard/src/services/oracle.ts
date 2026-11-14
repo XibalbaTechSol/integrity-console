@@ -57,7 +57,8 @@ export interface AisComponents {
     entropy: number;
     grounding: number;
     sacrifice: number;
-    compliance: number;
+    /** Null when no compliance evidence was observed in the window (not 0). */
+    compliance: number | null;
 }
 
 export interface AisResponse {
@@ -88,10 +89,13 @@ export interface AisResponse {
     shadow_gate: {
         entropy_pass: boolean;
         grounding_pass: boolean;
-        compliance_pass: boolean;
+        /** Null when compliance was not observed; never assume a pass. */
+        compliance_pass: boolean | null;
         would_pass: boolean;
     };
     onchain_zk_boost_consistent: boolean | null;
+    /** Removed from the Oracle response; do not rely on it. */
+    settlement_eligible?: boolean;
 }
 
 export interface ComplianceResponse {
@@ -168,7 +172,7 @@ export interface AisHistoryPoint {
     entropy: number;
     grounding: number;
     sacrifice: number;
-    compliance: number;
+    compliance: number | null;
     zk_boost: number;
     event_count: number;
 }
