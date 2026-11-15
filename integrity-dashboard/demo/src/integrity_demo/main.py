@@ -1,8 +1,5 @@
-import inspect
 import os
 import logging
-
-from eth_account import Account
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -10,10 +7,8 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from integrity_sdk import chain
-from integrity_sdk.registration import register_agent, RegistrationError
+from integrity_sdk.registration_offchain import register_offchain
 from integrity_sdk.did import load_or_create_did
-from integrity_sdk.wallet import generate_or_load_evm_wallet
 from integrity_sdk.client import IntegrityClient
 
 from integrity_demo import userapi_bridge
@@ -22,6 +17,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("integrity_demo.main")
 
 OTLP_ENDPOINT = "http://localhost:4317"
+# Registration v3: personas register gasless and off-chain at the Oracle
+# (`POST /v1/agent/register/offchain`). No funder key, RPC or on-chain
+# primitives -- the same default the SDK, CLI and Shield use.
+ORACLE_URL = os.getenv("ORACLE_URL", "http://localhost:8080")
 
 # Per-agent OTel tracers, deliberately NOT installed as the process-global
 # provider. `opentelemetry.trace.set_tracer_provider` (and this SDK's own
@@ -108,38 +107,6 @@ def _flush_all_tracers() -> None:
             logger.warning("failed to flush OTel spans for %s", agent_id, exc_info=True)
 
 
-def _check_funder_balance(agent_ids: list) -> None:
-    """Real preflight check against the actual chain, not a guess -- reads
-    the same FUNDER_PRIVATE_KEY/RPC_URL `register_agent` itself reads, and
-    fails loudly with the exact shortfall before any registration is
-    attempted. Found the need for this the hard way: the funder wallet on
-    live Base Sepolia sits well under one agent's worth of funding today
-    (see FAUCET_INFO.md) -- without this check, a real run silently fails
-    registration 1 of N with a deep RPC error instead of a clear upfront
-    one. Required amount is read off `register_agent`'s own default
-    parameter via reflection, not a second hardcoded constant that could
-    drift from the real one."""
-    funder_key = os.getenv("FUNDER_PRIVATE_KEY")
-    if not funder_key:
-        return  # register_agent() raises its own clear error for this
-    rpc_url = os.getenv("RPC_URL", "http://localhost:8545")
-    w3 = chain.get_w3(rpc_url)
-    if not w3.is_connected():
-        return  # register_agent() raises its own clear error for this
-
-    fund_amount_wei = inspect.signature(register_agent).parameters["fund_amount_wei"].default
-    funder = Account.from_key(funder_key)
-    balance = w3.eth.get_balance(funder.address)
-    required = fund_amount_wei * len(agent_ids)
-    if balance < required:
-        raise RegistrationError(
-            f"Funder wallet {funder.address} has {w3.from_wei(balance, 'ether')} ETH, but "
-            f"registering {len(agent_ids)} agents needs at least {w3.from_wei(required, 'ether')} ETH "
-            f"({w3.from_wei(fund_amount_wei, 'ether')} ETH each, register_agent's own default). "
-            f"Fund the wallet before running this scenario -- see FAUCET_INFO.md for faucet links."
-        )
-
-
 def main():
     logger.info("Initializing Integrity Demo Scenario Engine")
     # No-op unless USERAPI_URL/USERAPI_TOKEN/USERAPI_RUN_ID are all set (see
@@ -166,43 +133,19 @@ def _run_scenario() -> dict:
         {"id": "capital_allocation_agent", "vertical": "capital_allocation"},
     ]
 
-    _check_funder_balance([a["id"] for a in agents])
-
     agent_data = {}
 
     for a in agents:
         logger.info(f"Registering {a['id']}...")
-        # Resolve the real DID before opening the span -- `load_or_create_did`
-        # is a pure, deterministic local keypair load/create with no chain
-        # interaction, and `register_agent` calls it again internally with
-        # the same result, so this doesn't duplicate any real work. Every
-        # OTel span for this agent must be tagged with its real DID, not the
-        # internal persona short-name ("capital_allocation_agent") -- the
-        # oracle's telemetry/trace endpoints and the frontend both key
-        # exclusively by DID (see GET /v1/agents, /v1/agent/{did}/telemetry),
-        # so a span resource attribute using the short-name would be
-        # permanently invisible to any per-agent view (found by actually
-        # querying the oracle after a real run and getting zero rows back
-        # for a DID that had spans stored under the short-name instead).
+        # Every OTel span for this agent is tagged with its real DID, not the
+        # persona short-name: the oracle's telemetry/trace endpoints and the
+        # frontend key exclusively by DID (GET /v1/agents,
+        # /v1/agent/{did}/telemetry).
         agent_did, keypair, _ = load_or_create_did(a["id"])
-        with _tracer_for(agent_did).start_as_current_span("register_agent"):
+        with _tracer_for(agent_did).start_as_current_span("register_offchain"):
             try:
-                # skip_oracle_registration if no oracle running locally
-                # A compliance vertical needs the full PrimitiveSet: core registration
-                # has no compliance capability, and register_agent rejects the pair.
-                reg = register_agent(
-                    agent_id=a["id"],
-                    compliance_vertical=a["vertical"],
-                    skip_oracle_registration=False,
-                    full_registration=True,
-                )
-                evm_wallet = generate_or_load_evm_wallet(a["id"])
-
-                agent_data[a["id"]] = {
-                    "registration": reg,
-                    "keypair": keypair,
-                    "evm_wallet": evm_wallet
-                }
+                reg = register_offchain(ORACLE_URL, agent_did, keypair)
+                agent_data[a["id"]] = {"registration": reg, "did": agent_did}
 
                 # Real telemetry_events row -- see _submit_telemetry's
                 # docstring for why this didn't exist before. No text_output
@@ -229,8 +172,13 @@ def _run_scenario() -> dict:
     summary = {
         "agents_attempted": len(agents),
         "agents_registered": sorted(agent_data.keys()),
-        "sovereign_agent_addresses": {
-            agent_id: data["registration"].sovereign_agent for agent_id, data in agent_data.items()
+        "registrations": {
+            agent_id: {
+                "did": data["did"],
+                "verification_tier": data["registration"].verification_tier,
+                "outcome": data["registration"].outcome,
+            }
+            for agent_id, data in agent_data.items()
         },
     }
     return summary
