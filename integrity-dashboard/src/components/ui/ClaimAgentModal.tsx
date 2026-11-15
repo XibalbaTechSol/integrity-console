@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Shield, Lock, CheckCircle, Loader2, AlertCircle, XCircle } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { oracle } from '../../services/oracle';
+import { describeHandleWriteError, handleStatusColor, handleStatusMessage, useHandleAvailability } from '../../services/xnsAvailability';
 import { SOVEREIGN_AGENT_ABI } from '../../chain/bytecode';
 
 interface ClaimAgentModalProps {
@@ -31,24 +32,9 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
   // it into the oracle for the first time still requires claiming a handle here (see
   // oracle.ts's RegisterAgentRequest / migration 0022's header note).
   const [handle, setHandle] = useState('');
-  const [handleStatus, setHandleStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
-  const [handleSuggestions, setHandleSuggestions] = useState<string[]>([]);
-  useEffect(() => {
-    const h = handle.trim().toLowerCase();
-    if (!h) { setHandleStatus('idle'); setHandleSuggestions([]); return; }
-    setHandleStatus('checking');
-    const t = setTimeout(async () => {
-      try {
-        const res = await oracle.xnsAvailable(h);
-        setHandleStatus(res.available ? 'available' : 'taken');
-        setHandleSuggestions(res.suggestions ?? []);
-      } catch {
-        setHandleStatus('invalid');
-        setHandleSuggestions([]);
-      }
-    }, 350);
-    return () => clearTimeout(t);
-  }, [handle]);
+  const handleCheck = useHandleAvailability(handle);
+  const handleStatus = handleCheck.status;
+  const handleSuggestions = handleCheck.suggestions;
 
   const handleVerify = async () => {
     if (!ethers.isAddress(agentAddress)) {
@@ -95,7 +81,8 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
       addToast('success', 'Agent linked to your dashboard.');
       onSuccess();
     } catch (err: any) {
-      addToast('error', `Link failed: ${err.message}`);
+      // 503: on-chain XNS couldn't be checked, so the Oracle refused to write (retryable).
+      addToast('error', `Link failed: ${describeHandleWriteError(err).message}`);
     } finally {
       setIsLinking(false);
     }
@@ -156,11 +143,7 @@ export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSucces
                       <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>XNS handle (required)</label>
                       <input type="text" placeholder="atlas" className="input" value={handle} onChange={(e) => setHandle(e.target.value.toLowerCase())} />
                       <p style={{ fontSize: '0.72rem', margin: 0 }}>
-                        {handleStatus === 'checking' && <span style={{ color: 'var(--text-muted)' }}>Checking availability…</span>}
-                        {handleStatus === 'available' && <span style={{ color: 'var(--success)' }}>Available -- this agent will be identified by this handle everywhere.</span>}
-                        {handleStatus === 'taken' && <span style={{ color: 'var(--danger)' }}>Taken. Pick another, or a suggestion below.</span>}
-                        {handleStatus === 'invalid' && <span style={{ color: 'var(--danger)' }}>3-32 chars, lowercase letters/digits/./-/_, starting with a letter.</span>}
-                        {handleStatus === 'idle' && <span style={{ color: 'var(--text-muted)' }}>Unique across the whole ecosystem, like a chat-app username.</span>}
+                        <span role="status" style={{ color: handleStatusColor(handleStatus) }}>{handleStatusMessage(handleCheck)}</span>
                       </p>
                       {handleStatus === 'taken' && handleSuggestions.length > 0 && (
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
