@@ -250,8 +250,9 @@ User API, read in `app/config.py` (and `app/security.py` for the cookie flag):
 | `CORS_ORIGINS` | local UI ports | Must list both `localhost` and `127.0.0.1` forms — they are distinct CORS origins |
 | `USERAPI_INSECURE_COOKIES` | unset | `1` omits the `Secure` cookie attribute. Required for plain-HTTP localhost, where the browser would otherwise never return the session cookie. Never set it in production |
 
-Demo (`integrity-dashboard/demo/`) needs `FUNDER_PRIVATE_KEY` and `INTEGRITY_WALLET_PASSWORD`,
-supplied through the environment. Do not commit either.
+Demo (`integrity-dashboard/demo/`) registers its personas gasless and off-chain at the Oracle
+(`POST /v1/agent/register/offchain`, registration v3). It needs only `ORACLE_URL`
+(default `http://localhost:8080`): no funder key, wallet password or RPC.
 
 ## Running locally
 
@@ -280,7 +281,7 @@ Per package, without compose:
 ```bash
 cd integrity-dashboard && npm ci --legacy-peer-deps && npm run dev   # also: build, lint
 cd integrity-userapi && uv sync && uv run pytest                    # needs userapi-postgres on :5435
-cd integrity-dashboard/demo && uv sync && uv run integrity-demo      # needs FUNDER_PRIVATE_KEY, INTEGRITY_WALLET_PASSWORD
+cd integrity-dashboard/demo && uv sync && uv run integrity-demo      # needs ORACLE_URL (off-chain registration)
 ```
 
 `docker compose up userapi-postgres` alone is enough to run the user API test suite, which
