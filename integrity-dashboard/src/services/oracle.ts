@@ -283,10 +283,21 @@ export interface AgentHandleDto {
 // distinct from the on-chain XnsResolveDto/resolveXns above. An agent can hold one of
 // these without ever registering on-chain; every agent that completes full on-chain
 // registration is required to hold exactly one (see migration 0022's header note).
+/** On-chain XibalbaNameService status of a handle (backend::handlers::OnchainHandleStatus). */
+export type XnsOnchainStatus = 'free' | 'taken' | 'not_deployed' | 'unverified';
+
 export interface XnsAvailabilityDto {
     handle: string;
+    /** True only when well-formed AND free in the Oracle directory AND free on-chain
+     * (or XNS not deployed). `onchain: 'unverified'` always yields false. */
     available: boolean;
-    /** Populated only when `available` is false. */
+    /** Grammar check. Absent on Oracles that predate the dual-namespace check. */
+    valid?: boolean;
+    /** Free in the Oracle-local directory; null when malformed, absent on older Oracles. */
+    directory_available?: boolean | null;
+    /** On-chain status; null when malformed, absent on older Oracles. */
+    onchain?: XnsOnchainStatus | null;
+    /** Populated only when the handle is taken. */
     suggestions: string[];
 }
 
@@ -599,16 +610,16 @@ export const oracle = {
     // Reverse: the agent's primary XNS handle (backend::handlers::get_agent_handle).
     getAgentHandle: (id: string) => get<AgentHandleDto>(`/v1/agent/${encodeURIComponent(id)}/handle`),
 
-    // Oracle-local XNS directory: chat-app-style username search/claim, independent of
-    // on-chain state. Live-as-you-type availability check; returns close, currently-free
-    // suggestions when the requested handle is taken (backend::handlers::xns_available).
+    // XNS handle availability across BOTH namespaces (Oracle directory + on-chain
+    // XibalbaNameService). Live-as-you-type; returns close suggestions free in both when the
+    // handle is taken (backend::handlers::xns_available). Use services/xnsAvailability.ts.
     xnsAvailable: (handle: string) =>
         get<XnsAvailabilityDto>(`/v1/xns/available/${encodeURIComponent(handle)}`),
     // Resolve an Oracle-local handle to the agent that holds it (backend::handlers::xns_resolve).
     xnsResolveHandle: (handle: string) =>
         get<XnsHandleResolveDto>(`/v1/xns/handle/${encodeURIComponent(handle)}`),
-    // Claim a handle for an agent -- 409 if taken, or if that agent already holds a
-    // different one (backend::handlers::xns_claim).
+    // Claim a handle for an agent -- 409 if taken (directory or on-chain), or if that agent
+    // already holds a different one; 503 if on-chain XNS can't be checked (fail closed).
     xnsClaim: (agentId: string, handle: string) =>
         post<XnsHandleDto>('/v1/xns/claim', { agent_id: agentId, handle }),
 

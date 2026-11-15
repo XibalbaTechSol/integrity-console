@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { X, Loader2, Check, ExternalLink } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { oracle } from '../../services/oracle';
+import { describeHandleWriteError, handleStatusColor, handleStatusMessage, useHandleAvailability } from '../../services/xnsAvailability';
 import {
   AGENT_PRIMITIVES_FACTORY_ADDRESS,
   ITK_TOKEN_ADDRESS,
@@ -91,24 +92,9 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
   // one in the same request (see oracle.ts's RegisterAgentRequest / migration 0022's
   // header note). Independent of on-chain state; checked live as the operator types.
   const [handle, setHandle] = React.useState('');
-  const [handleStatus, setHandleStatus] = React.useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle');
-  const [handleSuggestions, setHandleSuggestions] = React.useState<string[]>([]);
-  React.useEffect(() => {
-    const h = handle.trim().toLowerCase();
-    if (!h) { setHandleStatus('idle'); setHandleSuggestions([]); return; }
-    setHandleStatus('checking');
-    const t = setTimeout(async () => {
-      try {
-        const res = await oracle.xnsAvailable(h);
-        setHandleStatus(res.available ? 'available' : 'taken');
-        setHandleSuggestions(res.suggestions ?? []);
-      } catch {
-        setHandleStatus('invalid');
-        setHandleSuggestions([]);
-      }
-    }, 350);
-    return () => clearTimeout(t);
-  }, [handle]);
+  const handleCheck = useHandleAvailability(handle);
+  const handleStatus = handleCheck.status;
+  const handleSuggestions = handleCheck.suggestions;
   // Keep the generated DID as the safe default, but allow an operator to register
   // an existing identity (for example the Shield DID already bound to this device).
   // This must be chosen before the first wallet-signed step; changing an identity
@@ -398,13 +384,20 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
     addToast('info', 'Recording the agent in the oracle…');
     // The oracle re-verifies the submitted addresses against XibalbaAgentRegistry before accepting.
     if (handleStatus !== 'available') throw new Error('Choose an available XNS handle before recording in the oracle.');
-    await oracle.register({
-      did,
-      did_document: { id: did, controller: walletAddress },
-      primitives: primitives as any,
-      eth_address_hex: walletAddress || undefined,
-      handle,
-    });
+    try {
+      await oracle.register({
+        did,
+        did_document: { id: did, controller: walletAddress },
+        primitives: primitives as any,
+        eth_address_hex: walletAddress || undefined,
+        handle,
+      });
+    } catch (err) {
+      // 503 = on-chain XNS couldn't be checked; the Oracle fails closed. Retryable, step stays open.
+      const status = (err as { status?: number } | null)?.status;
+      if (status === 503 || status === 409) throw new Error(describeHandleWriteError(err).message);
+      throw err;
+    }
     setOracleDone(true);
     setProgressLoaded(false);
     try { localStorage.removeItem(PROGRESS_KEY); } catch { /* storage may be disabled */ }
@@ -483,11 +476,9 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
                 aria-describedby="ra-handle-help"
               />
               <small id="ra-handle-help" className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                {handleStatus === 'checking' && 'Checking availability…'}
-                {handleStatus === 'available' && <span style={{ color: 'var(--success, var(--success))' }}>Available -- this agent will be identified by this handle everywhere.</span>}
-                {handleStatus === 'taken' && <span style={{ color: 'var(--danger)' }}>Taken. Pick another, or one of the suggestions below.</span>}
-                {handleStatus === 'invalid' && <span style={{ color: 'var(--danger)' }}>3-32 chars, lowercase letters/digits/./-/_, starting with a letter.</span>}
-                {handleStatus === 'idle' && 'Unique across the whole ecosystem, chosen like a chat-app username. Agents without one are shown by DID.'}
+                {handleStatus === 'idle'
+                  ? 'Unique across the whole ecosystem, chosen like a chat-app username. Agents without one are shown by DID.'
+                  : <span role="status" style={{ color: handleStatusColor(handleStatus) }}>{handleStatusMessage(handleCheck)}</span>}
               </small>
               {handleStatus === 'taken' && handleSuggestions.length > 0 && (
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>

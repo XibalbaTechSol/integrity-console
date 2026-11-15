@@ -2,16 +2,15 @@
 import React, { useState } from 'react';
 import { Search, Globe, Fingerprint, AlertTriangle, Loader2, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
 import { oracle } from '../../services/oracle';
+import { classifyAvailability, describeHandleWriteError, handleStatusMessage } from '../../services/xnsAvailability';
 import { useDashboard } from '../../context/DashboardContext';
 
-// Two distinct handle systems live behind this one search box:
-//  - The on-chain XibalbaNameService (oracle.resolveXns) -- a separate, optional
-//    "list this handle as an on-chain alias" step, not the primary directory.
-//  - The Oracle-local xns_handles directory (oracle.xnsAvailable/xnsResolveHandle/
-//    xnsClaim) -- a chat-app-style unique username per agent, independent of on-chain
-//    state, and what every agent registered through this dashboard actually gets. This
-//    component searches/claims against the Oracle-local directory; on-chain aliasing is
-//    a separate, not-yet-built capability.
+// Two handle namespaces live behind this one search box: the Oracle-local xns_handles
+// directory (what every agent registered here gets) and the on-chain XibalbaNameService.
+// oracle.xnsAvailable checks BOTH, so "available" here means free in both; a handle held
+// in either is taken, and an unverifiable on-chain read is reported as such, never as taken.
+// Claims go to the Oracle directory, which refuses (409) a handle held on-chain and fails
+// closed (503) when it cannot check.
 export const XNSSearchService: React.FC = () => {
     const { agents } = useDashboard();
     const [query, setQuery] = useState('');
@@ -49,9 +48,25 @@ export const XNSSearchService: React.FC = () => {
 
             const handle = q.replace(/^@/, '');
             const avail = await oracle.xnsAvailable(handle);
-            if (avail.available) {
+            const check = classifyAvailability(avail);
+            if (check.status === 'available') {
                 setAvailableHandle(avail.handle);
                 setClaimAgentId(agents[0]?.id ?? '');
+                return;
+            }
+            if (check.status === 'invalid' || check.status === 'unverified') {
+                setError(handleStatusMessage(check));
+                return;
+            }
+            if (check.takenBy === 'onchain') {
+                // Held only on-chain: the directory has no holder to show.
+                let holder = '';
+                try {
+                    const onchain = await oracle.resolveXns(handle);
+                    holder = onchain.sovereign_agent ? ` by ${onchain.sovereign_agent}` : '';
+                } catch { /* best effort: the availability answer already says taken */ }
+                setError(`Handle "${handle}" is held on-chain (XibalbaNameService)${holder}.`);
+                setSuggestions(check.suggestions);
                 return;
             }
 
@@ -91,12 +106,7 @@ export const XNSSearchService: React.FC = () => {
             setClaimed(claim.handle);
             setAvailableHandle(null);
         } catch (e: any) {
-            const status = e?.status as number | undefined;
-            if (status === 409) {
-                setError('Someone claimed that handle just now, or this agent already holds a different one. Try another.');
-            } else {
-                setError('Could not claim this handle right now. Try again in a moment.');
-            }
+            setError(describeHandleWriteError(e).message);
         } finally {
             setIsClaiming(false);
         }
