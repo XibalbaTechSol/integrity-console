@@ -15,8 +15,8 @@ export const XIBALBA_AGENT_REGISTRY_ADDRESS = S.XibalbaAgentRegistry;
 // EIP-1167 factory that clones + registers an agent's 7-primitive set.
 export const AGENT_PRIMITIVES_FACTORY_ADDRESS = S.AgentPrimitivesFactory;
 // Domain membership -- AgentPrimitivesFactory.registerPrimitives reverts
-// DomainJoinNotApproved() if canJoin(domainId, controller) is false here. See
-// RegisterAgentModal.tsx's preflight check, which reads this before any gas is spent.
+// DomainJoinNotApproved() if canJoin(domainId, controller) is false here. (The v2
+// factory path; the console's v3 registration does not use it.)
 export const DOMAIN_REGISTRY_ADDRESS = S.DomainRegistry;
 export const SMART_BAA_FACTORY_ADDRESS = S.SmartBAAFactory;
 export const COVERED_ENTITY_REGISTRY_ADDRESS = S.CoveredEntityRegistry;
@@ -24,6 +24,10 @@ export const XNS_ADDRESS = (S as Record<string, string>).XibalbaNameService;
 // undefined until DeployEHRGate.s.sol runs against Base Sepolia (only ever run
 // locally so far — see PRODUCTION_GAPS.md). Consumers must check for this before use.
 export const EHR_GATE_ADDRESS = (S as Record<string, string>).EHRGate;
+// Registration v3 AgentRegistry. undefined until its Base Sepolia broadcast is mirrored
+// here; RegisterAgentModal keeps the on-chain step disabled until then (the Oracle's
+// /onchain/sync also answers 503 without it). Consumers must check for this before use.
+export const AGENT_REGISTRY_ADDRESS: string | undefined = (S as Record<string, string>).AgentRegistry;
 
 // Protocol-held signer that every agent grants StateAnchor ANCHOR_ROLE to (and the
 // SovereignAgent `oracle_` constructor arg). Single-operator testnet setup.

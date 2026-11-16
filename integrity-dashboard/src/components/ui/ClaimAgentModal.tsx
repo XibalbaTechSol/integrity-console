@@ -1,185 +1,115 @@
 import { useState } from 'react';
-import { ethers } from 'ethers';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield, Lock, CheckCircle, Loader2, AlertCircle, XCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, Shield, CheckCircle, Loader2, AlertCircle, XCircle } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
-import { oracle } from '../../services/oracle';
-import { describeHandleWriteError, handleStatusColor, handleStatusMessage, useHandleAvailability } from '../../services/xnsAvailability';
-import { SOVEREIGN_AGENT_ABI } from '../../chain/bytecode';
+import { oracle, type OnchainRecordDto } from '../../services/oracle';
 
 interface ClaimAgentModalProps {
   isOpen: boolean;
-  defaultAddress?: string;
+  /** Prefilled DID (the selected agent's id). */
+  defaultDid?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-// Real "claim" (no mock challenge/signature theater). Control of a SovereignAgent is
-// held as its DEFAULT_ADMIN_ROLE (AccessControl) — the `onlyController` modifier is just
-// hasRole(DEFAULT_ADMIN_ROLE, msg.sender). So the honest, on-chain proof of ownership is
-// reading that role for the connected wallet; a signed string proves nothing the chain
-// doesn't already record. If the wallet controls the agent we link it in the oracle
-// (associating the DID with this owner); if it doesn't, we say so plainly — only the
-// current controller can transfer control via SovereignAgent.rotateController.
-export function ClaimAgentModal({ isOpen, defaultAddress = '', onClose, onSuccess }: ClaimAgentModalProps) {
-  const { addToast, walletAddress, connectWallet } = useDashboard();
-  const [step, setStep] = useState<1 | 2>(1);
-  const [agentAddress, setAgentAddress] = useState(defaultAddress);
-  const [isChecking, setIsChecking] = useState(false);
-  const [isLinking, setIsLinking] = useState(false);
-  const [result, setResult] = useState<{ did: string; controls: boolean } | null>(null);
-  // Mandatory Oracle-local XNS handle -- this agent may already be on-chain, but linking
-  // it into the oracle for the first time still requires claiming a handle here (see
-  // oracle.ts's RegisterAgentRequest / migration 0022's header note).
-  const [handle, setHandle] = useState('');
-  const handleCheck = useHandleAvailability(handle);
-  const handleStatus = handleCheck.status;
-  const handleSuggestions = handleCheck.suggestions;
+// Registration v3 (Phase 4 PR 4.5): "claim" an agent that is already registered on-chain by
+// asking the Oracle to sync its AgentRegistry record (POST /v1/agent/{id}/onchain/sync).
+// The sync reads AgentRegistry.resolveDID itself, so the chain, not this form, decides what
+// is stored; nothing here is a write the wallet has to authorize. The record's guardian is
+// the address that controls it, shown against the connected wallet.
+export function describeSyncError(err: unknown): string {
+  const status = (err as { status?: number } | null)?.status;
+  const detail = String((err as { message?: string } | null)?.message ?? '');
+  if (status === 404) return 'This DID has no AgentRegistry record yet. Register it on-chain first (Register agent, or `integrity register --onchain`).';
+  if (status === 503) return 'This Oracle has no AgentRegistry deployment configured yet, so on-chain records cannot be synced.';
+  if (status === 400) return 'Enter a DID of the form did:integrity: followed by 64 lowercase hex characters.';
+  return detail || 'Sync failed. Try again shortly.';
+}
 
-  const handleVerify = async () => {
-    if (!ethers.isAddress(agentAddress)) {
-      addToast('error', 'Please enter a valid Ethereum address');
-      return;
-    }
-    if (!walletAddress) {
-      addToast('error', 'Connect a wallet first — control is checked against it.');
-      return;
-    }
-    setIsChecking(true);
-    try {
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const sa = new ethers.Contract(agentAddress, SOVEREIGN_AGENT_ABI, provider);
-      // agentDID() also validates this is really a SovereignAgent (a non-SA address reverts).
-      const did: string = await sa.agentDID();
-      const adminRole: string = await sa.DEFAULT_ADMIN_ROLE();
-      const controls: boolean = await sa.hasRole(adminRole, walletAddress);
-      setResult({ did, controls });
-      setStep(2);
-    } catch (err: any) {
-      addToast('error', `Not a resolvable SovereignAgent: ${err.shortMessage || err.message}`);
-    } finally {
-      setIsChecking(false);
-    }
-  };
+const DID_RE = /^did:integrity:[0-9a-f]{64}$/;
 
-  const handleLink = async () => {
-    if (!result || !walletAddress) return;
-    if (handleStatus !== 'available') { addToast('error', 'Choose an available XNS handle before linking.'); return; }
-    setIsLinking(true);
+export function ClaimAgentModal({ isOpen, defaultDid = '', onClose, onSuccess }: ClaimAgentModalProps) {
+  const { addToast, walletAddress } = useDashboard();
+  const [did, setDid] = useState(DID_RE.test(defaultDid) ? defaultDid : '');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [record, setRecord] = useState<OnchainRecordDto | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    const id = did.trim();
+    if (!DID_RE.test(id)) { setError(describeSyncError({ status: 400 })); return; }
+    setIsSyncing(true);
+    setError(null);
     try {
-      // Resolve the real 7-primitive set the oracle derives from XibalbaAgentRegistry,
-      // then record the association (the oracle re-verifies primitives on-chain).
-      const detail = await oracle.getAgent(agentAddress);
-      if (!detail.primitives) throw new Error('Agent primitives not resolvable on-chain yet.');
-      await oracle.register({
-        did: result.did,
-        did_document: { id: result.did, controller: walletAddress },
-        primitives: detail.primitives,
-        eth_address_hex: walletAddress,
-        handle,
-      });
-      addToast('success', 'Agent linked to your dashboard.');
-      onSuccess();
-    } catch (err: any) {
-      // 503: on-chain XNS couldn't be checked, so the Oracle refused to write (retryable).
-      addToast('error', `Link failed: ${describeHandleWriteError(err).message}`);
+      setRecord(await oracle.onchainSync(id));
+    } catch (err) {
+      const message = describeSyncError(err);
+      setError(message);
+      addToast('error', message);
     } finally {
-      setIsLinking(false);
+      setIsSyncing(false);
     }
   };
 
   if (!isOpen) return null;
+  const isGuardian = !!record && !!walletAddress && record.guardian.toLowerCase() === walletAddress.toLowerCase();
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
         style={{ position: 'absolute', inset: 0, background: 'var(--navy-deep)', opacity: 0.85, backdropFilter: 'blur(8px)' }} />
 
-      <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+      <motion.div role="dialog" aria-modal="true" aria-label="Claim on-chain agent" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
         style={{ position: 'relative', width: '100%', maxWidth: '500px', background: 'var(--bg-secondary)', border: '1px solid var(--theme-accent-muted)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}>
         <div style={{ padding: 'var(--space-6)', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--navy-light)' }}>
           <div className="flex items-center gap-3">
             <Shield size={20} color="var(--theme-accent)" />
-            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>Claim Existing Agent</h3>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>Claim On-Chain Agent</h3>
           </div>
           <button onClick={onClose} className="secondary-button" aria-label="Close" title="Close"><X size={20} /></button>
         </div>
 
-        <div style={{ padding: 'var(--space-8)' }}>
-          <AnimatePresence mode="wait">
-            {step === 1 ? (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-col gap-6">
-                <div className="flex-col gap-2">
-                  <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>SovereignAgent Address</label>
-                  <input type="text" placeholder="0x..." className="input mono" value={agentAddress} onChange={(e) => setAgentAddress(e.target.value)} />
-                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    Enter the SovereignAgent contract address. We check on-chain whether your connected wallet holds its controller role.
-                  </p>
-                </div>
-                {!walletAddress ? (
-                  <button className="primary-button" onClick={connectWallet}>Connect Wallet</button>
-                ) : (
-                  <button className="primary-button" onClick={handleVerify} disabled={isChecking || !agentAddress}>
-                    {isChecking ? <><Loader2 className="spin" size={18} /> Checking control…</> : 'Verify Control On-Chain'}
-                  </button>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex-col gap-6">
-                <div style={{ padding: 'var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--glass-border)' }}>
-                  <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 800 }}>
-                    <Lock size={14} /> AGENT DID
-                  </div>
-                  <div className="mono" style={{ fontSize: '0.8rem', wordBreak: 'break-all', opacity: 0.8 }}>{result?.did}</div>
-                </div>
+        <div style={{ padding: 'var(--space-8)' }} className="flex-col gap-6">
+          <div className="flex-col gap-2">
+            <label htmlFor="ca-did" style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Agent DID</label>
+            <input id="ca-did" type="text" placeholder="did:integrity:…" className="input mono" value={did} onChange={(e) => { setDid(e.target.value.trim()); setRecord(null); }} />
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+              The Oracle reads this DID's AgentRegistry record from the chain and stores it. Nothing is signed or sent from your wallet.
+            </p>
+          </div>
 
-                {result?.controls ? (
-                  <div className="flex-col gap-4">
-                    <div style={{ padding: 'var(--space-4)', background: 'rgba(66, 214, 139, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <CheckCircle size={20} color="var(--success)" />
-                      <div style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600 }}>Your wallet holds this agent's controller role.</div>
-                    </div>
-                    <div className="flex-col gap-2">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>XNS handle (required)</label>
-                      <input type="text" placeholder="atlas" className="input" value={handle} onChange={(e) => setHandle(e.target.value.toLowerCase())} />
-                      <p style={{ fontSize: '0.72rem', margin: 0 }}>
-                        <span role="status" style={{ color: handleStatusColor(handleStatus) }}>{handleStatusMessage(handleCheck)}</span>
-                      </p>
-                      {handleStatus === 'taken' && handleSuggestions.length > 0 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                          {handleSuggestions.map((s) => (
-                            <button key={s} type="button" className="secondary-button" style={{ fontSize: '0.72rem', padding: '3px 8px' }} onClick={() => setHandle(s)}>{s}</button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button className="primary-button" onClick={handleLink} disabled={isLinking || handleStatus !== 'available'}>
-                      {isLinking ? <><Loader2 className="spin" size={18} /> Linking…</> : 'Link Agent to Dashboard'}
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ padding: 'var(--space-4)', background: 'rgba(255, 107, 122, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--danger)', fontWeight: 600, fontSize: '0.85rem' }}>
-                      <XCircle size={18} /> Connected wallet is not the controller.
-                    </div>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>
-                      Only the agent's current controller can transfer control (SovereignAgent.rotateController). Connect the controlling wallet, or have the current controller rotate control to <span className="mono">{walletAddress?.slice(0, 6)}…{walletAddress?.slice(-4)}</span>.
-                    </p>
-                  </div>
-                )}
+          <button className="primary-button" onClick={handleSync} disabled={isSyncing || !did}>
+            {isSyncing ? <><Loader2 className="spin" size={18} /> Reading the chain…</> : 'Sync On-Chain Record'}
+          </button>
 
-                <button className="secondary-button btn-sm" onClick={() => { setStep(1); setResult(null); }} disabled={isLinking}>
-                  Back to Address
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {error && (
+            <div role="alert" style={{ padding: 'var(--space-4)', background: 'rgba(255, 107, 122, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger)', display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.8rem', color: 'var(--danger)' }}>
+              <XCircle size={18} style={{ flex: 'none' }} /> {error}
+            </div>
+          )}
+
+          {record && (
+            <div className="flex-col gap-3">
+              <div style={{ padding: 'var(--space-4)', background: 'rgba(66, 214, 139, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <CheckCircle size={20} color="var(--success)" />
+                <div style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600 }}>
+                  {record.active ? 'Active' : 'Retired'} on-chain record synced at block {record.synced_block}.
+                </div>
+              </div>
+              <dl style={{ fontSize: '0.75rem', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 12px', margin: 0 }}>
+                <dt className="text-muted">Guardian</dt><dd className="mono" style={{ margin: 0, wordBreak: 'break-all' }}>{record.guardian}{isGuardian ? ' (your wallet)' : ''}</dd>
+                <dt className="text-muted">Actor</dt><dd className="mono" style={{ margin: 0, wordBreak: 'break-all' }}>{record.actor ?? 'none (existence-only)'}</dd>
+                <dt className="text-muted">Settlement</dt><dd style={{ margin: 0 }}>{record.settlement_eligible ? 'eligible' : 'not eligible (needs an active record with an actor)'}</dd>
+              </dl>
+              <button className="primary-button" onClick={onSuccess}>Done</button>
+            </div>
+          )}
         </div>
 
         <div style={{ padding: 'var(--space-4) var(--space-8)', background: 'var(--bg-secondary)', borderTop: '1px solid var(--glass-border)', display: 'flex', gap: '12px', alignItems: 'center' }}>
           <AlertCircle size={16} color="var(--text-muted)" />
           <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', margin: 0 }}>
-            Claiming links an agent you already control on-chain (deployed outside this dashboard) to your session.
+            For agents registered on-chain outside this dashboard (for example with the CLI). Control of the record belongs to its guardian address.
           </p>
         </div>
       </motion.div>

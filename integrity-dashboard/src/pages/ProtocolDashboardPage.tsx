@@ -337,7 +337,7 @@ export default function ProtocolDashboardPage() {
       </div>
 
       {isRegisterModalOpen && <RegisterAgentModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} onSuccess={() => setIsRegisterModalOpen(false)} />}
-      {isClaimModalOpen && <ClaimAgentModal isOpen={isClaimModalOpen} defaultAddress={selectedAgent?.eth_address} onClose={() => setIsClaimModalOpen(false)} onSuccess={() => setIsClaimModalOpen(false)} />}
+      {isClaimModalOpen && <ClaimAgentModal isOpen={isClaimModalOpen} defaultDid={selectedAgent?.id} onClose={() => setIsClaimModalOpen(false)} onSuccess={() => setIsClaimModalOpen(false)} />}
     </div>
   );
 }
