@@ -51,23 +51,6 @@ export const EXPLORER_URL = deployments.explorerUrl;
 // tagged with this same DID so a test run is queryable by the same identity everywhere.
 export const XIBALBA_TEST_AGENT_ID = 'did:integrity:68fed1331613937555a59398223e8e87520a87dd0305aac4fd7ecdc32a14a861';
 
-// Phase I's guardian-governed IntegrityAccount + its bound IntegrityKernel (the three
-// reference adapters -- budget, reputation-floor, assurance-tier -- live inside the
-// kernel). Real bytecode on Base Sepolia, unlike LicenceAccount -- but explicitly marked
-// experimental at the deploy record itself; KERNEL_REFERENCE.disclosure is that exact
-// string, surfaced verbatim by KernelPage rather than paraphrased.
-export const KERNEL_REFERENCE = (
-  deployments as unknown as {
-    experimentalPhase1Reference?: {
-      IntegrityAccount: string;
-      IntegrityKernel: string;
-      ReputationRegistry: string;
-      deployedFromCommit: string;
-      disclosure: string;
-    };
-  }
-).experimentalPhase1Reference;
-
 export const LICENCE_REFERENCE = (
   deployments as unknown as {
     experimentalPhase2LicenceReference?: {

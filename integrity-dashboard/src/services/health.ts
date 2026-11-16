@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
 import { BCC_MIDDLEWARE_URL, GRAPH_MEMORY_URL, ORACLE_URL, SHIELD_BACKEND_URL } from '../config';
-import { RPC_URL } from '../constants';
 
 // Lifted out of AppHeader.tsx (which used this inline) so the Guided System Test wizard
 // (Developer page) can share one source of truth for "is this service actually reachable"
@@ -25,8 +23,6 @@ const httpChecks = [
   { key: 'shield', label: 'Shield', url: `${SHIELD_BACKEND_URL}/api/shield/health`, fixHint: `Shield backend not reachable at ${SHIELD_BACKEND_URL} -- run \`python -m shield.backend.api --admin-token dev-shield-admin\` in xibalba-shield/.` },
 ] as const;
 
-const KERNEL_FIX_HINT = `Anvil RPC not reachable at ${RPC_URL} -- run \`make chain\` in integrity-core/, then deploy the kernel-bridge testbed (contracts/script/DeployKernelBridgeTestbed.s.sol).`;
-
 async function checkHttp(url: string): Promise<ServiceState> {
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(2500) });
@@ -41,19 +37,9 @@ async function checkHttp(url: string): Promise<ServiceState> {
   }
 }
 
-async function checkKernelRpc(): Promise<ServiceState> {
-  try {
-    const provider = new ethers.JsonRpcProvider(RPC_URL);
-    await provider.getBlockNumber();
-    return 'online';
-  } catch {
-    return 'offline';
-  }
-}
-
 export function useServiceHealth(pollIntervalMs = 15000): ServiceCheck[] {
   const [states, setStates] = useState<Record<string, ServiceState>>(() =>
-    Object.fromEntries([...httpChecks.map((c) => [c.key, 'checking']), ['kernel', 'checking']]) as Record<string, ServiceState>,
+    Object.fromEntries(httpChecks.map((c) => [c.key, 'checking'])) as Record<string, ServiceState>,
   );
 
   useEffect(() => {
@@ -61,7 +47,6 @@ export function useServiceHealth(pollIntervalMs = 15000): ServiceCheck[] {
     const runChecks = async () => {
       const results = await Promise.all([
         ...httpChecks.map(async (c) => [c.key, await checkHttp(c.url)] as const),
-        (async () => ['kernel', await checkKernelRpc()] as const)(),
       ]);
       if (!cancelled) setStates(Object.fromEntries(results));
     };
@@ -79,6 +64,5 @@ export function useServiceHealth(pollIntervalMs = 15000): ServiceCheck[] {
       const detail = status === 'offline' ? c.fixHint : status === 'auth-required' ? `${c.label} is up, but this dashboard has no session with it -- sign in there directly.` : undefined;
       return { key: c.key, label: c.label, status, detail };
     }),
-    { key: 'kernel', label: 'Kernel bridge (RPC)', status: states.kernel ?? 'checking', detail: states.kernel === 'offline' ? KERNEL_FIX_HINT : undefined },
   ];
 }

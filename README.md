@@ -165,7 +165,7 @@ legacy aliases so an aliased URL still highlights the right nav entry.
 
 Service clients live in `src/services/` — `oracle.ts`, `userapi.ts`, `bccMiddleware.ts`,
 `shieldBackend.ts`, `graphMemory.ts`, `aisProfile.ts`, `health.ts`, `testResults.ts` — and chain
-reads in `src/chain/` (`agent`, `kernel`, `licence`, `shield`, `xns`, `bytecode`, `retry`).
+reads in `src/chain/` (`agent`, `licence`, `shield`, `xns`, `bytecode`, `retry`).
 Zero-authority presentation helpers for Oracle-verified `ais/v1-geometric-1` 4-axis telemetry,
 closed-loop control zones (`GREEN` / `YELLOW` / `RED`), signed policy pack digests, and step/epoch
 reward decomposition ($R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS} + \Delta\Phi - \text{Penalty}$)
@@ -369,8 +369,10 @@ Verified against the current tree, and worth knowing before you trust a surface:
 - The nested `integrity-dashboard/README.md` is **stale**: it documents
   Identity, Shield, Financials, Intelligence and Memory pages that are now redirects, and its
   relative links predate the A1 split. Treat this file as the current description.
-- `src/pages/KernelPage.tsx` and `src/pages/PolicyPacksPage.tsx` exist but are not routed in
-  `App.tsx`; they are unreachable in the running app.
+- The Phase I kernel viewer (`KernelPage`, `src/chain/kernel.ts`) and the Guided System Test's
+  kernel-bridge step were removed on 2026-11-16, when `IntegrityKernel`/`IntegrityAccount` were
+  archived in integrity-core (tag `kernel-phase1-archive`). `/kernel` and `/kernel-intent` still
+  redirect to `/system` so old links land somewhere.
 - `integrity-userapi/app/config.py` declares `jwt_secret` twice (and imports `Field` twice). The
   second declaration wins, so the named `_generate_jwt_secret()` helper and its explicit warning
   are dead code, replaced by a bare lambda. The documented behaviour above is unaffected: with

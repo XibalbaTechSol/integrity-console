@@ -344,8 +344,6 @@ html {
 .knowledge-fit-button:hover { color: var(--text-primary); }
 .knowledge-assurance-note { display: flex; align-items: flex-start; gap: 0.45rem; padding: 0.7rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.62rem; line-height: 1.45; }
 .knowledge-assurance-note svg { flex: 0 0 auto; color: var(--gold); }
-.kernel-intent-page { min-width: 0; max-width: 100%; }
-.kernel-intent-page code { overflow-wrap: anywhere; word-break: break-word; }
 .licence-stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); min-width: 0; }
 .licence-stat-grid > * { min-width: 0; }
 

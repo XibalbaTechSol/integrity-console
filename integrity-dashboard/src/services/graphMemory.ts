@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { GRAPH_MEMORY_TOKEN, GRAPH_MEMORY_URL } from '../config';
 
 // Mirrors xibalba_cortex.local_api's routes exactly, which themselves are thin wrappers around
@@ -17,8 +16,6 @@ import type {
     GraphPayload,
     InferenceManifest,
     InferenceTask,
-    KernelDecision,
-    KernelIntentTriple,
     ParaClassification,
     IntegrityLinksStatus,
     InvocationCorrelation,
@@ -54,8 +51,6 @@ export type {
     GraphPayload,
     InferenceManifest,
     InferenceTask,
-    KernelDecision,
-    KernelIntentTriple,
     ParaClassification,
     IntegrityLinkRecord,
     IntegrityLinksStatus,
@@ -175,7 +170,6 @@ export const graphMemory = {
         postJson<{ session_id: string; recorded: number }>('/api/otel/batch', { session_id: sessionId, events }),
     sessionExchanges: (id: string) => getJson<Exchange[]>(`/api/session/${encodeURIComponent(id)}/exchanges`),
     sessionMerkleRoot: (id: string) => getJson<MerkleRoot>(`/api/session/${encodeURIComponent(id)}/merkle-root`),
-    sessionKernelIntents: (id: string) => getJson<KernelIntentTriple[]>(`/api/session/${encodeURIComponent(id)}/kernel-intents`),
 
     // Graph & search
     graph: (limit = 500, similarityThreshold = 0.75) =>
