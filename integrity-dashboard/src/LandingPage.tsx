@@ -122,7 +122,7 @@ const CONSOLE_SURFACES = [
     route: '/system',
     name: 'System control',
     icon: SlidersHorizontal,
-    body: 'Kernel and intent surfaces, developer tooling and operational state for the deployment the console is pointed at.',
+    body: 'Service health, policy packs, developer tooling and operational state for the deployment the console is pointed at.',
   },
   {
     route: '/health',

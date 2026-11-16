@@ -30,7 +30,6 @@ test.describe('consolidated operator workspaces', () => {
     }
     await expect(page.getByText('Live Attack Demo', { exact: true })).toHaveCount(0);
     await page.getByRole('tab', { name: 'Intent review' }).click();
-    await expect(page.getByText('Kernel intent vs. outcome')).toBeVisible();
   });
 
   test('Knowledge retains Cortex, the full intelligence page, and evidence correlation', async ({ page }) => {

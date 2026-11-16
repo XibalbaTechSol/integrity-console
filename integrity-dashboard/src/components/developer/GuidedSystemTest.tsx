@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Loader2, Circle, ShieldCheck, Database, Cpu, Radio, Play, IdCard, Gauge, History, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Circle, ShieldCheck, Database, Radio, Play, IdCard, Gauge, History, RefreshCw } from 'lucide-react';
 import { Panel } from '../shared/Panel';
 import { useServiceHealth } from '../../services/health';
 import { graphMemory } from '../../services/graphMemory';
 import { shieldBackend } from '../../services/shieldBackend';
 import { oracle } from '../../services/oracle';
 import { reportTestResult, XIBALBA_SYSTEM_TESTS_SESSION_ID } from '../../services/testResults';
-import { GRAPH_MEMORY_URL } from '../../config';
 import { XIBALBA_TEST_AGENT_ID } from '../../constants';
 
 interface ActivityRow {
@@ -116,14 +115,6 @@ export function GuidedSystemTest() {
   const [shieldStatus, setShieldStatus] = useState<StepStatus>('idle');
   const [shieldResult, setShieldResult] = useState<{ ok: boolean; seededDecisions?: number; error?: string } | null>(null);
 
-  const [kernelStatus, setKernelStatus] = useState<StepStatus>('idle');
-  const [kernelResult, setKernelResult] = useState<{
-    passed: boolean;
-    matchedSuccess?: boolean;
-    kernelExceedingSuccess?: boolean;
-    error?: string;
-  } | null>(null);
-
   const [memoryStatus, setMemoryStatus] = useState<StepStatus>('idle');
   const [memoryResult, setMemoryResult] = useState<{ ok: boolean; exchangeId?: string; readBack?: boolean; error?: string } | null>(null);
 
@@ -139,34 +130,6 @@ export function GuidedSystemTest() {
       setShieldResult({ ok: false, error: message });
       setShieldStatus('failed');
       void reportTestResult({ testName: 'shield', status: 'failed', detail: message });
-    }
-  };
-
-  const runKernelTest = async () => {
-    setKernelStatus('running');
-    try {
-      const response = await fetch(`${GRAPH_MEMORY_URL}/api/kernel-bridge/self-test`, {
-        method: 'POST',
-        body: JSON.stringify({ session_id: XIBALBA_SYSTEM_TESTS_SESSION_ID }),
-      });
-      const body = await response.json();
-      if (!body.ok) throw new Error(body.error ?? 'self-test failed');
-      setKernelResult({
-        passed: !!body.passed,
-        matchedSuccess: body.matched?.success,
-        kernelExceedingSuccess: body.kernel_exceeding?.success,
-      });
-      setKernelStatus(body.passed ? 'passed' : 'failed');
-      void reportTestResult({
-        testName: 'kernel_bridge',
-        status: body.passed ? 'passed' : 'failed',
-        detail: `matched=${body.matched?.success} kernel_exceeding=${body.kernel_exceeding?.success}`,
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      setKernelResult({ passed: false, error: message });
-      setKernelStatus('failed');
-      void reportTestResult({ testName: 'kernel_bridge', status: 'failed', detail: message });
     }
   };
 
@@ -265,14 +228,14 @@ export function GuidedSystemTest() {
     setActivityLoading(false);
   };
 
-  const testableStatuses = [shieldStatus, kernelStatus, memoryStatus, agentLookupStatus, aisStatus];
+  const testableStatuses = [shieldStatus, memoryStatus, agentLookupStatus, aisStatus];
   const passedCount = testableStatuses.filter((s) => s === 'passed').length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
       <Panel title="Guided System Test" icon={<ShieldCheck size={16} />}>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: '0 0 var(--space-2)' }}>
-          Verifies Shield, Cortex/Memory, the Kernel/Adapter bridge, and the Oracle's own agent
+          Verifies Shield, Cortex/Memory, and the Oracle's own agent
           registry and AIS scoring pipeline, with real requests against real backends. Each step
           below is disabled until its service shows online in the checklist. Every result also
           fans out to Oracle's audit_log, Cortex's otel_events, and Shield's test_events, tagged
@@ -329,31 +292,6 @@ export function GuidedSystemTest() {
               <Row label="Seeded decisions" value={shieldResult.seededDecisions} />
             ) : (
               <Row label="Error" value={shieldResult.error} />
-            )}
-          </>
-        )}
-      </ActionStep>
-
-      <ActionStep
-        icon={<Cpu size={16} />}
-        title="Kernel / adapter bridge"
-        description="Submits two real signed UserOperations against the kernel-bridge testbed: one within budget (expect ALLOW) and one over the kernel's own per-op budget (expect DENY)."
-        status={kernelStatus}
-        disabledReason={svc('kernel')?.status !== 'online' ? 'Kernel RPC is offline -- see the service health panel above.' : undefined}
-        onRun={() => void runKernelTest()}
-      >
-        {kernelResult && (
-          <>
-            {kernelResult.error ? (
-              <Row label="Error" value={kernelResult.error} />
-            ) : (
-              <>
-                <Row label="Matched case (0.1 ETH)" value={kernelResult.matchedSuccess ? 'ALLOW (expected)' : 'DENY (unexpected)'} />
-                <Row
-                  label="Kernel-exceeding case (1.5 ETH)"
-                  value={kernelResult.kernelExceedingSuccess === false ? 'DENY (expected)' : 'ALLOW (unexpected)'}
-                />
-              </>
             )}
           </>
         )}
@@ -419,7 +357,7 @@ export function GuidedSystemTest() {
         <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
           Not yet available from the dashboard -- signing a real BCC commitment needs a private
           key, which must never live in browser JS. This is the working, non-experimental
-          intent-gating pipeline (distinct from the Kernel bridge above); wiring it in needs a
+          intent-gating pipeline; wiring it in needs a
           small server-side signer first.
         </p>
       </Panel>

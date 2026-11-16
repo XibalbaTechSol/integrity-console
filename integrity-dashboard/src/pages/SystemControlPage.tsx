@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { Activity, ShieldCheck, BookOpen, ScrollText } from 'lucide-react';
+import { Activity, BookOpen, ScrollText } from 'lucide-react';
 import { SubTabs } from '../components/ui/SubTabs';
 import HealthPage from './HealthPage';
-import KernelPage from './KernelPage';
 import WikiPage from './WikiPage';
 import PolicyPacksPage from './PolicyPacksPage';
 
 const TABS = [
   { id: 'health', label: 'Service health', icon: <Activity size={14} /> },
-  { id: 'kernel', label: 'Runtime controls', icon: <ShieldCheck size={14} /> },
   { id: 'policies', label: 'Policy packs', icon: <ScrollText size={14} /> },
   { id: 'wiki', label: 'Knowledge base', icon: <BookOpen size={14} /> },
 ];
@@ -23,7 +21,7 @@ export default function SystemControlPage() {
           <p className="eyebrow">Shared operational tools</p>
           <h2>Operations</h2>
           <p className="control-page-description">
-            Runtime health, protocol controls, and documentation in one place.
+            Runtime health, policy packs, and documentation in one place.
           </p>
         </div>
         <Activity size={28} aria-hidden="true" />
@@ -31,7 +29,6 @@ export default function SystemControlPage() {
       <SubTabs tabs={TABS} activeTab={tab} setActiveTab={setTab} />
       <div style={{ marginTop: 'var(--space-2)' }}>
         {tab === 'health' && <HealthPage />}
-        {tab === 'kernel' && <KernelPage />}
         {tab === 'policies' && <PolicyPacksPage />}
         {tab === 'wiki' && <WikiPage />}
       </div>
