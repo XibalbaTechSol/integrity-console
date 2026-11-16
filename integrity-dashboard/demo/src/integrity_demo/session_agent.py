@@ -3,6 +3,9 @@ telemetry, so the session appears as a live Integrity agent — with a genuinely
 AIS (never a seeded/dialed number) — alongside the seeded demo fleet.
 
 Honesty contract (matches the repo's "no silent mocks" rule and this session's own audit):
+  * Registration is the v3 path every agent uses: a signed, gasless
+    POST /v1/agent/register/offchain (`register_offchain`). The Oracle assigns the tier
+    (1 for a self-signed key); nothing is written to its database directly.
   * The agent's Ed25519 identity is real and freshly generated, persisted under
     ~/.integrity/wallet/xibalba_session. It is a NEW operator identity — the FAUCET_INFO
     "Agent Derived Address" 0xabfeEaC…'s private key is not on disk, so it cannot sign; this
@@ -16,9 +19,7 @@ Honesty contract (matches the repo's "no silent mocks" rule and this session's o
     session genuinely had none — so grounding/compliance come out high honestly.
 
 Run (from repo root):
-  integrity-sdk/.venv/bin/python -m pip install -q psycopg[binary]   # once, if missing
   ORACLE_URL=http://localhost:8085 OTLP_ENDPOINT=localhost:4337 \
-    DATABASE_URL=postgres://integrity:integrity_dev_only@localhost:5436/integrity \
     PYTHONPATH=integrity-sdk:integrity-dashboard/demo/src \
     integrity-sdk/.venv/bin/python integrity-dashboard/demo/src/integrity_demo/session_agent.py
 """
@@ -28,18 +29,16 @@ import json
 import os
 import sys
 import time
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-import psycopg
 import requests
 
-from integrity_sdk.did import Keypair, fingerprint_for_pubkey, build_did_document
+from integrity_sdk.did import Keypair, fingerprint_for_pubkey
 from integrity_sdk.client import IntegrityClient
+from integrity_sdk.registration_offchain import OffchainRegistrationError, register_offchain
 
 ORACLE_URL = os.environ.get("ORACLE_URL", "http://localhost:8085")
 OTLP_ENDPOINT = os.environ.get("OTLP_ENDPOINT", "localhost:4337")
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgres://integrity:integrity_dev_only@localhost:5436/integrity")
 AGENT_NAME = "Xibalba Agent"
 KEY_DIR = Path.home() / ".integrity" / "wallet" / "xibalba_session"
 KEY_PEM = KEY_DIR / "private_key.pem"
@@ -54,36 +53,6 @@ def load_or_create_identity() -> Keypair:
     KEY_PEM.write_bytes(kp.to_pem())
     KEY_PEM.chmod(0o600)
     return kp
-
-
-def upsert_agent_row(did: str, pubkey: bytes) -> None:
-    """Insert the agent into the oracle DB so /v1/agents surfaces it in the fleet. This is
-    the same direct-insert path the seeder uses for DB-only agents (the on-chain
-    /v1/agent/register path would reject an agent with no matching on-chain primitives)."""
-    did_doc = {
-        "id": did,
-        "controller": did,
-        "verificationMethod": [{
-            "id": f"{did}#key-1",
-            "type": "Ed25519VerificationKey2020",
-            "publicKeyHex": pubkey.hex(),
-        }],
-        "alsoKnownAs": [AGENT_NAME],
-    }
-    with psycopg.connect(DATABASE_URL) as conn, conn.cursor() as cur:
-        cur.execute(
-            """
-            INSERT INTO agents (id, ed25519_pubkey, eth_address, verification_tier, last_nonce, created_at, did_document)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (id) DO UPDATE SET
-                ed25519_pubkey = EXCLUDED.ed25519_pubkey,
-                did_document   = EXCLUDED.did_document
-            """,
-            (did, pubkey, "", 2, 0,
-             datetime.now(timezone.utc) - timedelta(minutes=5),
-             json.dumps(did_doc)),
-        )
-        conn.commit()
 
 
 # Real actions this session performed, as telemetry entries. `text_output` is grounded
@@ -114,8 +83,13 @@ def main() -> int:
     print(f"Xibalba session agent DID: {did}")
     print(f"  (new operator identity — 0xabfeEaC…'s key is not on disk, disclosed not faked)")
 
-    upsert_agent_row(did, pubkey)
-    print("  agent row upserted into oracle DB (joins the fleet)")
+    try:
+        reg = register_offchain(ORACLE_URL, did, kp)
+    except OffchainRegistrationError as exc:
+        # Unregistered agents' telemetry is rejected, so stop here rather than emit into the void.
+        print(f"  off-chain registration failed: {exc}")
+        return 1
+    print(f"  registered off-chain: tier {reg.verification_tier} ({reg.outcome})")
 
     client = IntegrityClient(
         agent_id=did,
