@@ -19,6 +19,7 @@ import { ClaimAgentModal } from '../components/ui/ClaimAgentModal';
 import { SubTabs } from '../components/ui/SubTabs';
 import { useDashboard } from '../context/DashboardContext';
 import { oracle, type AisResponse, type AgentResponse, type AuditLogEntryDto, type Erc8004BindingDto, type ProvenanceEntryDto, type WalletResponse } from '../services/oracle';
+import { actorOf, onchainContractRows } from '../chain/v3';
 import { graphMemory, type MerkleRoot, type StoreStatus } from '../services/graphMemory';
 import { readAgentBalances, type OnChainBalance } from '../integrity/wallet/chainClient';
 import { ALLOW_UNSCOPED_AGENT_DIRECTORY } from '../config';
@@ -112,7 +113,7 @@ export default function ProtocolDashboardPage() {
       if (aisResult.status === 'fulfilled') setAis(aisResult.value);
       if (detailResult.status === 'fulfilled') {
         setDetail(detailResult.value);
-        const sovereignAgent = detailResult.value.primitives?.sovereign_agent;
+        const sovereignAgent = actorOf(detailResult.value);
         if (sovereignAgent && ethers.isAddress(sovereignAgent)) {
           readAgentBalances(sovereignAgent)
             .then(balance => { if (!active) return; setOnChainBalance(balance); setEthBalance(balance.eth); })
@@ -131,7 +132,8 @@ export default function ProtocolDashboardPage() {
     return () => { active = false; };
   }, [selectedAgent, refreshNonce]);
 
-  const primitiveRows = useMemo(() => detail?.primitives ? Object.entries(detail.primitives) : [], [detail]);
+  const primitiveRows = useMemo(() => onchainContractRows(detail), [detail]);
+  const actor = actorOf(detail);
   const nav = NAVIGATION_ITEMS;
 
   return (
@@ -169,7 +171,7 @@ export default function ProtocolDashboardPage() {
                 </div>
                 <div className="identity-lines">
                   <EvidenceValue label="ERC-8004 / DID" value={selectedAgent?.id} />
-                  <EvidenceValue label="Sovereign agent" value={detail?.primitives?.sovereign_agent} />
+                  <EvidenceValue label="Sovereign agent" value={actor} />
                   <EvidenceValue label="NFT owner" value={erc8004?.nft_owner_address} />
                   <EvidenceValue label="Agent wallet" value={erc8004?.agent_wallet_address} />
                   <div className="ais-score">
@@ -248,7 +250,7 @@ export default function ProtocolDashboardPage() {
               </div>
               <div className="wallet-address-row">
                 <span>Agent wallet · on-chain resolved</span>
-                <code>{short(detail?.primitives?.sovereign_agent, 12, 10)}</code>
+                <code>{short(actor, 12, 10)}</code>
                 <small>Controller and signer relationship are shown only when independently verified by ERC-8004 data.</small>
               </div>
               <div className="balance-grid">
@@ -257,7 +259,7 @@ export default function ProtocolDashboardPage() {
               </div>
               <div className="wallet-actions">
                 <button className="primary-button" onClick={() => void connectWallet()}><ArrowUpFromLine size={16} />Connect external signer</button>
-                <button className="secondary-button" onClick={() => void copyText(detail?.primitives?.sovereign_agent)}><ArrowDownToLine size={16} />Copy receive address</button>
+                <button className="secondary-button" onClick={() => void copyText(actor)}><ArrowDownToLine size={16} />Copy receive address</button>
               </div>
               {onChainBalance && <div className="source-line">On-chain read · Base Sepolia · block {onChainBalance.blockNumber} · {onChainBalance.itkSymbol} {onChainBalance.itk}</div>}
             </div>
@@ -317,8 +319,8 @@ export default function ProtocolDashboardPage() {
                   {primitiveRows.map(([name, address]) => (
                     <tr key={name}>
                       <td><code>{short(String(address), 11, 8)}</code></td>
-                      <td><strong>{name.replace(/_/g, ' ')}</strong><small>Resolved by Oracle from agent registry</small></td>
-                      <td>Protocol primitive</td>
+                      <td><strong>{name.replace(/_/g, ' ')}</strong><small>From the agent's AgentRegistry record (Oracle-synced)</small></td>
+                      <td>{name === 'sovereign_agent' ? 'Bound actor' : 'Registry record'}</td>
                       <td>{erc8004 ? short(erc8004.nft_owner_address, 8, 6) : 'Unverified'}</td>
                       <td><State ok={Boolean(address && !/^0x0+$/i.test(String(address)))}>{address && !/^0x0+$/i.test(String(address)) ? 'Resolved' : 'Missing'}</State></td>
                     </tr>
