@@ -19,7 +19,9 @@ from uuid import uuid4
 import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
-from app.deps import get_pool
+from app import oracle_client
+from app.config import Settings
+from app.deps import get_pool, get_settings
 
 router = APIRouter()
 
@@ -54,25 +56,10 @@ async def build_agent_response_from_db(pool: asyncpg.Pool, agent_id: str) -> dic
         return None
     if row is None:
         return None
-    prim = await pool.fetchrow(
-        "SELECT * FROM public.agent_primitives WHERE agent_id = $1 ORDER BY resolved_at DESC LIMIT 1",
-        agent_id,
-    )
     handle = await pool.fetchval(
         "SELECT handle FROM public.xns_handles WHERE agent_id = $1 LIMIT 1",
         agent_id,
     )
-    primitives_dto = None
-    if prim:
-        primitives_dto = {
-            "sovereign_agent": prim["sovereign_agent_address"],
-            "state_anchor": prim["state_anchor_address"],
-            "reputation_registry": prim["reputation_registry_address"],
-            "slasher": prim["slasher_address"],
-            "verifier_registry": prim["verifier_registry_address"],
-            "compliance_gate": prim["compliance_gate_address"],
-            "agent_profile": prim["agent_profile_address"],
-        }
     did_doc = row["did_document"]
     if isinstance(did_doc, str):
         try:
@@ -88,8 +75,12 @@ async def build_agent_response_from_db(pool: asyncpg.Pool, agent_id: str) -> dic
         "created_at": row["created_at"].isoformat() if row["created_at"] else datetime.now(timezone.utc).isoformat(),
         "has_ed25519_key": bool(row["ed25519_pubkey"]),
         "has_eth_address": bool(row["eth_address"]),
-        "primitives": primitives_dto,
-        "primitives_source": "supabase_oracle_registry" if primitives_dto else "unregistered",
+        # Fallback copy only (the real Oracle was unreachable). The v2 per-agent primitives
+        # are gone (registration v3); the on-chain record is only known to the real Oracle.
+        "primitives": None,
+        "primitives_source": "unavailable",
+        "onchain": None,
+        "source": "userapi_db_fallback",
         "did_document": did_doc,
     }
 
@@ -100,12 +91,17 @@ async def oracle_healthz() -> dict[str, Any]:
 
 
 @router.get("/v1/agents")
-async def list_agents(pool: asyncpg.Pool = Depends(get_pool)) -> list[dict[str, Any]]:
+async def list_agents(
+    pool: asyncpg.Pool = Depends(get_pool), settings: Settings = Depends(get_settings)
+) -> list[dict[str, Any]]:
+    live = await oracle_client.oracle_get("/v1/agents", settings)
+    if live.status == 200 and isinstance(live.body, list):
+        return live.body
+    # Fallback: the database copy, when the real Oracle can't answer.
     rows = await pool.fetch("""
         SELECT a.id, a.verification_tier, a.created_at,
-               p.controller_address, x.handle
+               NULL::text AS controller_address, x.handle
         FROM public.agents a
-        LEFT JOIN public.agent_primitives p ON p.agent_id = a.id
         LEFT JOIN public.xns_handles x ON x.agent_id = a.id
         ORDER BY a.created_at DESC
     """)
@@ -127,10 +123,18 @@ async def list_agents(pool: asyncpg.Pool = Depends(get_pool)) -> list[dict[str, 
 
 
 @router.get("/v1/agent/{agent_id}")
-async def get_agent(agent_id: str, pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
+async def get_agent(
+    agent_id: str, pool: asyncpg.Pool = Depends(get_pool), settings: Settings = Depends(get_settings)
+) -> dict[str, Any]:
+    live = await oracle_client.oracle_get(f"/v1/agent/{agent_id}", settings)
+    if live.status == 200:
+        return live.body
+    if live.status == 404:
+        raise HTTPException(status_code=404, detail="agent not found on oracle")
+    # The real Oracle couldn't answer (unreachable / 5xx): serve the database copy if any.
     data = await build_agent_response_from_db(pool, agent_id)
     if data is None:
-        raise HTTPException(status_code=404, detail="agent not found on oracle")
+        raise HTTPException(status_code=503, detail=live.error or f"oracle returned HTTP {live.status}")
     return data
 
 
@@ -353,35 +357,16 @@ async def get_agent_compliance(agent_id: str) -> dict[str, Any]:
 
 
 @router.get("/v1/agent/{agent_id}/wallet")
-async def get_agent_wallet(agent_id: str, pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
-    prim = await pool.fetchrow("SELECT sovereign_agent_address FROM public.agent_primitives WHERE agent_id = $1 LIMIT 1", agent_id)
-    sa = prim["sovereign_agent_address"] if prim else "0x52f9ea2100000000000000000000000068fed133"
-    now = datetime.now(timezone.utc).isoformat()
-    return {
-        "agent_id": agent_id,
-        "sovereign_agent": sa,
-        "itk_balance": "2500.00",
-        "transaction_history": [
-            {
-                "id": "tx-stake-01",
-                "type": "STAKE",
-                "asset": "ITK",
-                "amount": "2500.00",
-                "usd": "2500.00",
-                "agent": agent_id,
-                "status": "CONFIRMED",
-                "time": now,
-            }
-        ],
-        "allowances": [
-            {
-                "agent": agent_id,
-                "limit": "1000.00",
-                "spent": 42.5,
-                "status": "ACTIVE",
-            }
-        ],
-    }
+async def get_agent_wallet(agent_id: str, settings: Settings = Depends(get_settings)) -> dict[str, Any]:
+    """The real Oracle's wallet view, passed through. Never fabricated: this route used to return
+    a hardcoded SovereignAgent address and a fixed "2500.00" ITK balance (which the console's
+    `ethers.formatEther` cannot even parse, since it expects a wei string)."""
+    live = await oracle_client.oracle_get(f"/v1/agent/{agent_id}/wallet", settings)
+    if live.status == 200:
+        return live.body
+    if live.status == 404:
+        raise HTTPException(status_code=404, detail="no on-chain wallet for this agent")
+    raise HTTPException(status_code=503, detail=live.error or f"oracle returned HTTP {live.status}")
 
 
 @router.get("/v1/agent/{agent_id}/baas")
