@@ -46,3 +46,45 @@ def test_roster_is_the_union_cortex_serves(tmp_path):
 def test_roster_serves_without_identity_snapshot(tmp_path):
     g = tmp_path / "g.sqlite3"; _graph(g)
     assert "did:a" in {a["agent_id"] for a in cortex_agent_roster(g, None)}
+
+
+def test_roster_supports_super_cortex_provenance_schema(tmp_path):
+    sc_db = tmp_path / "provenance.db"
+    c = sqlite3.connect(sc_db)
+    c.executescript("""
+        CREATE TABLE agents (
+            agent_id TEXT PRIMARY KEY,
+            name TEXT,
+            default_scope_id TEXT,
+            client_type TEXT,
+            status TEXT,
+            last_active_at TEXT,
+            created_at TEXT
+        );
+        CREATE TABLE exchanges (
+            exchange_id TEXT PRIMARY KEY,
+            session_id TEXT,
+            agent_id TEXT,
+            created_at TEXT
+        );
+        CREATE TABLE memories (
+            id TEXT PRIMARY KEY,
+            text TEXT,
+            lifecycle_status TEXT,
+            namespace TEXT,
+            metadata_json TEXT,
+            created_at TEXT
+        );
+        INSERT INTO agents VALUES ('agy', 'Antigravity Controller', 'agent:agy', 'antigravity', 'active', '2026-11-17T00:00:00Z', '2026-11-17T00:00:00Z');
+        INSERT INTO exchanges VALUES ('ex1', 'sess_1', 'agy', '2026-11-17T01:00:00Z');
+        INSERT INTO memories VALUES ('m1', 'Fact 1', 'active', 'agent-agy', '{"agent_id":"agy"}', '2026-11-17T02:00:00Z');
+    """)
+    c.commit()
+    c.close()
+
+    by_id = {a["agent_id"]: a for a in cortex_agent_roster(sc_db, None)}
+    assert "agy" in by_id
+    assert by_id["agy"]["memories"] == 1
+    assert by_id["agy"]["sessions"] == 1
+    assert by_id["agy"]["agent_name"] == "Antigravity Controller"
+
