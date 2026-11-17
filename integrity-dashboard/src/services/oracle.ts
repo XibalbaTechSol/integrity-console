@@ -23,6 +23,10 @@ export interface AgentResponse {
     primitives: PrimitiveSetDto | null;
     primitives_source: string;
     did_document: Record<string, unknown> | null;
+    /** Registration v3: the synced `AgentRegistry` record, or null when not registered on-chain. */
+    onchain?: OnchainRecordDto | null;
+    /** An active on-chain record with a bound actor. */
+    settlement_eligible?: boolean;
 }
 
 export interface Erc8004BindingDto {
@@ -363,8 +367,8 @@ export interface IntentOutcomeDto {
 }
 
 // backend::handlers::get_unregistered_agents — real "shadow AI" discovery: DIDs the
-// oracle has telemetry/audit evidence for that never registered via
-// POST /v1/agent/register. See db::list_unregistered_agents' doc comment.
+// oracle has telemetry/audit evidence for that never registered with the Oracle.
+// See db::list_unregistered_agents' doc comment.
 export interface UnregisteredAgentDto {
     agent_id: string;
     source: 'otel' | 'audit_log';
@@ -414,27 +418,72 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     return res.json();
 }
 
-// POST /v1/agent/register — mirrors backend::handlers::RegisterAgentRequest. The
-// oracle independently re-verifies `primitives` against XibalbaAgentRegistry on-chain
-// and rejects a mismatch, so these MUST be the real addresses the factory registered.
-export interface RegisterAgentRequest {
+// Registration v3 (backend::handlers::OffchainRegisterRequest). The proof is an Ed25519
+// signature by the agent's own key; see services/agentRegistration.ts for how it is built.
+export interface OffchainRegisterRequest {
     did: string;
-    did_document: Record<string, unknown>;
-    primitives: PrimitiveSetDto;
-    ed25519_pubkey_hex?: string;
-    eth_address_hex?: string;
-    /** Mandatory: every agent completing this registration must claim a unique
-     *  Oracle-local XNS handle in the same request (see migration 0022's header note). */
-    handle: string;
+    ed25519_pubkey_hex: string;
+    /** Unix seconds; the Oracle accepts +/-300 s of its clock. */
+    timestamp: number;
+    signature: string;
+    did_document: Record<string, unknown> | null;
+    /** Optional XNS handle claimed in the same request. */
+    handle?: string;
 }
 
-export interface RegisterAgentResponse {
-    id: string;
+export interface OffchainRegisterResponse {
+    agent_id: string;
     verification_tier: number;
-    handle: string;
-    primitives: PrimitiveSetDto;
-    controller: string;
+    outcome: 'created' | 'already_registered' | 'key_attached';
+    handle: string | null;
+}
+
+// backend::handlers::OnchainAttestationRequest. `actor` / `domain_id` omitted = zero
+// (an existence-only record).
+export interface OnchainAttestationRequest {
+    guardian: string;
+    actor?: string;
+    domain_id?: string;
+    uri: string;
+    deadline: number;
+    /** Ed25519 signature (hex) over the raw 32-byte EIP-712 `RegisterAgent` digest. */
+    signature: string;
+}
+
+export interface OnchainAttestationResponse {
+    agent_id: string;
+    digest: string;
+    /** 65-byte ECDSA signature over `digest`: the `proof` argument of `register`. */
+    attestation: string;
+    attester: string;
+    proof_kind: number;
+    chain_id: number;
+    agent_registry: string;
+    pubkey: string;
+    guardian: string;
+    actor: string;
     domain_id: string;
+    uri: string;
+    deadline: number;
+}
+
+// backend::handlers::OnchainRecordDto — the agent's AgentRegistry record as last synced.
+export interface OnchainRecordDto {
+    agent_id: string;
+    chain_id: number;
+    agent_registry: string;
+    pubkey: string;
+    guardian: string;
+    actor: string | null;
+    domain_id: string;
+    uri: string;
+    registered_at: number;
+    retired_at: number | null;
+    proof_kind: number;
+    active: boolean;
+    settlement_eligible: boolean;
+    synced_block: number;
+    synced_at: string;
 }
 
 // Verification Ladder (backend::verification / backend::kyc) — registration establishes
@@ -528,8 +577,14 @@ export const oracle = {
         if (!sa || /^0x0+$/i.test(sa)) throw new Error('Agent has no on-chain SovereignAgent yet (not fully registered).');
         return sa;
     },
-    // Records an agent in the oracle DB AFTER its primitives are registered on-chain.
-    register: (req: RegisterAgentRequest) => post<RegisterAgentResponse>('/v1/agent/register', req),
+    // Registration v3: gasless off-chain registration, proven by the agent's Ed25519 key.
+    registerOffchain: (req: OffchainRegisterRequest) =>
+        post<OffchainRegisterResponse>('/v1/agent/register/offchain', req),
+    // The Oracle's attestation over the EIP-712 RegisterAgent digest (the `proof` for register).
+    onchainAttestation: (id: string, req: OnchainAttestationRequest) =>
+        post<OnchainAttestationResponse>(`/v1/agent/${encodeURIComponent(id)}/onchain/attestation`, req),
+    // Re-reads AgentRegistry.resolveDID and stores it; the chain, not the request, is the source.
+    onchainSync: (id: string) => post<OnchainRecordDto>(`/v1/agent/${encodeURIComponent(id)}/onchain/sync`, {}),
     // Every real agent the oracle knows about — no client-side mock filter. Mock/seeded
     // agents are gated server-side via the /v1/protocol/settings mock_mode flag instead.
     listAgents: () => get<AgentSummary[]>('/v1/agents'),
