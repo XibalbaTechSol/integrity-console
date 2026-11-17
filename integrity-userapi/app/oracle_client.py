@@ -57,3 +57,34 @@ async def fetch_agent(
         return AgentLookupResult(live_data=resp.json(), error=None)
     except ValueError as exc:
         return AgentLookupResult(live_data=None, error=f"oracle returned malformed JSON: {exc}")
+
+
+@dataclass
+class OracleResponse:
+    """Result of a read-only GET against integrity-oracle. `status` is None when the Oracle
+    could not be reached at all (timeout, refused, DNS) -- distinct from any HTTP status."""
+
+    status: int | None
+    body: Any | None
+    error: str | None
+
+
+async def oracle_get(path: str, settings: Settings) -> OracleResponse:
+    """GET `path` on integrity-oracle and return its status + parsed JSON body, never raising.
+
+    Used by the Oracle-compatible routes in `oracle_routes.py`, so the hosted console reads the
+    real Oracle (including the v3 `onchain` record) rather than this service's database copy.
+    """
+    url = f"{settings.oracle_url.rstrip('/')}{path}"
+    try:
+        async with httpx.AsyncClient(timeout=settings.oracle_timeout_seconds) as client:
+            resp = await client.get(url)
+    except httpx.HTTPError as exc:
+        return OracleResponse(status=None, body=None, error=f"oracle unreachable: {exc}")
+    try:
+        body = resp.json()
+    except ValueError:
+        body = None
+    if resp.status_code == 200 and body is None:
+        return OracleResponse(status=502, body=None, error="oracle returned malformed JSON")
+    return OracleResponse(status=resp.status_code, body=body, error=None)
