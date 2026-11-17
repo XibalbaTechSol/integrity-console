@@ -14,24 +14,11 @@ export const ERC20_ABI = [
   'event Transfer(address indexed from, address indexed to, uint256 value)',
 ] as const;
 
-export const AGENT_PROFILE_ABI = [
-  'function setProfile(bytes32 primaryDomain, string profileURI)',
-  'function primaryDomain() view returns (bytes32)',
-  'function profileURI() view returns (string)',
-] as const;
-
-// Read-only view of an agent's Slasher clone (a kept PrimitiveSet template). The Health page's
-// quarantine scan calls it directly, because the oracle's /v1/agent/{id}/stake route was cut.
-// `lockedStakeOf(sovereignAgent) > 0` is the same signal bcc_middleware/app/quarantine.py gates on.
-export const SLASHER_READ_ABI = [
-  'function lockedStakeOf(address) view returns (uint256)',
-] as const;
-
 /**
  * Route a call through the agent's own SovereignAgent.execute: the protocol's calling
- * convention for every registered-agent-gated contract (AgentProfile.setProfile,
- * SmartBAA.sign, EHRGate.verifyAndLogAccess, ...). `msg.sender` inside the target is then the
- * SovereignAgent, which is what XibalbaAgentRegistry resolves against. The connected signer
+ * convention for every registered-agent-gated contract (SmartBAA.sign,
+ * EHRGate.verifyAndLogAccess, ...). `msg.sender` inside the target is then the SovereignAgent,
+ * the actor AgentRegistry binds to the agent's DID. The connected signer
  * MUST be the agent's controller (SovereignAgent.execute is onlyController) or the transaction
  * reverts with NotController.
  */

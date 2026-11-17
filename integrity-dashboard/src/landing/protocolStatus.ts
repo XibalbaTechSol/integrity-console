@@ -140,7 +140,7 @@ export const MISSION_PHASES: readonly MissionPhase[] = [
       'signer custody, verifier coverage, external security review and key-custody evidence all ' +
       'remain open. Queued receipts are not settlement proof.',
     open: [
-      'Testnet StateAnchor deployment and Oracle connectivity remain separate gates.',
+      'The Base Sepolia v3 deployment (AgentRegistry, ActionAnchor) and Oracle connectivity remain separate gates.',
       'Hosted multi-tenant scale, billing and payment processing are deferred.',
       'Real-PHI operation is a separate gate, and still needs SOC 2 Type II and a BAA.',
     ],

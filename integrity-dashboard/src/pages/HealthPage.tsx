@@ -21,7 +21,8 @@ import { bccMiddleware } from '../services/bccMiddleware';
 import { oracle, type BaaDto, type AuditLogEntryDto } from '../services/oracle';
 import { ITK_TOKEN_ADDRESS, ARBITRATOR_ADDRESS, EHR_GATE_ADDRESS, RPC_URL, XIBALBA_TEST_AGENT_ID } from '../constants';
 import { SMART_BAA_ABI, EHR_GATE_ABI } from '../chain/shield';
-import { ERC20_ABI, SLASHER_READ_ABI, executeAsAgent } from '../chain/agent';
+import { ERC20_ABI, executeAsAgent } from '../chain/agent';
+import { actorOf, resolveStakeVault, STAKE_VAULT_READ_ABI } from '../chain/v3';
 import { usePinnedAgent } from '../hooks/usePinnedAgent';
 import { BaaAuthoringPanel } from '../components/health/BaaAuthoringPanel';
 
@@ -81,12 +82,11 @@ interface ConsentGate {
   grantedAt: number;
 }
 
-// Real quarantine semantics, mirroring bcc_middleware/app/quarantine.py exactly:
-// an agent is quarantined iff Slasher.lockedStakeOf(sovereignAgent) > 0 on the agent's own
-// Slasher clone, read directly on-chain (the oracle's /stake route was cut in integrity-core's
-// execution plan A1). Quarantine clears itself the moment the arbitrator resolves the
-// dispute (bcc_middleware never builds a manual "restore" step, so this UI doesn't
-// fake one either — see Slasher.sol's resolveDispute).
+// Real quarantine semantics, mirroring bcc_middleware/app/quarantine.py exactly: an agent is
+// quarantined iff StakeVault.disputeLockedOf(actor) > 0, with `actor` its AgentRegistry actor
+// and the vault resolved through AgentRegistry.trustConfig() -> TrustConfig.stakeVault().
+// Quarantine clears itself the moment governance resolves the dispute (resolveDispute always
+// lowers the hold), so this UI has no manual "restore" step.
 interface QuarantinedAgent {
   agentId: string;
   agentDid: string;
@@ -111,9 +111,11 @@ export default function HealthPage() {
   const [arbitratorQueueLoading, setArbitratorQueueLoading] = useState(false);
   const [quarantinedAgents, setQuarantinedAgents] = useState<QuarantinedAgent[]>([]);
   const [quarantineLoading, setQuarantineLoading] = useState(true);
-  // Agents whose Slasher could not be read (no primitives on record, RPC failure). Shown
-  // rather than dropped: bcc_middleware treats "cannot verify" exactly like quarantined.
+  // Agents whose dispute hold could not be read (vault not deployed, RPC failure), and agents
+  // with no bound actor. bcc_middleware fails OPEN on both (NO_ACTOR / CANNOT_VERIFY) except
+  // for its high-risk intents, which it denies on an unverifiable read.
   const [quarantineUnverified, setQuarantineUnverified] = useState(0);
+  const [quarantineNoActor, setQuarantineNoActor] = useState(0);
   const [loading, setLoading] = useState(true);
   const [busyBaa, setBusyBaa] = useState<string | null>(null);
 
@@ -189,31 +191,32 @@ export default function HealthPage() {
     fetchHealthData();
   }, [fetchHealthData]);
 
-  // Real quarantine scan: for every registered agent, resolve its PrimitiveSet through the
-  // oracle (which re-verifies it against XibalbaAgentRegistry) and read
-  // `Slasher.lockedStakeOf(sovereignAgent)` on-chain, the exact check bcc_middleware's
-  // quarantine.py enforces at the request-gating layer. This just surfaces that same state.
+  // Real quarantine scan: for every registered agent, read its AgentRegistry actor from the
+  // Oracle's synced `onchain` record and `StakeVault.disputeLockedOf(actor)` on-chain, the exact
+  // check bcc_middleware's quarantine.py enforces at the request-gating layer.
   const refreshQuarantine = useCallback(async () => {
     if (agentsLoading) return;
     setQuarantineLoading(true);
     try {
       const provider = new ethers.JsonRpcProvider(RPC_URL);
+      // One vault for every agent; a failed resolution makes every actor unverifiable.
+      const vaultAddr = await resolveStakeVault(provider).catch(() => null);
+      const vault = vaultAddr ? new ethers.Contract(vaultAddr, STAKE_VAULT_READ_ABI, provider) : null;
       const results = await Promise.all(
         (agents as any[]).map(async (a) => {
           try {
-            const detail = await oracle.getAgent(a.id);
-            const slasher = detail.primitives?.slasher;
-            const sovereignAgent = detail.primitives?.sovereign_agent;
-            if (!slasher || !sovereignAgent) return { a, locked: null };
-            const contract = new ethers.Contract(slasher, SLASHER_READ_ABI, provider);
-            const locked: bigint = await contract.lockedStakeOf(sovereignAgent);
-            return { a, sovereignAgent, locked };
+            const actor = actorOf(await oracle.getAgent(a.id));
+            if (!actor) return { a, noActor: true, locked: null };
+            if (!vault) return { a, locked: null };
+            const locked: bigint = await vault.disputeLockedOf(actor);
+            return { a, sovereignAgent: actor, locked };
           } catch {
             return { a, locked: null };
           }
         })
       );
-      setQuarantineUnverified(results.filter(r => r.locked === null).length);
+      setQuarantineNoActor(results.filter(r => 'noActor' in r).length);
+      setQuarantineUnverified(results.filter(r => r.locked === null && !('noActor' in r)).length);
       const quarantined = results
         .filter((r): r is { a: any; sovereignAgent: string; locked: bigint } => r.locked !== null && r.locked > 0n)
         .map(({ a, sovereignAgent, locked }) => ({
@@ -931,12 +934,18 @@ export default function HealthPage() {
               <Panel title="Agent Circuit Breakers (Quarantine Zone)" icon={<AlertTriangle size={18} color="var(--danger)" />}>
                 <div className="flex-col gap-4">
                   <p className="text-muted" style={{ fontSize: '0.85rem' }}>
-                    Real quarantine state: an agent is quarantined the moment its Slasher clone shows locked stake (an unresolved dispute), the exact same <code>lockedStakeOf(agent) &gt; 0</code> check <code>bcc_middleware</code>'s pre-execution gate enforces on every request. There's no separate "restore" action to build — quarantine clears itself the instant the arbitrator resolves the dispute via <code>SmartBAA.arbitrate</code> (Smart BAAs tab) or the dispute is otherwise released on-chain.
+                    Real quarantine state: an agent is quarantined the moment <code>StakeVault.disputeLockedOf(actor) &gt; 0</code> (an unresolved dispute holds part of its stake), the exact check <code>bcc_middleware</code>'s pre-execution gate enforces on every request. There's no separate "restore" action — quarantine clears itself the instant governance resolves the dispute on-chain.
                   </p>
 
                   {!quarantineLoading && quarantineUnverified > 0 && (
                     <p className="text-muted" style={{ fontSize: '0.8rem', color: 'var(--warning)' }}>
-                      {quarantineUnverified} agent{quarantineUnverified === 1 ? '' : 's'} could not be checked (no Slasher on record or the RPC read failed). The pre-execution gate treats these as quarantined.
+                      {quarantineUnverified} agent{quarantineUnverified === 1 ? '' : 's'} could not be checked (StakeVault not deployed on this network yet, or the RPC read failed). The pre-execution gate admits these, except for its high-risk intents, which it denies on an unverifiable read.
+                    </p>
+                  )}
+
+                  {!quarantineLoading && quarantineNoActor > 0 && (
+                    <p className="text-muted" style={{ fontSize: '0.8rem' }}>
+                      {quarantineNoActor} agent{quarantineNoActor === 1 ? ' is' : 's are'} off-chain (no actor bound in AgentRegistry), so there is no stake to dispute. The gate treats them like an unverifiable read.
                     </p>
                   )}
 

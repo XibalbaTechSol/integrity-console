@@ -275,7 +275,7 @@ export const TelemetryStream = () => {
                                                             <Lock size={12} /> Cryptographic Provenance
                                                         </div>
                                                         {/* Real fields from the signed TelemetryEventDetailDto — the Merkle leaf that gets
-                                                            anchored on-chain via StateAnchor, its nonce, and the oracle's ZK-verify result. */}
+                                                            anchored on-chain (ActionAnchor), its nonce, and the oracle's ZK-verify result. */}
                                                         <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                                             <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Event ID: </span><span style={{ fontFamily: 'monospace', color: 'white' }}>{data.id}</span></div>
                                                             <div><span style={{ color: 'rgba(255,255,255,0.4)' }}>Merkle Leaf: </span><span style={{ fontFamily: 'monospace', color: 'white', wordBreak: 'break-all' }}>{data.metadata?.leaf_hash || '—'}</span></div>
