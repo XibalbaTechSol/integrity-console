@@ -5,26 +5,37 @@ import { Panel } from '../shared/Panel';
 import { Shield, Save, Loader2 } from 'lucide-react';
 import { useDashboard } from '../../context/DashboardContext';
 import { oracle } from '../../services/oracle';
-import { RPC_URL } from '../../constants';
-import { AGENT_PROFILE_ABI, executeAsAgent } from '../../chain/agent';
+import { AGENT_REGISTRY_ADDRESS } from '../../constants';
+import { AGENT_REGISTRY_ABI } from '../../chain/v3';
 
-// Real AgentProfile wiring (no mock api.updateAgentMetadata). AgentProfile only affords
-// setProfile(primaryDomain, profileURI) — there is no on-chain field for arbitrary privacy
-// flags. So the panel's preferences are serialized into the agent's on-chain profileURI as a
-// data: JSON document (a legitimate profile-document pointer that happens to be inline), while
-// the agent's existing primaryDomain is preserved. setProfile is admin-gated to the
-// SovereignAgent, so the write routes through SovereignAgent.execute (executeAsAgent). The
-// current prefs are read straight back from the on-chain profileURI on load.
+// Registration v3 wiring (v2-graph deletion C1). The agent's metadata lives in its
+// AgentRegistry record's `uri` (the v2 per-agent profile clone is gone). There is no on-chain field
+// for arbitrary privacy flags, so the preferences are serialized into that uri as a
+// data:application/json document. `setUri` is guarded to the record's guardian, so the
+// connected wallet must be the guardian. Prefs are read back from the Oracle's synced record.
 const DEFAULT_PREFS = { privacy_mode: 'public' as const, publish_telemetry: true, publish_transactions: true, publish_staking: true };
+const DATA_JSON = 'data:application/json,';
 
-function parseProfileURI(uri: string): typeof DEFAULT_PREFS {
+/** The JSON document a record uri carries, `{}` for an empty uri, or null for any other uri. */
+export function parseRecordUri(uri: string | null | undefined): Record<string, unknown> | null {
+  if (!uri) return {};
+  if (!uri.startsWith(DATA_JSON)) return null;
   try {
-    if (uri?.startsWith('data:')) {
-      const json = decodeURIComponent(uri.slice(uri.indexOf(',') + 1));
-      return { ...DEFAULT_PREFS, ...JSON.parse(json) };
-    }
-  } catch { /* not our JSON document */ }
-  return DEFAULT_PREFS;
+    const doc = JSON.parse(decodeURIComponent(uri.slice(DATA_JSON.length)));
+    return doc && typeof doc === 'object' && !Array.isArray(doc) ? doc : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The uri to write: `prefs` merged into the record's existing JSON document, so other keys
+ * survive. Throws rather than overwrite a uri that points somewhere else (e.g. an https DID doc).
+ */
+export function mergePrefsIntoUri(existing: string | null | undefined, prefs: typeof DEFAULT_PREFS | Record<string, unknown>): string {
+  const doc = parseRecordUri(existing);
+  if (doc === null) throw new Error('The record uri points at an external document; refusing to overwrite it.');
+  return DATA_JSON + encodeURIComponent(JSON.stringify({ ...doc, ...prefs }));
 }
 
 export function PrivacyPanel() {
@@ -35,20 +46,16 @@ export function PrivacyPanel() {
   const [publishStaking, setPublishStaking] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Load the real prefs from the agent's on-chain AgentProfile.profileURI.
+  // Load the prefs from the agent's AgentRegistry record uri (the Oracle's synced copy).
   useEffect(() => {
     if (!selectedAgent) return;
     let active = true;
     (async () => {
       try {
         const detail = await oracle.getAgent(selectedAgent.eth_address);
-        const profileAddr = detail.primitives?.agent_profile;
-        if (!profileAddr || /^0x0+$/i.test(profileAddr)) return;
-        const provider = new ethers.JsonRpcProvider(RPC_URL);
-        const profile = new ethers.Contract(profileAddr, AGENT_PROFILE_ABI, provider);
-        const uri: string = await profile.profileURI();
-        if (!active) return;
-        const p = parseProfileURI(uri);
+        const doc = parseRecordUri(detail.onchain?.uri);
+        if (!active || !doc) return;
+        const p = { ...DEFAULT_PREFS, ...doc } as typeof DEFAULT_PREFS;
         setPrivacyMode(p.privacy_mode);
         setPublishTelemetry(p.publish_telemetry);
         setPublishTransactions(p.publish_transactions);
@@ -63,25 +70,26 @@ export function PrivacyPanel() {
     if (!walletAddress) { addToast('error', 'Connect the agent controller wallet to save on-chain.'); return; }
     setIsSaving(true);
     try {
+      if (!AGENT_REGISTRY_ADDRESS) throw new Error('AgentRegistry is not deployed on this network yet.');
       const detail = await oracle.getAgent(selectedAgent.eth_address);
-      const profileAddr = detail.primitives?.agent_profile;
-      const sovereignAgent = detail.primitives?.sovereign_agent;
-      if (!profileAddr || /^0x0+$/i.test(profileAddr)) throw new Error('Agent has no deployed AgentProfile clone.');
-      if (!sovereignAgent || /^0x0+$/i.test(sovereignAgent)) throw new Error('Agent has no on-chain SovereignAgent.');
+      const rec = detail.onchain;
+      if (!rec || !rec.active) throw new Error('Agent has no active AgentRegistry record (register it on-chain first).');
 
       const eth = (window as any).ethereum;
       const signer = await new ethers.BrowserProvider(eth).getSigner();
-      // Preserve the agent's existing primaryDomain; only the profileURI changes.
-      const readProfile = new ethers.Contract(profileAddr, AGENT_PROFILE_ABI, signer);
-      const primaryDomain: string = await readProfile.primaryDomain();
+      if ((await signer.getAddress()).toLowerCase() !== rec.guardian.toLowerCase()) {
+        throw new Error(`Connect the record's guardian wallet (${rec.guardian}); only it can change the uri.`);
+      }
 
       const prefs = { privacy_mode: privacyMode, publish_telemetry: publishTelemetry, publish_transactions: publishTransactions, publish_staking: publishStaking };
-      const profileURI = 'data:application/json,' + encodeURIComponent(JSON.stringify(prefs));
-      const data = new ethers.Interface(AGENT_PROFILE_ABI as any).encodeFunctionData('setProfile', [primaryDomain, profileURI]);
+      const uri = mergePrefsIntoUri(rec.uri, prefs);
+      const registry = new ethers.Contract(AGENT_REGISTRY_ADDRESS, AGENT_REGISTRY_ABI, signer);
+      const fingerprint: string = await registry.fingerprintOfDID(rec.agent_id);
 
-      addToast('info', 'Writing profile to chain…');
-      // Route through the real SovereignAgent (admin of the AgentProfile), NOT the DID.
-      await executeAsAgent(signer, sovereignAgent, profileAddr, data);
+      addToast('info', 'Writing preferences to the AgentRegistry record…');
+      await (await registry.setUri(fingerprint, uri)).wait();
+      // Refresh the Oracle's mirror; the chain is the source either way.
+      await oracle.onchainSync(selectedAgent.eth_address).catch(() => undefined);
       addToast('success', 'Privacy configurations written on-chain.');
     } catch (err: any) {
       addToast('error', `Failed to update profile: ${err.shortMessage || err.reason || err.message}`);

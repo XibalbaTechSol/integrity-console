@@ -1,6 +1,6 @@
 // Registration v3 (Phase 4 PR 4.5): the console's client for the Oracle's off-chain
 // registration and on-chain attestation/sync routes. It replaces the legacy v2
-// primitives registration route (the factory flow), which 4.6 deletes from the Oracle.
+// registration route (the factory flow), which 4.6 deletes from the Oracle.
 //
 //   1. Identity: an Ed25519 key, generated in the browser or imported from an SDK
 //      `private_key.pem`. The DID is `did:integrity:` + sha256(raw 32-byte pubkey), the

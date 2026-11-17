@@ -16,8 +16,8 @@ import {
   type AgentKey,
 } from '../../services/agentRegistration';
 
-// Registration v3 (Phase 4 PR 4.5). Replaces the v2 flow (deploy SovereignAgent +
-// StateAnchor, factory registerCore, then the legacy Oracle route), which 4.6 deletes.
+// Registration v3 (Phase 4 PR 4.5). Replaces the v2 flow (a per-agent contract set deployed
+// through the old factory, then the legacy Oracle route), which 4.6 deletes.
 //   1. Identity: an Ed25519 agent key, generated here or imported from an SDK
 //      `private_key.pem`. The DID is sha256(pubkey); the key never leaves this page.
 //   2. Off-chain registration (gasless, no wallet): the key signs a proof the Oracle checks.
