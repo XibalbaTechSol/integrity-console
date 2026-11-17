@@ -38,11 +38,13 @@ function withBearer(target: string, tokenFile: string, extra: ProxyOptions = {})
   }
 }
 
+const cortexUrl = process.env.DASHBOARD_CORTEX_URL ?? 'http://127.0.0.1:4174'
+
 const proxy: Record<string, ProxyOptions> = {
   // Canonical Shield control plane (retired 8421/8765 must not be revived).
   '/api/shield': withBearer('http://127.0.0.1:8435', shieldTokenFile, { changeOrigin: true }),
-  // Root Cortex local API (all agent profiles mounted read-only).
-  '/cortex-api': withBearer('http://127.0.0.1:8420', cortexTokenFile, {
+  // Super-Cortex Studio & API (replaced legacy 8420 xibalba-cortex-local-api).
+  '/cortex-api': withBearer(cortexUrl, cortexTokenFile, {
     changeOrigin: false,
     rewrite: (path) => path.replace(/^\/cortex-api/, ''),
   }),

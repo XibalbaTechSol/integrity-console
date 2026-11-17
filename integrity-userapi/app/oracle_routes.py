@@ -685,17 +685,41 @@ async def shield_bridge_quality(
         conn.close()
 
 
+def _is_super_cortex_schema(conn: sqlite3.Connection) -> bool:
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(memories)").fetchall()}
+    return "lifecycle_status" in cols and "text" in cols
+
+
+async def _load_cortex_db(pool: asyncpg.Pool) -> Path | None:
+    snap = await _load_sqlite_snapshot(pool, "cortex", "provenance.db")
+    if snap is not None:
+        return snap
+    snap = await _load_sqlite_snapshot(pool, "cortex", "tenants/t-97030dfbcc624f369fea981d252855da/graph-memory.sqlite3")
+    if snap is not None:
+        return snap
+    local_sc = Path.home() / ".super-cortex" / "provenance.db"
+    if local_sc.exists():
+        return local_sc
+    return None
+
+
 @router.get("/cortex-api/api/status")
 async def cortex_bridge_status(pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
-    snap = await _load_sqlite_snapshot(pool, "cortex", "tenants/t-97030dfbcc624f369fea981d252855da/graph-memory.sqlite3")
+    snap = await _load_cortex_db(pool)
     if snap is None:
         return {"status": "online", "memories": 0}
     conn = sqlite3.connect(str(snap))
     try:
-        m_cnt = conn.execute("SELECT COUNT(*) FROM memories WHERE status IN ('active', 'confirmed')").fetchone()[0]
-        s_cnt = conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
-        e_cnt = conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0]
-        r_cnt = conn.execute("SELECT COUNT(*) FROM relations").fetchone()[0]
+        if _is_super_cortex_schema(conn):
+            m_cnt = conn.execute("SELECT COUNT(*) FROM memories WHERE lifecycle_status = 'active'").fetchone()[0]
+            s_cnt = conn.execute("SELECT COUNT(DISTINCT session_id) FROM exchanges").fetchone()[0] if _table_exists(conn, "exchanges") else 0
+            e_cnt = conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0] if _table_exists(conn, "entities") else 0
+            r_cnt = conn.execute("SELECT COUNT(*) FROM relations").fetchone()[0] if _table_exists(conn, "relations") else 0
+        else:
+            m_cnt = conn.execute("SELECT COUNT(*) FROM memories WHERE status IN ('active', 'confirmed')").fetchone()[0]
+            s_cnt = conn.execute("SELECT COUNT(*) FROM sessions").fetchone()[0]
+            e_cnt = conn.execute("SELECT COUNT(*) FROM entities").fetchone()[0]
+            r_cnt = conn.execute("SELECT COUNT(*) FROM relations").fetchone()[0]
         return {
             "status": "online",
             "profile_id": "t-97030dfbcc624f369fea981d252855da",
@@ -740,23 +764,47 @@ def cortex_agent_roster(graph_db: Path, tokens_db: Path | None, tenant_id: str =
     conn = sqlite3.connect(str(graph_db))
     conn.row_factory = sqlite3.Row
     try:
-        for r in conn.execute("""
-            SELECT s.agent_id, COUNT(DISTINCT m.id) AS memories,
-                   COUNT(DISTINCT s.session_id) AS sessions, MAX(m.created_at) AS last_seen_at
-            FROM sources s LEFT JOIN memories m ON m.source_id = s.id
-            WHERE s.agent_id IS NOT NULL AND s.agent_id != ''
-            GROUP BY s.agent_id
-        """):
-            e = entry(str(r["agent_id"]))
-            e.update(memories=int(r["memories"] or 0), sessions=int(r["sessions"] or 0), last_seen_at=r["last_seen_at"])
-        if _table_exists(conn, "sessions"):
-            for r in conn.execute("SELECT agent_id, COUNT(*) AS n FROM sessions WHERE agent_id IS NOT NULL AND agent_id != '' GROUP BY agent_id"):
+        if _is_super_cortex_schema(conn):
+            if _table_exists(conn, "agents"):
+                for r in conn.execute("SELECT agent_id, name, client_type, last_active_at FROM agents"):
+                    e = entry(str(r["agent_id"]))
+                    e["agent_name"] = r["name"]
+                    e["device_name"] = r["client_type"]
+                    e["last_seen_at"] = r["last_active_at"]
+            if _table_exists(conn, "exchanges"):
+                for r in conn.execute("SELECT agent_id, COUNT(DISTINCT session_id) AS n, MAX(created_at) AS last_seen FROM exchanges WHERE agent_id IS NOT NULL AND agent_id != '' GROUP BY agent_id"):
+                    e = entry(str(r["agent_id"]))
+                    e["sessions"] = max(e["sessions"], int(r["n"] or 0))
+                    if r["last_seen"] and (not e["last_seen_at"] or r["last_seen"] > e["last_seen_at"]):
+                        e["last_seen_at"] = r["last_seen"]
+            for r in conn.execute("SELECT namespace, metadata_json, created_at FROM memories WHERE lifecycle_status = 'active'"):
+                meta = json.loads(r["metadata_json"] or "{}")
+                aid = str(meta.get("agent_id") or "")
+                if not aid and str(r["namespace"] or "").startswith("agent-"):
+                    aid = str(r["namespace"])[6:]
+                if aid:
+                    e = entry(aid)
+                    e["memories"] += 1
+                    if r["created_at"] and (not e["last_seen_at"] or r["created_at"] > e["last_seen_at"]):
+                        e["last_seen_at"] = r["created_at"]
+        else:
+            for r in conn.execute("""
+                SELECT s.agent_id, COUNT(DISTINCT m.id) AS memories,
+                       COUNT(DISTINCT s.session_id) AS sessions, MAX(m.created_at) AS last_seen_at
+                FROM sources s LEFT JOIN memories m ON m.source_id = s.id
+                WHERE s.agent_id IS NOT NULL AND s.agent_id != ''
+                GROUP BY s.agent_id
+            """):
                 e = entry(str(r["agent_id"]))
-                e["sessions"] = max(e["sessions"], int(r["n"] or 0))
-        if _table_exists(conn, "agent_devices"):
-            for r in conn.execute("SELECT agent_id, display_name FROM agent_devices ORDER BY updated_at DESC"):
-                e = entry(str(r["agent_id"]))
-                e["device_name"] = e["device_name"] or r["display_name"]
+                e.update(memories=int(r["memories"] or 0), sessions=int(r["sessions"] or 0), last_seen_at=r["last_seen_at"])
+            if _table_exists(conn, "sessions"):
+                for r in conn.execute("SELECT agent_id, COUNT(*) AS n FROM sessions WHERE agent_id IS NOT NULL AND agent_id != '' GROUP BY agent_id"):
+                    e = entry(str(r["agent_id"]))
+                    e["sessions"] = max(e["sessions"], int(r["n"] or 0))
+            if _table_exists(conn, "agent_devices"):
+                for r in conn.execute("SELECT agent_id, display_name FROM agent_devices ORDER BY updated_at DESC"):
+                    e = entry(str(r["agent_id"]))
+                    e["device_name"] = e["device_name"] or r["display_name"]
     finally:
         conn.close()
 
@@ -792,7 +840,7 @@ def cortex_agent_roster(graph_db: Path, tokens_db: Path | None, tenant_id: str =
 
 @router.get("/cortex-api/api/agents")
 async def cortex_bridge_agents(pool: asyncpg.Pool = Depends(get_pool)) -> dict[str, Any]:
-    snap = await _load_sqlite_snapshot(pool, "cortex", f"tenants/{_CORTEX_TENANT_ID}/graph-memory.sqlite3")
+    snap = await _load_cortex_db(pool)
     if snap is None:
         return {"agents": [], "oracle_reachable": True}
     try:
@@ -809,12 +857,46 @@ async def cortex_bridge_agent_summary(
     limit: int = Query(default=8, ge=1, le=50),
     pool: asyncpg.Pool = Depends(get_pool),
 ) -> dict[str, Any]:
-    snap = await _load_sqlite_snapshot(pool, "cortex", "tenants/t-97030dfbcc624f369fea981d252855da/graph-memory.sqlite3")
+    snap = await _load_cortex_db(pool)
     if snap is None:
         return {"agent_id": agent_id, "memory_count": 0, "session_count": 0, "recent_memories": []}
     conn = sqlite3.connect(str(snap))
     conn.row_factory = sqlite3.Row
     try:
+        if _is_super_cortex_schema(conn):
+            matched_mems = []
+            for r in conn.execute("SELECT id, text, lifecycle_status, namespace, metadata_json, created_at FROM memories WHERE lifecycle_status = 'active' ORDER BY created_at DESC"):
+                meta = json.loads(r["metadata_json"] or "{}")
+                aid = str(meta.get("agent_id") or "")
+                if not aid and str(r["namespace"] or "").startswith("agent-"):
+                    aid = str(r["namespace"])[6:]
+                if aid == agent_id:
+                    matched_mems.append((r, meta))
+            s_cnt = (
+                conn.execute("SELECT COUNT(DISTINCT session_id) FROM exchanges WHERE agent_id = ?", (agent_id,)).fetchone()[0]
+                if _table_exists(conn, "exchanges")
+                else 0
+            )
+            return {
+                "agent_id": agent_id,
+                "memory_count": len(matched_mems),
+                "session_count": int(s_cnt),
+                "recent_memories": [
+                    {
+                        "id": r["id"],
+                        "content": r["text"],
+                        "status": r["lifecycle_status"],
+                        "created_at": r["created_at"],
+                        "source": {
+                            "kind": meta.get("source_origin", "super_cortex"),
+                            "agent_id": agent_id,
+                            "session_id": meta.get("session_id"),
+                            "role": "assistant",
+                        },
+                    }
+                    for r, meta in matched_mems[:limit]
+                ],
+            }
         m_cnt = conn.execute(
             "SELECT COUNT(*) FROM memories m JOIN sources s ON s.id = m.source_id WHERE s.agent_id = ? AND m.status IN ('active', 'confirmed')",
             (agent_id,),
@@ -851,12 +933,30 @@ async def cortex_bridge_sessions(
     limit: int = Query(default=20, ge=1, le=200),
     pool: asyncpg.Pool = Depends(get_pool),
 ) -> list[dict[str, Any]]:
-    snap = await _load_sqlite_snapshot(pool, "cortex", "tenants/t-97030dfbcc624f369fea981d252855da/graph-memory.sqlite3")
+    snap = await _load_cortex_db(pool)
     if snap is None:
         return []
     conn = sqlite3.connect(str(snap))
     conn.row_factory = sqlite3.Row
     try:
+        if _is_super_cortex_schema(conn):
+            if not _table_exists(conn, "exchanges"):
+                return []
+            if agent_id:
+                rows = conn.execute(
+                    """SELECT session_id AS id, session_id AS external_session_id, 'standard' AS retention_tier,
+                              MIN(created_at) AS started_at, MAX(created_at) AS ended_at, NULL AS summary_memory_id, agent_id
+                       FROM exchanges WHERE agent_id = ? GROUP BY session_id ORDER BY started_at DESC LIMIT ?""",
+                    (agent_id, limit),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """SELECT session_id AS id, session_id AS external_session_id, 'standard' AS retention_tier,
+                              MIN(created_at) AS started_at, MAX(created_at) AS ended_at, NULL AS summary_memory_id, MAX(agent_id) AS agent_id
+                       FROM exchanges GROUP BY session_id ORDER BY started_at DESC LIMIT ?""",
+                    (limit,),
+                ).fetchall()
+            return [dict(r) for r in rows]
         if agent_id:
             rows = conn.execute("SELECT * FROM sessions WHERE agent_id = ? ORDER BY started_at DESC LIMIT ?", (agent_id, limit)).fetchall()
         else:
