@@ -4,9 +4,11 @@ name: CI
 # (integrity-core docs/EXECUTION_PLAN.md, A1).
 on:
   push:
-    branches: [main]
+    branches: [main, fix/ui-consistency]
   pull_request:
-    branches: [main]
+    # fix/ui-consistency is the branch the live console (Render integrity-console-test)
+    # auto-deploys from; without it here, PRs into the live branch got no CI at all.
+    branches: [main, fix/ui-consistency]
 
 concurrency:
   group: integrity-console-ci-${{ github.workflow }}-${{ github.ref }}
