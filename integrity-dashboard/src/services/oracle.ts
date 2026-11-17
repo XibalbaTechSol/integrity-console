@@ -1,17 +1,8 @@
 import { ORACLE_URL } from '../config';
+import { actorOf } from '../chain/v3';
 
 // Mirrors integrity-oracle/backend/src/handlers.rs's response DTOs exactly —
 // keep in sync with spec/ais-api/v1/openapi.yaml if that surface changes.
-
-export interface PrimitiveSetDto {
-    sovereign_agent: string;
-    state_anchor: string;
-    reputation_registry: string;
-    slasher: string;
-    verifier_registry: string;
-    compliance_gate: string;
-    agent_profile: string;
-}
 
 export interface AgentResponse {
     id: string;
@@ -20,8 +11,8 @@ export interface AgentResponse {
     created_at: string;
     has_ed25519_key: boolean;
     has_eth_address: boolean;
-    primitives: PrimitiveSetDto | null;
-    primitives_source: string;
+    // (The Oracle still returns the v2 per-agent contract set until Phase 4 PR 4.6 removes it;
+    // the console no longer reads it. The agent's on-chain identity is `onchain` below.)
     did_document: Record<string, unknown> | null;
     /** Registration v3: the synced `AgentRegistry` record, or null when not registered on-chain. */
     onchain?: OnchainRecordDto | null;
@@ -568,13 +559,13 @@ function historyQuery(bucket?: HistoryBucket, since?: string): string {
 export const oracle = {
     getAgent: (id: string) => get<AgentResponse>(`/v1/agent/${encodeURIComponent(id)}`),
     getErc8004: (id: string) => get<Erc8004BindingDto | null>(`/v1/agent/${encodeURIComponent(id)}/erc8004`),
-    // Resolve an agent's real on-chain SovereignAgent contract address from its DID. The
+    // Resolve an agent's on-chain SovereignAgent (its AgentRegistry actor) from its DID. The
     // dashboard keys agents by DID (Agent.eth_address actually holds the DID), so any on-chain
     // write that needs the real address must resolve it here rather than using that field.
     resolveSovereignAgent: async (id: string): Promise<string> => {
         const detail = await get<AgentResponse>(`/v1/agent/${encodeURIComponent(id)}`);
-        const sa = detail.primitives?.sovereign_agent;
-        if (!sa || /^0x0+$/i.test(sa)) throw new Error('Agent has no on-chain SovereignAgent yet (not fully registered).');
+        const sa = actorOf(detail);
+        if (!sa) throw new Error('Agent has no actor bound in AgentRegistry (register it on-chain first).');
         return sa;
     },
     // Registration v3: gasless off-chain registration, proven by the agent's Ed25519 key.
@@ -650,7 +641,7 @@ export const oracle = {
     getUnregisteredAgents: () => get<UnregisteredAgentDto[]>('/v1/shield/unregistered-agents'),
 
     // The agent's real on-chain-anchored provenance chain (backend::handlers::
-    // get_provenance) — each committed Merkle leaf + the StateAnchor root/tx that
+    // get_provenance) — each committed Merkle leaf + the on-chain anchor root/tx that
     // anchored it + the policy decision that produced it.
     getProvenance: (id: string) =>
         get<ProvenanceEntryDto[]>(`/v1/agent/${encodeURIComponent(id)}/provenance`),

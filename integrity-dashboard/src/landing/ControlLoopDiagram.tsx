@@ -16,7 +16,7 @@ import React from 'react';
  *   Cortex hash-chained memory                    sensor (recorder)
  *   Oracle (Record) - verify sig/leaf -> anchor   state estimator
  *   AIS (Learn) - "finite bounds only"            bounded adaptive gain
- *   Chain (StateAnchor)                           settlement / flight recorder
+ *   Chain (ActionAnchor)                          settlement / flight recorder
  *
  * The two dashed semantics also come straight from the spec's own diagram:
  * AIS may "widen finite bound only", and MUST NOT turn a deny into an allow.
