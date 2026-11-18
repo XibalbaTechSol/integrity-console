@@ -1,10 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Key, ShieldCheck } from 'lucide-react';
-import { useAuth0 } from '@auth0/auth0-react';
+import { ArrowRight, Key } from 'lucide-react';
 import { userapi, UserApiError } from '../services/userapi';
 import { useDashboard } from '../context/DashboardContext';
-import { GOOGLE_CLIENT_ID } from '../config';
 
 const AuthPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,24 +12,9 @@ const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { connectWallet } = useDashboard();
-  const { loginWithRedirect, isAuthenticated: isAuth0Authenticated, getIdTokenClaims } = useAuth0();
-  const gsiInitialized = useRef(false);
 
   useEffect(() => {
-    // 0. Check if Auth0 authentication completed
-    if (isAuth0Authenticated) {
-      getIdTokenClaims().then(claims => {
-        if (claims?.__raw) {
-          setLoading(true);
-          userapi.loginWithAuth0({ id_token: claims.__raw })
-            .then(() => navigate('/dashboard'))
-            .catch((err: any) => setError(err?.message || 'Failed to authenticate with Auth0'))
-            .finally(() => setLoading(false));
-        }
-      });
-      return;
-    }
-    // 1. Check if URL has access_token in hash (from Supabase OAuth redirect)
+    // Check if URL has access_token in hash (from shared Supabase Google/GitHub OAuth redirect)
     if (window.location.hash) {
       const rawHash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
       const hashParams = new URLSearchParams(rawHash);
@@ -41,77 +24,10 @@ const AuthPage: React.FC = () => {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
         userapi.loginWithSupabase(accessToken)
           .then(() => navigate('/dashboard'))
-          .catch((err: any) => setError(err?.message || 'Failed to authenticate with Supabase OAuth'))
+          .catch((err: any) => setError(err?.message || 'Failed to authenticate with OAuth 2.0'))
           .finally(() => setLoading(false));
         return;
       }
-    }
-
-    // 2. Check if URL has ?code= from an OAuth redirect
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    if (code) {
-      setLoading(true);
-      const redirectUri = window.location.origin + window.location.pathname;
-      userapi.loginWithGoogle({ code, redirect_uri: redirectUri })
-        .then(() => navigate('/dashboard'))
-        .catch((err: any) => setError(err?.message || 'Failed to authenticate with Google'))
-        .finally(() => setLoading(false));
-      return;
-    }
-
-    // 2. Initialize Google Identity Services if available (only once)
-    const initGsi = () => {
-      const google = (window as any).google;
-      if (!google?.accounts?.id || !GOOGLE_CLIENT_ID || gsiInitialized.current) return;
-      gsiInitialized.current = true;
-
-      try {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: async (response: { credential?: string }) => {
-            if (!response.credential) return;
-            setLoading(true);
-            setError(null);
-            try {
-              await userapi.loginWithGoogle({ id_token: response.credential });
-              navigate('/dashboard');
-            } catch (err: any) {
-              setError(err?.message || 'Google authentication failed');
-            } finally {
-              setLoading(false);
-            }
-          },
-        });
-
-        const container = document.getElementById('google-signin-container');
-        if (container) {
-          google.accounts.id.renderButton(container, {
-            theme: 'filled_black',
-            size: 'large',
-            // A fixed 400 overflowed every phone viewport: the button is wider
-            // than a 390px screen, so the whole page scrolled sideways. Google
-            // caps this at 400, so clamp to whatever the column actually is.
-            width: Math.min(400, container.clientWidth || 400),
-            text: 'continue_with',
-            shape: 'rectangular',
-          });
-        }
-      } catch (e) {
-        console.warn('Google Identity Services init warning:', e);
-      }
-    };
-
-    if ((window as any).google?.accounts?.id) {
-      initGsi();
-    } else {
-      const timer = setInterval(() => {
-        if ((window as any).google?.accounts?.id) {
-          clearInterval(timer);
-          initGsi();
-        }
-      }, 300);
-      return () => clearInterval(timer);
     }
   }, [navigate]);
 
@@ -205,30 +121,6 @@ const AuthPage: React.FC = () => {
                 <span>Continue with Google</span>
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => loginWithRedirect()}
-              disabled={loading}
-              className="secondary-button"
-              style={{
-                width: '100%',
-                padding: '0.85rem',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '0.75rem',
-                background: '#1a1f2c',
-                color: '#fff',
-                border: '1px solid #eb5424',
-                borderRadius: 'var(--radius)',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontWeight: 600,
-              }}
-            >
-              <ShieldCheck size={18} color="#eb5424" />
-              <span>Continue with Auth0 (SSO)</span>
-            </button>
 
             <button
               type="button"
