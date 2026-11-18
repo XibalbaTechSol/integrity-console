@@ -13,6 +13,7 @@ import TermsPage from './pages/TermsPage';
 
 import { DashboardProvider } from './context/DashboardContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import MainAppLayout from './layouts/MainAppLayout';
 import PublicLayout from './layouts/PublicLayout';
 import { AgentRegistryPage } from './pages/AgentRegistryPage';
@@ -27,9 +28,10 @@ const WikiPage = lazy(() => import('./pages/WikiPage'));
 
 function App() {
   return (
-    <SettingsProvider>
-      <DashboardProvider>
-        <Routes>
+    <ErrorBoundary fallbackTitle="Integrity Console encounter error">
+      <SettingsProvider>
+        <DashboardProvider>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route element={<PublicLayout />}>
@@ -80,6 +82,7 @@ function App() {
         </Routes>
       </DashboardProvider>
     </SettingsProvider>
+  </ErrorBoundary>
   );
 }
 

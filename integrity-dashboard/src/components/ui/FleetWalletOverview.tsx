@@ -64,7 +64,7 @@ export function FleetWalletOverview() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fleet total ITK</div>
-            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--theme-accent)' }}>{totalItk.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--theme-accent)' }}>{(totalItk ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
           </div>
           <button aria-label="Refresh wallet overview" onClick={load} disabled={loading} style={{ background: 'none', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '6px', color: 'var(--text-muted)', cursor: 'pointer' }}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
@@ -104,7 +104,7 @@ export function FleetWalletOverview() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
                 {r.ais != null && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>AIS {r.ais.toFixed(0)}</span>}
-                <span style={{ fontWeight: 700, fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums' }}>{r.balance.toLocaleString(undefined, { maximumFractionDigits: 2 })} ITK</span>
+                <span style={{ fontWeight: 700, fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums' }}>{(r.balance ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} ITK</span>
                 <ChevronRight size={14} color="var(--text-muted)" />
               </div>
             </button>

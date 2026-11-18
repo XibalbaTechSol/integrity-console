@@ -335,11 +335,11 @@ export const TokenWallet = () => {
                             <Copy size={14} style={{ color: 'var(--theme-accent)', opacity: 0.6 }} />
                         </div>
                     )}
-                    {!isProfileLoading && profileBalance !== null && (
+                    {!isProfileLoading && profileBalance != null && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px 20px', marginTop: 'var(--space-2)', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)', width: '100%', maxWidth: '360px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Your custodial app-wallet balance (separate ledger, not this agent's on-chain ITK)</span>
-                                <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{profileBalance.toLocaleString()} ITK</span>
+                                <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{(profileBalance ?? 0).toLocaleString()} ITK</span>
                             </div>
                             {appWalletAddress && (
                                 <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--text-muted)', opacity: 0.7, wordBreak: 'break-all' }}>{appWalletAddress}</span>

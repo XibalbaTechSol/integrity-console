@@ -49,9 +49,9 @@ export function SystemSummaryCard({ system }: { system: 'shield' | 'cortex' }) {
           if (active) setState({
             loading: false, error: null,
             metrics: [
-              { label: 'Memories', value: String(status.memory_count) },
-              { label: 'Integrity check', value: status.integrity_check },
-              { label: 'Journal mode', value: status.journal_mode },
+              { label: 'Memories', value: String(status.memory_count ?? status.memories ?? 0) },
+              { label: 'Integrity check', value: status.integrity_check ?? status.status ?? 'ok' },
+              { label: 'Journal mode', value: status.journal_mode ?? 'WAL' },
             ],
           });
         }

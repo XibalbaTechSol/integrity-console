@@ -193,7 +193,7 @@ export function VerificationPanel() {
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '10px 0 6px' }}>Signed message format</div>
                             <div className="mono" style={{ fontSize: '0.7rem', wordBreak: 'break-all' }}>{challenge.message_format}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '10px 0 6px' }}>Expires</div>
-                            <div className="mono" style={{ fontSize: '0.8rem' }}>{new Date(challenge.expires_at).toLocaleString()}</div>
+                            <div className="mono" style={{ fontSize: '0.8rem' }}>{challenge.expires_at ? new Date(challenge.expires_at).toLocaleString() : '—'}</div>
                         </div>
                     )}
 

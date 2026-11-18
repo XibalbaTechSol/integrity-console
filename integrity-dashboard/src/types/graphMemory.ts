@@ -99,16 +99,22 @@ export interface CortexAgentWorkspace {
 }
 
 export interface StoreStatus {
-    schema_version: number;
-    journal_mode: string;
-    foreign_keys: boolean;
-    fts5: boolean;
-    integrity_check: string;
-    identity_mode: string;
-    db_path: string;
-    memory_count: number;
-    backup_ready: boolean;
-    backup_method: string;
+    schema_version?: number;
+    journal_mode?: string;
+    foreign_keys?: boolean;
+    fts5?: boolean;
+    integrity_check?: string;
+    identity_mode?: string;
+    db_path?: string;
+    memory_count?: number;
+    memories?: number;
+    sessions?: number;
+    entities?: number;
+    relations?: number;
+    status?: string;
+    profile_id?: string;
+    backup_ready?: boolean;
+    backup_method?: string;
 }
 
 export interface IntegrityLinkRecord {

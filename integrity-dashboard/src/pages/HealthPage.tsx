@@ -156,7 +156,7 @@ export default function HealthPage() {
       setBaas(baaData);
       setLogs(auditData.map((a) => ({
         id: a.id,
-        time: new Date(a.created_at).toLocaleString(),
+        time: a.created_at ? new Date(a.created_at).toLocaleString() : '—',
         action: a.event_type,
         resourceHash: a.detail || '—',
         agent: a.agent_id || '—',
@@ -591,7 +591,7 @@ export default function HealthPage() {
                             <tr key={b.address}>
                               <td className="mono" title={b.covered_entity}>{b.covered_entity.substring(0, 15)}...</td>
                               <td><StatusBadge status={b.status} /></td>
-                              <td className="mono" style={{ color: 'var(--theme-accent)' }}>{(Number(b.required_collateral) / 1e18).toLocaleString()} ITK</td>
+                              <td className="mono" style={{ color: 'var(--theme-accent)' }}>{(Number(b.required_collateral || 0) / 1e18).toLocaleString()} ITK</td>
                               <td className="mono" title={b.agreement_hash}>{b.agreement_hash.substring(0, 10)}...</td>
                               <td>
                                 <div style={{ display: 'flex', gap: '4px' }}>
@@ -967,7 +967,7 @@ export default function HealthPage() {
                           quarantinedAgents.map((qa, index) => (
                             <tr key={qa.agentId ? `${qa.agentId}-${index}` : `${qa.agentDid}-${index}`}>
                               <td className="mono" title={qa.agentDid}>{qa.agentDid.substring(0, 24)}...</td>
-                              <td className="mono" style={{ color: 'var(--danger)' }}>{(Number(qa.lockedStake) / 1e18).toLocaleString()} ITK</td>
+                              <td className="mono" style={{ color: 'var(--danger)' }}>{(Number(qa.lockedStake || 0) / 1e18).toLocaleString()} ITK</td>
                               <td>
                                 <span style={{
                                   fontSize: '0.65rem', padding: '2px 6px', borderRadius: 'var(--radius)',
@@ -1027,7 +1027,7 @@ export default function HealthPage() {
               </div>
               <div>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Required Collateral</span>
-                <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }} className="mono">{(Number(selectedBAA.required_collateral) / 1e18).toLocaleString()} ITK</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }} className="mono">{(Number(selectedBAA.required_collateral || 0) / 1e18).toLocaleString()} ITK</div>
               </div>
               <div>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Agreement Hash</span>
