@@ -6,7 +6,7 @@ Autonomous software agents traversing geometric knowledge graphs, executing cont
 
 **`integrity-console` is the Universal Verifiable Operator Window for the machine economy.**
 
-It renders live geometric graph navigation trajectories from `xibalba-cortex`, verifies multi-agent DID credentials and Autonomous Integrity Scores (AIS as the native reward function $R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS}$) from `integrity-core`, surfaces real-time enterprise EDR and agent response approval queues from `xibalba-shield`, and enables operators to inspect tamper-evident cryptographic Merkle proofs—all while strictly holding zero protocol authority.
+It renders live geometric graph navigation trajectories from `super-cortex`, verifies multi-agent DID credentials and Autonomous Integrity Scores (AIS as the native reward function $R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS}$) from `integrity-core`, surfaces real-time enterprise EDR and agent response approval queues from `xibalba-shield`, and enables operators to inspect tamper-evident cryptographic Merkle proofs—all while strictly holding zero protocol authority.
 
 ---
 
@@ -18,13 +18,13 @@ The Integrity Ecosystem aligns autonomous machine behavior with cryptographic an
 |---|---|---|
 | **`integrity-console`** (this repo) | **👁️ The Universal Verifiable Operator Window** | Unified presentation and account layer. Visualizes agent graph navigation trajectories, multi-agent DID credentials, AIS score distributions, real-time response approval queues, and cryptographic Merkle verification. |
 | **`integrity-core`** | **🦴 The Physics Engine of the Machine Economy** | Implements the Autonomous Integrity Score (AIS) as the deterministic reward function ($R_{\text{total}} = R_{\text{task}} + \lambda \cdot \text{AIS}$). Governs on-chain DIDs, Behavioral Commitment Chains (BCC), Merkle state anchors, cryptographic state verification, and the on-chain execution firewall. |
-| **`xibalba-cortex`** | **🧠 The Navigational Engine** | Neuro-symbolic knowledge graph and active inference engine. Replaces probabilistic text generation with geometric graph traversal (R-GCN + TKGE/TransE), dynamic logit masking, temporal event reification, and domain connectors (Biomedical/MIMIC-IV, FHIR live-feeds, ChEMBL, CMS economic cost friction $\lambda C(e)$). |
+| **`super-cortex`** | **🧠 The Navigational Engine** | Neuro-symbolic knowledge graph and active inference engine. Replaces probabilistic text generation with geometric graph traversal (R-GCN + TKGE/TransE), dynamic logit masking, temporal event reification, and domain connectors (Biomedical/MIMIC-IV, FHIR live-feeds, ChEMBL, CMS economic cost friction $\lambda C(e)$). |
 | **`xibalba-shield`** | **🛡️ Cryptographic Topology & Response Governance** | Enforces topological boundary gating, zero-probability unauthorized state spaces, and vendor-neutral response governance across enterprise EDRs (CrowdStrike, Defender) and AI agents (MCP, SOAR). *"The EDR detects and acts; Shield proves who authorized it."* Produces tamper-evident audit ledgers and HIPAA assurance packets. |
 
 ```mermaid
 flowchart LR
     subgraph Agents["Autonomous AI Agents & Runtimes"]
-        A["Agent / Researcher / LLM"] -->|"1. Geometric Graph Traversal<br/>(R-GCN + dynamic logit masking)"| C["🧠 xibalba-cortex<br/>(The Navigational Terrain)"]
+        A["Agent / Researcher / LLM"] -->|"1. Geometric Graph Traversal<br/>(R-GCN + dynamic logit masking)"| C["🧠 super-cortex<br/>(The Navigational Terrain)"]
         A -->|"2. Response Intent<br/>(hash-bound authorization)"| S["🛡️ xibalba-shield<br/>(Boundary Gating)"]
     end
     subgraph Data["Knowledge Ingestion & Live Connectors"]
@@ -48,7 +48,7 @@ flowchart LR
 
 **It is** the presentation and account layer: a React operator UI, a FastAPI service for user accounts and developer API keys, and a Python scenario runner used for demos and seeding.
 
-**It is not** a trust backend. Nothing here computes an Agent Integrity Score, anchors a Behavioral Commitment Chain, defines a Merkle convention, enforces a policy, or owns a chain schema. Those live in `integrity-core` (protocol, oracle, BCC, contracts), `xibalba-shield` (endpoint enforcement) and `xibalba-cortex` (memory and provenance). When those services are not running, the UI is meant to show an honest unavailable state rather than invent data.
+**It is not** a trust backend. Nothing here computes an Agent Integrity Score, anchors a Behavioral Commitment Chain, defines a Merkle convention, enforces a policy, or owns a chain schema. Those live in `integrity-core` (protocol, oracle, BCC, contracts), `xibalba-shield` (endpoint enforcement) and `super-cortex` (memory and provenance). When those services are not running, the UI is meant to show an honest unavailable state rather than invent data.
 
 A consequence worth stating plainly: **the console cannot be the source of truth for anything it displays.** If a number here disagrees with the oracle or the chain, the oracle or the chain is right and this is a rendering bug.
 
@@ -108,7 +108,7 @@ Token files, overridable via `DASHBOARD_SHIELD_TOKEN_FILE` / `DASHBOARD_CORTEX_T
 | Service | Default token file |
 |---|---|
 | Shield backend | `~/.xibalba-shield/backend-admin.token` |
-| Cortex local API | `~/.hermes/xibalba-cortex/.viewer-dev.token` |
+| Cortex local API | `~/.hermes/super-cortex/.viewer-dev.token` |
 
 ## Ports
 
@@ -122,8 +122,8 @@ Token files, overridable via `DASHBOARD_SHIELD_TOKEN_FILE` / `DASHBOARD_CORTEX_T
 | 8080 | Oracle HTTP API | integrity-core |
 | 8000 | BCC middleware | integrity-core |
 | 8435 | Shield backend control plane (proxy target) | xibalba-shield |
-| 8420 | Cortex local API (proxy target) | xibalba-cortex |
-| 5193 / 5190 | Shield UI / Cortex UI deep links, as compose sets them | xibalba-shield / xibalba-cortex |
+| 8420 | Cortex local API (proxy target) | super-cortex |
+| 5193 / 5190 | Shield UI / Cortex UI deep links, as compose sets them | xibalba-shield / super-cortex |
 
 Note a real inconsistency: `src/config.ts` defaults the Shield and Cortex **UI** deep links to
 `https://localhost:9444` and `https://localhost:9443`, while `docker-compose.yml` sets them to
