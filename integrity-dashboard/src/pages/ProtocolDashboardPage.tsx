@@ -141,7 +141,7 @@ export default function ProtocolDashboardPage() {
       <section className="protocol-health">
         <div><span>Network health</span><strong><i />{detail ? 'Connected' : 'Awaiting Oracle'}</strong></div>
         <div><span>Identity binding</span><strong><i className={erc8004?.binding_status === 'verified' ? '' : 'muted-dot'} />{erc8004?.binding_status === 'verified' ? 'ERC-8004 verified' : 'Not confirmed'}</strong></div>
-        <div><span>Cortex evidence</span><strong><i className={cortex?.integrity_check === 'ok' ? '' : 'muted-dot'} />{cortex ? `${cortex.memory_count.toLocaleString()} memories` : 'Unavailable'}</strong></div>
+        <div><span>Cortex evidence</span><strong><i className={(cortex?.integrity_check === 'ok' || cortex?.status === 'online') ? '' : 'muted-dot'} />{cortex ? `${(cortex.memory_count ?? cortex.memories ?? 0).toLocaleString()} memories` : 'Unavailable'}</strong></div>
         <div><span>Live data</span><strong><i className={ais ? '' : 'muted-dot'} />{ais ? 'Oracle projection' : 'Read-only state'}</strong></div>
       </section>
 

@@ -158,7 +158,7 @@ export function COTPlatform() {
               }}
             >
               <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>{trace.name}</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{new Date(trace.start_time).toLocaleString()}</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>{trace.start_time ? new Date(trace.start_time).toLocaleString() : '—'}</div>
             </div>
           ))}
         </div>

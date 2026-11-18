@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { AppHeader } from '../components/AppHeader';
 import { useDashboard } from '../context/DashboardContext';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import '../pages/ProtocolDashboardPage.css';
 
 export default function MainAppLayout() {
@@ -19,7 +20,9 @@ export default function MainAppLayout() {
       <main className="protocol-main" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <AppHeader />
         <div className="protocol-content" style={{ flex: 1 }}>
-          <Outlet />
+          <ErrorBoundary fallbackTitle="Console view rendering error">
+            <Outlet />
+          </ErrorBoundary>
         </div>
       </main>
     </div>
