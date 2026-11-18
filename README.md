@@ -137,7 +137,8 @@ Canonical routes (`integrity-dashboard/src/App.tsx`):
 | Route | Page | Notes |
 |---|---|---|
 | `/` | `LandingPage` | Public, no app chrome |
-| `/auth` | `AuthPage` | Login and registration |
+| `/auth` | `AuthPage` | Login and registration (Google OAuth 2.0, GitHub OAuth 2.0, Email/Password) |
+| `/agent0` | `Agent0HubPage` | Agent0 Passport & Discovery Hub: on-chain ERC-8004 registry on Base Sepolia (84532), RFC 8785 two-way DID backlinks, A2A capability delegation, x402 micropayments |
 | `/docs`, `/privacy`, `/terms` | `DocsPage`, `PrivacyPage`, `TermsPage` | Public layout |
 | `/dashboard` | `ProtocolDashboardPage` | "Command center"; identity register/claim lives on its Overview tab |
 | `/agents` | `AgentRegistryPage` | Agent registry |
@@ -352,6 +353,19 @@ CI (`.github/workflows/ci.yml`) runs on pushes and pull requests to `main`, in t
 
 ## Deployment
 
+### Live Cloud Deployments
+
+Production pilot services run on Render tracking the `main` branch:
+
+| Service | Environment | Live URL |
+|---|---|---|
+| **Integrity Console** | Production Pilot (Vite / React 18) | [integrity-console-test.onrender.com](https://integrity-console-test.onrender.com) |
+| **Integrity User API** | Production Pilot (FastAPI / PostgreSQL) | [integrity-userapi-test.onrender.com](https://integrity-userapi-test.onrender.com) |
+| **Super-Cortex** | Production Pilot (FastAPI / Supermemory) | [cortex-managed-pilot.onrender.com](https://cortex-managed-pilot.onrender.com) |
+| **Xibalba Shield** | Production Pilot (FastAPI / Control Plane) | [xibalba-shield.onrender.com](https://xibalba-shield.onrender.com) |
+
+### Local Managed Preview
+
 `deploy/systemd/integrity-dashboard.service` serves whatever `npm run build` last produced, via
 `vite preview` on `127.0.0.1:4173`, from the **base checkout** at
 `~/Projects/integrity-console/integrity-dashboard`.
@@ -366,9 +380,6 @@ to serve the new `dist/`.
 
 Verified against the current tree, and worth knowing before you trust a surface:
 
-- The nested `integrity-dashboard/README.md` is **stale**: it documents
-  Identity, Shield, Financials, Intelligence and Memory pages that are now redirects, and its
-  relative links predate the A1 split. Treat this file as the current description.
 - The Phase I kernel viewer (`KernelPage`, `src/chain/kernel.ts`) and the Guided System Test's
   kernel-bridge step were removed on 2026-11-16, when `IntegrityKernel`/`IntegrityAccount` were
   archived in integrity-core (tag `kernel-phase1-archive`). `/kernel` and `/kernel-intent` still

@@ -102,6 +102,12 @@ const CONSOLE_SURFACES = [
     body: 'Register and claim agent identity, and read the protocol overview. Identity lives here, not on the registry — a point the route map now enforces.',
   },
   {
+    route: '/agent0',
+    name: 'Agent0 Passport & Discovery',
+    icon: Cpu,
+    body: 'On-chain ERC-8004 registry on Base Sepolia (84532), RFC 8785 canonical JSON DID backlinks, Agent-to-Agent (A2A) capability delegation, and x402 micropayments.',
+  },
+  {
     route: '/agents',
     name: 'Agent registry',
     icon: Radio,
