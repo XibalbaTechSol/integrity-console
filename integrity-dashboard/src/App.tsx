@@ -17,6 +17,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import MainAppLayout from './layouts/MainAppLayout';
 import PublicLayout from './layouts/PublicLayout';
 import { AgentRegistryPage } from './pages/AgentRegistryPage';
+import { Agent0HubPage } from './pages/Agent0HubPage';
 import { AisPage } from './pages/AisPage';
 import TreasuryControlPage from './pages/TreasuryControlPage';
 import ProtocolDashboardPage from './pages/ProtocolDashboardPage';
@@ -42,6 +43,7 @@ function App() {
           <Route element={<MainAppLayout />}>
             <Route path="/dashboard" element={<ProtocolDashboardPage />} />
             <Route path="/agents" element={<AgentRegistryPage />} />
+            <Route path="/agent0" element={<Agent0HubPage />} />
             {/* AIS radar, simulator, telemetry and derivation math: Oracle-computed AIS
                 shown per selected agent (display only; scoring lives in scoring-core). */}
             <Route path="/ais" element={<AisPage />} />

@@ -559,6 +559,8 @@ function historyQuery(bucket?: HistoryBucket, since?: string): string {
 export const oracle = {
     getAgent: (id: string) => get<AgentResponse>(`/v1/agent/${encodeURIComponent(id)}`),
     getErc8004: (id: string) => get<Erc8004BindingDto | null>(`/v1/agent/${encodeURIComponent(id)}/erc8004`),
+    linkErc8004: (id: string, req: { chain_id: number; identity_registry_address: string; agent_token_id: string }) =>
+        post<Erc8004BindingDto>(`/v1/agent/${encodeURIComponent(id)}/erc8004`, req),
     // Resolve an agent's on-chain SovereignAgent (its AgentRegistry actor) from its DID. The
     // dashboard keys agents by DID (Agent.eth_address actually holds the DID), so any on-chain
     // write that needs the real address must resolve it here rather than using that field.
