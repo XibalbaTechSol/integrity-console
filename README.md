@@ -409,4 +409,18 @@ unmerged dashboard work from integrity-core came across as branches:
 merged into `main`; the pack branch's ref still exists on the remote, which is why its status is
 worth stating explicitly above rather than inferring from the branch list.
 
+## Organization & Executive Inquiries
+
+**Xibalba Solutions LLC**
+- **Corporate Portal:** [https://xibalbasolutions.com](https://xibalbasolutions.com)
+- **Executive Contact:** [jacob@xibalbasolutions.com](mailto:jacob@xibalbasolutions.com)
+- **Direct Telephone:** `+1 (262) 864-1589`
+- **Headquarters:** Wisconsin, United States
+- **Commercial Verticals:**
+  - **Integrity Protocol:** On-chain agent control layer, verifiable DIDs, and deterministic AIS feedback.
+  - **Super-Cortex:** Local-first 3D graph memory, Merkle-attested provenance, and agent trajectory planning.
+  - **Xibalba Shield:** Deterministic response governance, boundary gating, and host containment.
+
+---
+
 Licensed under the MIT License (see `LICENSE`).
