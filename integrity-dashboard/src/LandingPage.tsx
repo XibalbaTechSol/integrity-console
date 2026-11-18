@@ -14,6 +14,10 @@ import {
   Minus,
   CircleDashed,
   XCircle,
+  Mail,
+  Phone,
+  Globe,
+  ExternalLink,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSettings } from './context/SettingsContext';
@@ -139,6 +143,23 @@ const CONSOLE_SURFACES = [
 export default function LandingPage() {
   const { animationsEnabled } = useSettings();
 
+  const [contactName, setContactName] = useState('');
+  const [contactOrg, setContactOrg] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactUseCase, setContactUseCase] = useState('Record only — signed evidence and anchoring (L0)');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSubmitted(true);
+    const subject = encodeURIComponent(`Integrity Protocol Inquiry from ${contactName || 'Partner'}`);
+    const body = encodeURIComponent(
+      `Name: ${contactName}\nOrganization: ${contactOrg}\nWork Email: ${contactEmail}\nScope: ${contactUseCase}\n\nMessage:\n${contactMessage}`
+    );
+    window.location.href = `mailto:jacob@xibalbasolutions.com?subject=${subject}&body=${body}`;
+  };
+
   const fadeInUp = {
     initial: animationsEnabled ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 },
     whileInView: { opacity: 1, y: 0 },
@@ -185,8 +206,12 @@ export default function LandingPage() {
           <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>The Loop</a>
           <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Feedback</a>
           <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Status</a>
+          <a href="#contact" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Contact</a>
           <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>FAQ</a>
           <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Wiki</Link>
+          <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+            Company <ExternalLink size={12} />
+          </a>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <a href="https://github.com/xibalbatechsol" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>GitHub</a>
@@ -701,45 +726,123 @@ export default function LandingPage() {
       </section>
 
       {/* 9. Contact */}
-      <section id="contact" style={{ padding: '4rem 2rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ maxWidth: '620px', margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '0.5rem', fontSize: '1.9rem' }}>Talk to us about a pilot</h2>
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>
-            For integrators, design partners and early pilot access.
-          </p>
+      <section id="contact" style={{ padding: '5rem 2rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+            <span style={{ display: 'inline-block', marginBottom: '0.75rem', color: 'var(--theme-accent)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              Direct Access &amp; Partnerships
+            </span>
+            <h2 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: 'clamp(1.9rem, 4.5vw, 2.5rem)' }}>Talk to us about a pilot</h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '640px', margin: '0 auto', fontSize: '1.05rem', lineHeight: 1.6 }}>
+              For integrators, enterprise design partners, and autonomous agent systems requiring cryptographic loop verification.
+            </p>
+          </motion.div>
 
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="landing-form-row" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Full Name</label>
-                <input id="contact-name" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', alignItems: 'stretch' }}>
+            {/* Direct Contact Info Card */}
+            <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.4rem', marginTop: 0, marginBottom: '1rem', color: 'var(--text-primary)' }}>Direct Executive Inquiries</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                  Connect directly with leadership for protocol pilots, integration architecture reviews, or commercial deployment inquiries.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  <a href="mailto:jacob@xibalbasolutions.com" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                      <Mail size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>Executive Email</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>jacob@xibalbasolutions.com</div>
+                    </div>
+                  </a>
+
+                  <a href="tel:+12628641589" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                      <Phone size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>Direct Telephone</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>1 (262) 864-1589</div>
+                    </div>
+                  </a>
+
+                  <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                      <Globe size={20} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-secondary)', fontWeight: 600 }}>Parent Company</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        xibalbasolutions.com <ExternalLink size={13} />
+                      </div>
+                    </div>
+                  </a>
+                </div>
               </div>
-              <div style={{ flex: 1, minWidth: '200px' }}>
-                <label htmlFor="contact-organization" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Organization</label>
-                <input id="contact-organization" type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Corp" />
+
+              <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                Xibalba Solutions LLC · Operations based in Wisconsin, USA
               </div>
-            </div>
-            <div>
-              <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Work Email</label>
-              <input id="contact-email" type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
-            </div>
-            <div>
-              <label htmlFor="contact-use-case" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Where you'd start</label>
-              <select id="contact-use-case" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
-                <option>Record only — signed evidence and anchoring (L0)</option>
-                <option>Constrain and record — hook plus pack (L1)</option>
-                <option>Integrity Health pack, synthetic data</option>
-                <option>Writing an adapter or a pack</option>
-                <option>Something else</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Message</label>
-              <textarea id="contact-message" rows={4} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What are you trying to put inside a loop?"></textarea>
-            </div>
-            <button type="button" className="primary-button" style={{ padding: '1rem', fontSize: '1rem', fontWeight: 600 }}>Submit Inquiry</button>
-          </form>
-        </motion.div>
+            </motion.div>
+
+            {/* Interactive Form Card */}
+            <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ padding: '2.5rem' }}>
+              <h3 style={{ fontSize: '1.4rem', marginTop: 0, marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Submit Pilot Inquiry</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: '2rem' }}>
+                Tell us about your agent runtime, conformance requirements, and target timeline.
+              </p>
+
+              {contactSubmitted ? (
+                <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(0, 255, 200, 0.08)', borderRadius: 'var(--radius)', border: '1px solid rgba(0, 255, 200, 0.3)' }}>
+                  <div style={{ color: 'var(--success)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Inquiry Prepared</div>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: '0 0 1.5rem 0' }}>
+                    Your message draft has been dispatched to <strong>jacob@xibalbasolutions.com</strong>. We typically respond within 24 business hours.
+                  </p>
+                  <button type="button" onClick={() => setContactSubmitted(false)} className="secondary-button" style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>
+                    Submit another response
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div className="landing-form-row" style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '180px' }}>
+                      <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Full Name *</label>
+                      <input id="contact-name" required value={contactName} onChange={(e) => setContactName(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '180px' }}>
+                      <label htmlFor="contact-organization" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Organization *</label>
+                      <input id="contact-organization" required value={contactOrg} onChange={(e) => setContactOrg(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Autonomous Systems" />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Work Email *</label>
+                    <input id="contact-email" required value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
+                  </div>
+                  <div>
+                    <label htmlFor="contact-use-case" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Where you'd start</label>
+                    <select id="contact-use-case" value={contactUseCase} onChange={(e) => setContactUseCase(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
+                      <option>Record only — signed evidence and anchoring (L0)</option>
+                      <option>Constrain and record — hook plus pack (L1)</option>
+                      <option>Integrity Health pack, synthetic data</option>
+                      <option>Writing an adapter or a policy pack</option>
+                      <option>Multi-agent swarm coordination</option>
+                      <option>Something else</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Message *</label>
+                    <textarea id="contact-message" required rows={3} value={contactMessage} onChange={(e) => setContactMessage(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What agents or tool actions are you putting inside a verifiable control loop?"></textarea>
+                  </div>
+                  <button type="submit" className="primary-button" style={{ padding: '0.9rem', fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                    Send Pilot Inquiry <ArrowRight size={16} />
+                  </button>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* 10. Specification */}
@@ -775,8 +878,8 @@ export default function LandingPage() {
       </section>
 
       {/* 11. Footer */}
-      <footer style={{ padding: '6rem 3rem 2rem 3rem', textAlign: 'center' }}>
-        <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ marginBottom: '5rem' }}>
+      <footer style={{ padding: '6rem 3rem 2.5rem 3rem', background: 'var(--bg-color)' }}>
+        <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '5rem' }}>
           <h2 style={{ fontSize: 'clamp(1.9rem, 4.5vw, 2.5rem)', marginBottom: '1.5rem' }}>Close the loop.</h2>
           <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto 2.5rem auto', lineHeight: 1.6 }}>
             Agents are getting more authority whether or not the control layer arrives first. Start with record-only
@@ -787,14 +890,73 @@ export default function LandingPage() {
           </Link>
         </motion.div>
 
-        <div className="landing-footer-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', color: 'var(--text-secondary)', fontSize: '0.9rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <img src="https://xibalbatechsol.github.io/XibalbaSolutionsLogo.png" alt="Xibalba Solutions" style={{ height: '24px' }} />
-            <span>&copy; {new Date().getFullYear()} Xibalba Solutions. All rights reserved.</span>
+        {/* Corporate Footer Grid */}
+        <div style={{ maxWidth: '1200px', margin: '0 auto', borderTop: '1px solid var(--border-color)', paddingTop: '3.5rem', paddingBottom: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2.5rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+              <img src="https://xibalbatechsol.github.io/XibalbaSolutionsLogo.png" alt="Xibalba Solutions" style={{ height: '32px' }} />
+              <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Integrity Protocol</span>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
+              The deterministic control and attestation layer for autonomous agent execution. Developed by Xibalba Solutions LLC.
+            </p>
+            <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', color: 'var(--theme-accent)', fontSize: '0.85rem', textDecoration: 'none', fontWeight: 600 }}>
+              xibalbasolutions.com <ExternalLink size={12} />
+            </a>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Navigation</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
+              <a href="#open-loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>The Problem</a>
+              <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>The Loop</a>
+              <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Feedback &amp; AIS</a>
+              <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Deployment Status</a>
+              <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>FAQ</a>
+              <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Protocol Wiki</Link>
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Ecosystem</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
+              <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Xibalba Solutions LLC</a>
+              <a href="https://github.com/xibalbatechsol/xibalba-shield" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Xibalba Shield (EDR)</a>
+              <a href="https://github.com/xibalbatechsol/xibalba-cortex" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Super-Cortex Memory</a>
+              <a href="https://github.com/xibalbatechsol/integrity-core" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Integrity Core (SDK)</a>
+              <a href="https://github.com/xibalbatechsol" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>GitHub Organization</a>
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '1rem', color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Direct Contact</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+              <a href="mailto:jacob@xibalbasolutions.com" style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Mail size={14} color="var(--theme-accent)" /> jacob@xibalbasolutions.com
+              </a>
+              <a href="tel:+12628641589" style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Phone size={14} color="var(--theme-accent)" /> 1 (262) 864-1589
+              </a>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)' }}>
+                <Globe size={14} color="var(--theme-accent)" /> Wisconsin, USA
+              </div>
+              <div style={{ marginTop: '0.5rem' }}>
+                <Link to="/auth" className="secondary-button" style={{ display: 'inline-block', padding: '0.4rem 0.8rem', fontSize: '0.8rem', textDecoration: 'none' }}>
+                  Open Console
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="landing-footer-bar" style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', color: 'var(--text-secondary)', fontSize: '0.85rem', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
+          <div>
+            <span>&copy; {new Date().getFullYear()} Xibalba Solutions LLC. All rights reserved.</span>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <a href="https://github.com/xibalbatechsol" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>GitHub Repo</a>
-            <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Integrity Wiki</Link>
+            <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>xibalbasolutions.com</a>
+            <a href="mailto:jacob@xibalbasolutions.com" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>jacob@xibalbasolutions.com</a>
+            <a href="tel:+12628641589" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>1 (262) 864-1589</a>
             <Link to="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link to="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms of Service</Link>
           </div>
