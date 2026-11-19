@@ -97,6 +97,20 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
             )}
           </div>
 
+          {data.allowedActions && data.allowedActions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-slate-400 mr-1">Permitted Actions:</span>
+              {data.allowedActions.map((act) => (
+                <span
+                  key={act}
+                  className="rounded bg-slate-850 px-2 py-0.5 font-mono text-[11px] text-cyan-300 border border-slate-700/60"
+                >
+                  {act}
+                </span>
+              ))}
+            </div>
+          )}
+
           {data.activePolicyPack && (
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
               <span>

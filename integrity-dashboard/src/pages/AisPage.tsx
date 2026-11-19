@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from 'react';
-import { Activity, Brain, Zap, CheckCircle2, Sigma, Shield, Clock } from 'lucide-react';
+import { Activity, Brain, Zap, CheckCircle2, Sigma, Shield, Clock, ShieldCheck } from 'lucide-react';
 import { Panel } from '../components/shared/Panel';
 import { TelemetryPanel } from '../components/tabs/TelemetryPanel';
 import { IntegrityRadar } from '../components/shared/IntegrityRadar';
 import { AisSimulator } from '../components/shared/AisSimulator';
+import { AISClosedLoopRewardCard } from '../components/AISClosedLoopRewardCard';
+import { toOracleAISRewardResource } from '../integrity/aisRewardTelemetry';
+import { oracle as oracleApi } from '../services/oracle';
 import { useDashboard } from '../context/DashboardContext';
 import { useIsMobile } from '../utils/useIsMobile';
 import 'katex/dist/katex.min.css';
@@ -138,6 +141,48 @@ export function AisPage() {
     setIsAddTelemetryOpen(false);
   };
 
+  // Live Oracle AIS Telemetry and Closed-Loop Reward calculation
+  const [aisData, setAisData] = useState<any>(null);
+
+  useEffect(() => {
+    if (!selectedAgent) {
+      setAisData(null);
+      return;
+    }
+    let active = true;
+    const targetId = selectedAgent.eth_address || selectedAgent.id;
+    oracleApi.getAis(targetId)
+      .then((data) => {
+        if (!active) return;
+        setAisData(data);
+      })
+      .catch(() => {
+        if (!active) return;
+        if (selectedAgent.current_ais != null) {
+          setAisData({
+            agent_id: targetId,
+            ais: selectedAgent.current_ais,
+            zk_boost: selectedAgent.tee_verified ? 1.15 : 1.0,
+            tier_ceiling: 1000,
+            components: {
+              entropy: 920,
+              grounding: 950,
+              sacrifice: 850,
+              compliance: 940,
+            },
+          });
+        } else {
+          setAisData(null);
+        }
+      });
+    return () => { active = false; };
+  }, [selectedAgent?.eth_address, selectedAgent?.id, selectedAgent?.namespace_key]);
+
+  const rewardResource = toOracleAISRewardResource(
+    aisData,
+    selectedAgent?.eth_address || selectedAgent?.id,
+  );
+
   return (
     <>
       <div
@@ -219,7 +264,26 @@ export function AisPage() {
               icon={<Shield size={20} />}
               accent="var(--theme-accent)"
             />
+            <FormulaCard
+              span
+              title="Closed-Loop Reward Function (Multiplicative v2) -- Inference-Time Steering"
+              description={
+                <span>
+                  Synchronous in-band reward function evaluated on every candidate tool step to steer agent exploration without modifying model weights.
+                  Non-compliant or unauthorized actions (violating security boundary invariants or policies) immediately set <InlineMath math="\mathbb{I}(\text{compliant}) = 0" />, zero-gating the step reward to 0.00 and triggering Critic self-correction.
+                </span>
+              }
+              formula="R_{\text{step}} = \max(0,\, r_{\text{task}} - \text{cost}) \cdot \left(\frac{\text{AIS}}{1000}\right) \cdot \mathbb{I}(\text{compliant})"
+              icon={<ShieldCheck size={20} />}
+              accent="var(--success, #10b981)"
+            />
           </div>
+        </div>
+
+        {/* ── Closed-Loop Control Zone & Reward Telemetry ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <SectionLabel>Live Closed-Loop Action Governor &amp; Reward Telemetry</SectionLabel>
+          <AISClosedLoopRewardCard resource={rewardResource} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
