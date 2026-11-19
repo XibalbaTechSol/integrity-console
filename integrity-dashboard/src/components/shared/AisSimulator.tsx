@@ -88,7 +88,33 @@ export function AisSimulator() {
     const ceiling = TIER_CEILINGS[tier];
     const ais = tier < 3 ? Math.min(raw, ceiling) : raw;
     const shadowGate = s_entropy >= SHADOW_FLOORS.entropy && s_grounding >= SHADOW_FLOORS.grounding && s_compliance >= SHADOW_FLOORS.compliance;
-    return { s_entropy, s_grounding, s_sacrifice, s_compliance, weighted, zk_boost, raw, ceiling, ais, shadowGate, tierCapped: tier < 3 && raw > ceiling };
+
+    // Closed-Loop Multiplicative v2 Reward function simulation
+    const isCompliant = s_compliance > 0 && penalty < 0.75;
+    const controlZone: 'green' | 'yellow' | 'red' =
+      ais >= 900 ? 'green' : ais >= 750 ? 'yellow' : 'red';
+    const taskReward = 1.0;
+    const executionCost = 0.05;
+    const stepReward = isCompliant
+      ? Math.max(0, taskReward - executionCost) * (ais / 1000)
+      : 0.0;
+
+    return {
+      s_entropy,
+      s_grounding,
+      s_sacrifice,
+      s_compliance,
+      weighted,
+      zk_boost,
+      raw,
+      ceiling,
+      ais,
+      shadowGate,
+      tierCapped: tier < 3 && raw > ceiling,
+      isCompliant,
+      controlZone,
+      stepReward,
+    };
   }, [variance, hgi, hours, penalty, zk, tier]);
 
   const applyPreset = (p: Preset) => {
@@ -199,6 +225,63 @@ export function AisSimulator() {
                 the other three axes cannot compensate, no matter how strong they are.
               </div>
             )}
+
+            {/* Closed-Loop Steering & Step Reward Simulation */}
+            <div style={{
+              marginTop: '10px',
+              paddingTop: '10px',
+              borderTop: '1px solid var(--glass-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Closed-Loop Control Zone
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                    border: '1px solid',
+                    ...(breakdown.controlZone === 'green'
+                      ? { background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#6ee7b7' }
+                      : breakdown.controlZone === 'yellow'
+                      ? { background: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#fde047' }
+                      : { background: 'rgba(244, 63, 94, 0.15)', borderColor: 'rgba(244, 63, 94, 0.4)', color: '#fda4af' }),
+                  }}
+                >
+                  {breakdown.controlZone === 'green'
+                    ? 'GREEN · FULL AUTONOMY'
+                    : breakdown.controlZone === 'yellow'
+                    ? 'YELLOW · SUPERVISED'
+                    : 'RED · HALT / ZERO-GATED'}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                  Inference-Time Step Reward (R_step)
+                </span>
+                <span
+                  className="mono"
+                  style={{
+                    fontSize: '0.85rem',
+                    fontWeight: 800,
+                    color: breakdown.stepReward > 0 ? '#34d399' : '#f87171',
+                  }}
+                >
+                  {breakdown.stepReward.toFixed(3)}
+                </span>
+              </div>
+
+              <div style={{ fontSize: '0.65rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
+                R_step = max(0, 1.0 - 0.05) × ({(breakdown.ais / 1000).toFixed(3)}) × 𝕀({breakdown.isCompliant ? 'compliant' : 'non-compliant'})
+              </div>
+            </div>
           </div>
         </div>
       </div>

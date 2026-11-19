@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from 'react';
-import { Activity, Brain, Zap, CheckCircle2, Sigma, Shield, Clock, ShieldCheck } from 'lucide-react';
+import { Activity, Brain, Zap, CheckCircle2, Sigma, Shield, Clock, ShieldCheck, Network, GitFork } from 'lucide-react';
 import { Panel } from '../components/shared/Panel';
 import { TelemetryPanel } from '../components/tabs/TelemetryPanel';
 import { IntegrityRadar } from '../components/shared/IntegrityRadar';
 import { AisSimulator } from '../components/shared/AisSimulator';
 import { AISClosedLoopRewardCard } from '../components/AISClosedLoopRewardCard';
+import { MermaidDiagram } from '../components/shared/MermaidDiagram';
 import { toOracleAISRewardResource } from '../integrity/aisRewardTelemetry';
 import { oracle as oracleApi } from '../services/oracle';
 import { useDashboard } from '../context/DashboardContext';
@@ -99,11 +100,96 @@ const FormulaCard = ({ title, description, formula, icon, accent = 'var(--primar
   </div>
 );
 
+const DIAGRAMS = {
+  steering: {
+    title: 'In-Band Test-Time Steering & Self-Correction Loop',
+    description: 'How the synchronous PreToolUse hook intercepts candidate tool calls, queries Xibalba Shield & Super-Cortex under 10ms, and provides immediate Critic remediation or positive reward back into the agent context.',
+    source: `flowchart TD
+    subgraph AgentRuntime["Agent Reasoning & Execution Loop"]
+        Thought["1. LLM Extended Reasoning<br/>(Proposes Next Candidate Action)"]
+        PreTool["2. PreToolUse Intercept<br/>(Harness Hook: Bash / Edit / Call)"]
+        Remediation["5a. In-Band Critic Feedback<br/>(Prunes Failure Branch & Re-routes)"]
+        Execution["5b. Permitted Action Execution<br/>(File / Command / Transaction)"]
+    end
+
+    subgraph IntegrityControl["Integrity Control Layer (In-Band Sub-10ms)"]
+        ShieldGate["3. Xibalba Shield Gate<br/>(Zone & Policy Enforcement)"]
+        CortexEval["4. Super-Cortex Step Evaluator<br/>R_step = max(0, r_task - cost) * (AIS/1000) * I(compliant)"]
+    end
+
+    subgraph Outcome["Dynamic Steering Verdict"]
+        DenyPath["Zero-Gated (R = 0.00)<br/>AIS Reward: 0.00 + Remediation Guidance"]
+        AllowPath["Permitted (Positive Reward)<br/>Signed Receipt + AIS Step Context"]
+    end
+
+    Thought --> PreTool
+    PreTool --> ShieldGate
+    ShieldGate --> CortexEval
+    CortexEval -->|"Policy Deny / Boundary Breach"| DenyPath
+    CortexEval -->|"Compliant Action in Allowed Zone"| AllowPath
+    DenyPath --> Remediation
+    Remediation --> Thought
+    AllowPath --> Execution`,
+  },
+  zones: {
+    title: 'Three-Tier Closed-Loop Action Zones & Dynamic Privileges',
+    description: 'Autonomous agents transition dynamically across Green, Yellow, and Red zones based on their Oracle-attested AIS score, controlling what tool categories they are authorized to execute.',
+    source: `stateDiagram-v2
+    [*] --> GreenZone: AIS >= 900
+    [*] --> YellowZone: 750 <= AIS < 900
+    [*] --> RedZone: AIS < 750
+
+    state GreenZone {
+        [*] --> Nominal
+        Nominal: Full Autonomy
+        Nominal: Permitted: read, draft, execute, transact, deploy
+        Nominal: Positive Reward R_step ~ (AIS / 1000)
+    }
+
+    state YellowZone {
+        [*] --> Supervised
+        Supervised: Supervised Execution
+        Supervised: Permitted: read, draft, co_sign_execute
+        Supervised: Privileged execution requires co-sign
+    }
+
+    state RedZone {
+        [*] --> Halted
+        Halted: Immediate Halt & Zero-Gating
+        Halted: Permitted: read, escalate
+        Halted: Privileged actions Zero-Gated (R = 0.00)
+    }
+
+    GreenZone --> YellowZone: Performance Drift / Variance Spike
+    YellowZone --> RedZone: Boundary Violation / Policy Flag
+    RedZone --> YellowZone: Human Grounding & Remediation
+    YellowZone --> GreenZone: Sustained Compliant Verification`,
+  },
+  test_time: {
+    title: 'Test-Time Search Steering vs LLM Weight Invariance',
+    description: 'Rather than modifying LLM weights via costly and brittle fine-tuning, the Multiplicative v2 AIS reward function acts as an objective function for test-time tree search (MCTS / Best-of-N), discarding zero-gated paths in-context while logging DPO preference pairs for offline training.',
+    source: `flowchart LR
+    subgraph TraditionalRL["Traditional RL / Fine-Tuning"]
+        Weights["Weights W_t"] --> Gradient["Backward Pass / Gradients"]
+        Gradient --> UpdatedWeights["Weights W_t+1 (High Cost / Compute)"]
+    end
+
+    subgraph IntegrityTestTime["Integrity Test-Time Reward Steering (Frozen Weights)"]
+        FrozenLLM["Frozen LLM (Zero Weight Mutations)"] --> Rollouts["Candidate Tool Steps (Tree Search)"]
+        Rollouts --> StepReward["In-Band AIS Evaluator (R_step Multiplicative v2)"]
+        StepReward --> TreeSearch["MCTS / Best-of-N Pruning (Discards R=0 Branches)"]
+        TreeSearch --> OptimalPath["Optimal Compliant Path (Self-Corrected in Context)"]
+        StepReward -.-> DPO["Offline Preference Pairs (y_w, y_l) for Memory"]
+    end`,
+  },
+};
+
 // ─── AisPage ────────────────────────────────────────────────────────────────
 
 export function AisPage() {
   const { stats, selectedAgent } = useDashboard() as any;
   const isMobile = useIsMobile();
+  const [activeDiagram, setActiveDiagram] = useState<'steering' | 'zones' | 'test_time'>('steering');
 
   // Customization States: control visibility of different panels
   const [showTelemetry, setShowTelemetry] = useState(true);
@@ -284,6 +370,36 @@ export function AisPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
           <SectionLabel>Live Closed-Loop Action Governor &amp; Reward Telemetry</SectionLabel>
           <AISClosedLoopRewardCard resource={rewardResource} />
+        </div>
+
+        {/* ── Closed-Loop Reward Architecture & Steering Diagrams ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+            <SectionLabel>Closed-Loop Reward Architecture &amp; Steering Diagrams</SectionLabel>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {[
+                { id: 'steering', label: 'In-Band Steering Loop', icon: <Network size={13} /> },
+                { id: 'zones', label: 'Control Zones State Machine', icon: <ShieldCheck size={13} /> },
+                { id: 'test_time', label: 'Test-Time vs Weights RL', icon: <GitFork size={13} /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveDiagram(tab.id as any)}
+                  className={`btn-xs ${activeDiagram === tab.id ? 'primary-button' : 'secondary-button'}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.7rem' }}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <MermaidDiagram
+            source={DIAGRAMS[activeDiagram].source}
+            title={DIAGRAMS[activeDiagram].title}
+            description={DIAGRAMS[activeDiagram].description}
+          />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
