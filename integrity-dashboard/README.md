@@ -19,22 +19,15 @@ Integrity aligns autonomous machine behavior with cryptographic and thermodynami
 
 ---
 
-## Canonical Routes
+## Canonical Navigation Surfaces (5-Pillar Architecture)
 
 | Route | Page | Purpose |
 |---|---|---|
-| `/` | `LandingPage` | Public overview, control loop diagram, and ecosystem map |
-| `/auth` | `AuthPage` | Google OAuth 2.0, GitHub OAuth 2.0, and Email/Password sign-in/registration |
-| `/agent0` | `Agent0HubPage` | Agent0 Passport & Discovery Hub: on-chain ERC-8004 registry on Base Sepolia (84532), RFC 8785 two-way DID backlinks, A2A capability delegation, and x402 micropayments |
-| `/dashboard` | `ProtocolDashboardPage` | Executive command center, identity registration, fleet telemetry |
-| `/agents` | `AgentRegistryPage` | Verified agent roster, DIDs, and status |
-| `/ais` | `AisPage` | Oracle-computed Autonomous Integrity Score (AIS), derivation math, closed-loop control zones (`GREEN` / `YELLOW` / `RED`) |
-| `/evidence` | `CorrelationPage` | Correlation ledger linking runtime activity, Shield policies, signed intents, and execution outcomes |
-| `/treasury` | `TreasuryControlPage` | Custodial ITK balances, transactions, and prediction market interfaces |
-| `/health` | `HealthPage` | Integrity Health: Smart BAA authoring, HIPAA safeguard gateways, and EHR-gate compliance |
-| `/system` | `SystemControlPage` | Service health, policy pack revisions, and operator diagnostics |
-| `/settings` | `SettingsPage` | Operator preferences, theme selection, developer API key issuance |
-| `/wiki` | `WikiPage` | Canonical protocol documentation generated from `integrity-core/docs/wiki` |
+| `/dashboard` | `ProtocolDashboardPage` | Executive command center, real-time telemetry, ecosystem status overview |
+| `/identity` | `AgentIdentityHubPage` | Agent Identity Hub: Canonical Triad (`xibalba.agy`, `xibalba.claude`, `xibalba.codex`), Shield fleet (`shield.local`, `shield.cloud`), on-chain ERC-8004 Token #10774 passport, and A2A dispatcher |
+| `/cortex` | `CortexMemoryPage` | Live Super-Cortex memory substrate (:4174), scope enclaves (`agent:*`, `shared`), knowledge graph propositions, and 3D studio integration |
+| `/shield` | `ShieldDefensePage` | Real-time Shield defense plane (:8435), workstation eBPF sensors, OPA policy gate, and containment actions |
+| `/intelligence` | `AisPage` | Oracle-computed Autonomous Integrity Score (AIS), derivation math, and closed-loop control zones (`GREEN` / `YELLOW` / `RED`) |
 
 ---
 

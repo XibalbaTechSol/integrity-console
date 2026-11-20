@@ -14,6 +14,10 @@ import type {
     ShieldExporterStatus,
     ShieldIntegration,
     ShieldSeedResult,
+    ShieldPolicyBundle,
+    ShieldPolicyPackManifest,
+    ShieldPolicyHistoryEntry,
+    ShieldOpaStatus,
 } from '../types/shield';
 
 export type {
@@ -30,6 +34,9 @@ export type {
     ShieldIntegration,
     ShieldPolicyBundle,
     ShieldSeedResult,
+    ShieldPolicyPackManifest,
+    ShieldPolicyHistoryEntry,
+    ShieldOpaStatus,
 } from '../types/shield';
 
 // ---------------------------------------------------------------------------
@@ -135,4 +142,32 @@ export const shieldBackend = {
         ),
     putIntegration: (payload: { tenant_id: string; kind: string; integration_id?: string; config?: Record<string, unknown> }, token?: string) =>
         adminPost<{ ok: boolean; integration_id: string }>('/api/shield/integrations', payload, token),
+
+    // Policy pack and OPA methods
+    getPolicyPack: () =>
+        adminGet<ShieldPolicyPackManifest>('/api/shield/nurse-rachel/policy-pack'),
+
+    getOpaPolicies: (tenantId: string) =>
+        adminGet<ShieldOpaStatus>('/api/shield/opa/policies', { tenant_id: tenantId }),
+
+    getPolicyDoc: (tenantId: string, deviceId: string) =>
+        adminGet<Record<string, unknown>>(`/api/shield/policies/${encodeURIComponent(tenantId)}/${encodeURIComponent(deviceId)}`),
+
+    putPolicyDoc: (tenantId: string, deviceId: string, policyDoc: Record<string, unknown>) =>
+        adminPost<ShieldPolicyBundle>(
+            `/api/shield/policies/${encodeURIComponent(tenantId)}/${encodeURIComponent(deviceId)}`,
+            policyDoc,
+        ),
+
+    getPolicyHistory: (tenantId: string, deviceId: string) =>
+        adminGet<{ history: ShieldPolicyHistoryEntry[] }>(
+            '/api/shield/policy-history',
+            { tenant_id: tenantId, device_id: deviceId },
+        ),
+
+    rollbackPolicy: (tenantId: string, deviceId: string, historyId: number) =>
+        adminPost<ShieldPolicyBundle>(
+            '/api/shield/policy-history/rollback',
+            { tenant_id: tenantId, device_id: deviceId, history_id: historyId },
+        ),
 };
