@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, Plus, Globe, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
-import { type Agent0Record, fetchAgent0Record, BASE_SEPOLIA_IDENTITY_REGISTRY } from '../../services/agent0';
+import { type Agent0Record, fetchAgent0Record, BASE_SEPOLIA_IDENTITY_REGISTRY, searchAgentsUniversal } from '../../services/agent0';
 import { Agent0PassportCard } from './Agent0PassportCard';
 import { Agent0RegisterModal } from './Agent0RegisterModal';
 import { Agent0A2ADispatcher } from './Agent0A2ADispatcher';
@@ -69,7 +69,32 @@ export function Agent0Explorer() {
   const [registerOpen, setRegisterOpen] = useState(false);
   const [dispatchTarget, setDispatchTarget] = useState<Agent0Record | null>(null);
   const [paymentTarget, setPaymentTarget] = useState<Agent0Record | null>(null);
-  const [feedbackTarget, setFeedbackTarget] = useState<Agent0Record | null>(null);
+    const [feedbackTarget, setFeedbackTarget] = useState<Agent0Record | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const live = await searchAgentsUniversal(query);
+        if (active && live.length > 0) {
+          // Merge live results with initial seeds
+          const ids = new Set(live.map((a) => a.agentId));
+          const unindexedSeeds = INITIAL_AGENT0_SEEDS.filter((s) => !ids.has(s.agentId));
+          setAgents([...live, ...unindexedSeeds]);
+        }
+      } catch (err) {
+        console.warn('Universal search notice:', err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query]);
 
   const filteredAgents = useMemo(() => {
     const q = query.trim().toLowerCase();
