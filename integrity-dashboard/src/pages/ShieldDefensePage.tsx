@@ -39,6 +39,13 @@ import {
 import { bccMiddleware } from '../services/bccMiddleware';
 
 // Canonical Agent0 Identities for Shield
+function formatSafeDate(val?: string | number | null, withTime = false): string {
+  if (!val) return 'Recent';
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return String(val);
+  return withTime ? d.toLocaleString() : d.toLocaleDateString();
+}
+
 export const SHIELD_AGENT0_PAIR = {
   local: {
     handle: 'shield.local',
@@ -683,7 +690,7 @@ export function ShieldDefensePage() {
                       <div>
                         <strong style={{ fontSize: '1rem', color: '#f8fafc' }}>{device.device_id}</strong>
                         <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                          Role: {device.device_role} · Enrolled: {new Date(device.enrolled_at).toLocaleDateString()}
+                          Role: {device.device_role} · Enrolled: {formatSafeDate(device.enrolled_at)}
                         </div>
                       </div>
                       <span style={{
@@ -968,7 +975,7 @@ export function ShieldDefensePage() {
                         (Version: {rev.policy_version})
                       </span>
                       <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontFamily: 'monospace' }}>
-                        Hash: {rev.policy_hash.slice(0, 20)}… · Recorded: {new Date(rev.created_at).toLocaleString()}
+                        Hash: {rev.policy_hash.slice(0, 20)}… · Recorded: {formatSafeDate(rev.created_at, true)}
                       </div>
                     </div>
 

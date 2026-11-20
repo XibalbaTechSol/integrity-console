@@ -9,6 +9,9 @@ import { Agent0FeedbackModal } from './Agent0FeedbackModal';
 import { Agent0MessengerModal } from './Agent0MessengerModal';
 import { BASE_SEPOLIA_CHAIN_ID, XIBALBA_TEST_AGENT_ID } from '../../constants';
 
+const isRender = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+const defaultCortexMcp = isRender ? 'https://cortex-managed-pilot.onrender.com/mcp' : 'http://127.0.0.1:4174/mcp';
+
 // Initial seeds or cached agents on Base Sepolia
 const INITIAL_AGENT0_SEEDS: Agent0Record[] = [
   {
@@ -49,7 +52,7 @@ const INITIAL_AGENT0_SEEDS: Agent0Record[] = [
     x402Support: true,
     services: [
       { name: 'DID', endpoint: 'did:integrity:b1a72980e8e45e97c7b92982a89b1963e470b45fa955c9bd245f046e1e32e39a' },
-      { name: 'MCP', endpoint: 'http://127.0.0.1:4174/mcp' },
+      { name: 'MCP', endpoint: defaultCortexMcp },
     ],
     registrations: [
       { agentId: '2', agentRegistry: `eip155:${BASE_SEPOLIA_CHAIN_ID}:${BASE_SEPOLIA_IDENTITY_REGISTRY.toLowerCase()}` },
