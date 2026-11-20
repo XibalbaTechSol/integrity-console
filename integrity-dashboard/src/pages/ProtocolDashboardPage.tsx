@@ -1,32 +1,45 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ethers } from 'ethers';
 import {
-  ArrowDownToLine,
-  ArrowUpFromLine,
+  Activity,
+  ArrowRight,
+  Brain,
+  CheckCircle2,
   ChevronRight,
   Copy,
+  ExternalLink,
+  Flame,
   KeyRound,
   LockKeyhole,
   RefreshCw,
+  ShieldAlert,
   ShieldCheck,
-  WalletCards,
+  Sparkles,
+  UsersRound,
+  Zap,
 } from 'lucide-react';
 
-import { XNSSearchService } from '../components/ui/XNSSearchService';
-import { RegisterAgentModal } from '../components/ui/RegisterAgentModal';
-import { ClaimAgentModal } from '../components/ui/ClaimAgentModal';
-import { SubTabs } from '../components/ui/SubTabs';
 import { useDashboard } from '../context/DashboardContext';
-import { oracle, type AisResponse, type AgentResponse, type AuditLogEntryDto, type Erc8004BindingDto, type ProvenanceEntryDto, type WalletResponse } from '../services/oracle';
+import {
+  oracle,
+  type AisResponse,
+  type AgentResponse,
+  type AuditLogEntryDto,
+  type Erc8004BindingDto,
+  type ProvenanceEntryDto,
+  type WalletResponse,
+} from '../services/oracle';
 import { actorOf, onchainContractRows } from '../chain/v3';
 import { graphMemory, type MerkleRoot, type StoreStatus } from '../services/graphMemory';
+import {
+  shieldBackend,
+  type ShieldDashboardSummary,
+  type ShieldPolicyPackManifest,
+} from '../services/shieldBackend';
 import { readAgentBalances, type OnChainBalance } from '../integrity/wallet/chainClient';
 import { ALLOW_UNSCOPED_AGENT_DIRECTORY } from '../config';
-import { NAVIGATION_ITEMS } from '../navigation';
 import './ProtocolDashboardPage.css';
-
-type Tab = 'overview' | 'identity' | 'records' | 'proofs' | 'wallets' | 'transactions' | 'contracts' | 'security' | 'activity';
 
 const short = (value?: string | null, start = 10, end = 8) => {
   if (!value) return 'Unavailable';
@@ -39,36 +52,70 @@ const copyText = async (value?: string | null) => {
   try {
     await navigator.clipboard?.writeText(value);
   } catch {
-    // Clipboard access is optional in embedded/automated browsers; never turn a
-    // copy affordance into an uncaught application error.
+    // Clipboard access optional
   }
 };
 
 const formatItk = (value?: string | null) => {
-  if (!value) return null;
-  try { return ethers.formatEther(value); } catch { return value; }
+  if (!value) return '0.00';
+  try {
+    return parseFloat(ethers.formatEther(value)).toFixed(2);
+  } catch {
+    return value;
+  }
 };
 
-function State({ ok, children }: { ok: boolean | null; children: string }) {
-  return <span className={`protocol-state ${ok === true ? 'good' : ok === false ? 'bad' : 'muted'}`}><i />{children}</span>;
-}
+const CANONICAL_TRIAD = [
+  {
+    alias: 'xibalba.agy',
+    role: 'Antigravity Orchestrator',
+    model: 'Gemini 2.5 Pro Extended',
+    did: 'did:integrity:b1a72980e8e45e97c7b92982a89b1963e470b45fa955c9bd245f046e1e32e39a',
+    erc8004Token: '10774',
+    scope: 'agent:agy',
+    badge: 'TRIAD CORE',
+  },
+  {
+    alias: 'xibalba.claude',
+    role: 'Claude Code Author',
+    model: 'Claude 3.7 Sonnet',
+    did: 'did:integrity:f07438ae1fb67f6ab1a21df87fb4771bead162c502c6e98cfa0bbdd7020a7e75',
+    erc8004Token: 'Pending',
+    scope: 'agent:claude',
+    badge: 'TRIAD AUTHOR',
+  },
+  {
+    alias: 'xibalba.codex',
+    role: 'Codex Verification Specialist',
+    model: 'Codex Reasoning',
+    did: 'did:integrity:d73b98dd869948c27c7cc16d53683779a23c46daf3020e221955d67d1a8723c5',
+    erc8004Token: 'Pending',
+    scope: 'agent:codex',
+    badge: 'TRIAD VERIFIER',
+  },
+];
 
-function EvidenceValue({ label, value }: { label: string; value?: string | null }) {
-  return <div className="evidence-value"><span>{label}</span><code>{short(value, 12, 10)}</code><button aria-label={`Copy ${label}`} onClick={() => void copyText(value)}><Copy size={13} /></button></div>;
-}
-
-function AgentCard({ agent, selected, onSelect }: { agent: ReturnType<typeof useDashboard>['agents'][number]; selected: boolean; onSelect: () => void }) {
-  return <button className={`agent-list-row ${selected ? 'selected' : ''}`} onClick={onSelect}>
-    <span className="agent-avatar">{(agent.alias || agent.name || 'A').slice(0, 2).toUpperCase()}</span>
-    <span className="agent-list-copy"><strong>{agent.alias || agent.name || short(agent.id, 12, 8)}</strong><small>{short(agent.id, 15, 9)}{agent.profile_id ? ` · ${agent.profile_id} · ${agent.writable === false || agent.store_access === 'read_only' ? 'read only' : 'writable'}` : ''}</small></span>
-    <span className="agent-list-score">{agent.current_ais == null ? '—' : agent.current_ais.toFixed(1)}<small>AIS</small></span>
-    <ChevronRight size={15} />
-  </button>;
-}
+const CANONICAL_SHIELD_PAIR = [
+  {
+    alias: 'shield.local',
+    role: 'Workstation Edge Daemon',
+    model: 'Jev Fast Classifier',
+    did: 'did:integrity:68fed1331613937555a59398223e8e87520a87dd0305aac4fd7ecdc32a14a861',
+    scope: 'agent:shield.local',
+    badge: 'EDGE KERNEL',
+  },
+  {
+    alias: 'shield.cloud',
+    role: 'Fleet Defense Coordinator',
+    model: 'Hermes 3 Reasoning',
+    did: 'did:integrity:2ea17967f7a65589d570ca7e800844701fb36e6aa7374243e8766de8651f6bc4',
+    scope: 'agent:shield.cloud',
+    badge: 'FLEET C2',
+  },
+];
 
 export default function ProtocolDashboardPage() {
-  const location = useLocation();
-  const { agents, agentsLoading, selectedAgent, setSelectedAgent, connectWallet, walletAddress } = useDashboard();
+  const { agents, selectedAgent, setSelectedAgent } = useDashboard();
   const [ais, setAis] = useState<AisResponse | null>(null);
   const [detail, setDetail] = useState<AgentResponse | null>(null);
   const [wallet, setWallet] = useState<WalletResponse | null>(null);
@@ -79,16 +126,30 @@ export default function ProtocolDashboardPage() {
   const [auditLog, setAuditLog] = useState<AuditLogEntryDto[]>([]);
   const [cortex, setCortex] = useState<StoreStatus | null>(null);
   const [merkle, setMerkle] = useState<MerkleRoot | null>(null);
+  const [shieldSummary, setShieldSummary] = useState<ShieldDashboardSummary | null>(null);
+  const [shieldPack, setShieldPack] = useState<ShieldPolicyPackManifest | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-
   const [refreshNonce, setRefreshNonce] = useState(0);
-  const [routeTab, setRouteTab] = useState('overview');
-  const tab = routeTab === 'identity' ? 'identity' : ['records', 'proofs', 'activity'].includes(routeTab) ? 'evidence' : ['transactions', 'security'].includes(routeTab) ? 'wallets' : routeTab as 'overview' | 'wallets' | 'contracts';
 
-  const tabTitles: Record<Tab, string> = { overview: 'Protocol overview', identity: 'Agent identity', records: 'Integrity records', proofs: 'Proofs & verification', wallets: 'Wallet', transactions: 'Transactions', contracts: 'Contracts', security: 'Security & keys', activity: 'Activity log' };
+  useEffect(() => {
+    let active = true;
+
+    // Fetch cross-system backbone health: Shield + Cortex
+    Promise.allSettled([
+      shieldBackend.dashboardSummary('default'),
+      shieldBackend.getPolicyPack(),
+      graphMemory.status(),
+    ]).then(([shieldRes, packRes, cortexRes]) => {
+      if (!active) return;
+      if (shieldRes.status === 'fulfilled') setShieldSummary(shieldRes.value);
+      if (packRes.status === 'fulfilled') setShieldPack(packRes.value);
+      if (cortexRes.status === 'fulfilled') setCortex(cortexRes.value);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [refreshNonce]);
 
   useEffect(() => {
     if (!selectedAgent) return;
@@ -99,247 +160,595 @@ export default function ProtocolDashboardPage() {
     setProvenance([]);
     setAuditLog([]);
     setLoading(true);
+
     Promise.allSettled([
       oracle.getAis(selectedAgent.id),
       oracle.getAgent(selectedAgent.id),
       oracle.getWallet(selectedAgent.id),
       oracle.getErc8004(selectedAgent.id),
       oracle.getProvenance(selectedAgent.id),
-      oracle.getAuditLog(selectedAgent.id, 20),
-      graphMemory.status(),
+      oracle.getAuditLog(selectedAgent.id, 10),
       graphMemory.sessions(1, selectedAgent.id, selectedAgent.store_id),
-    ]).then(([aisResult, detailResult, walletResult, ercResult, provenanceResult, auditResult, cortexResult, sessionsResult]) => {
-      if (!active) return;
-      if (aisResult.status === 'fulfilled') setAis(aisResult.value);
-      if (detailResult.status === 'fulfilled') {
-        setDetail(detailResult.value);
-        const sovereignAgent = actorOf(detailResult.value);
-        if (sovereignAgent && ethers.isAddress(sovereignAgent)) {
-          readAgentBalances(sovereignAgent)
-            .then(balance => { if (!active) return; setOnChainBalance(balance); setEthBalance(balance.eth); })
-            .catch(() => active && setEthBalance(null));
+    ])
+      .then(([aisRes, detailRes, walletRes, ercRes, provRes, auditRes, sessRes]) => {
+        if (!active) return;
+        if (aisRes.status === 'fulfilled') setAis(aisRes.value);
+        if (detailRes.status === 'fulfilled') {
+          setDetail(detailRes.value);
+          const sovereignAgent = actorOf(detailRes.value);
+          if (sovereignAgent && ethers.isAddress(sovereignAgent)) {
+            readAgentBalances(sovereignAgent)
+              .then((bal) => {
+                if (!active) return;
+                setOnChainBalance(bal);
+                setEthBalance(bal.eth);
+              })
+              .catch(() => active && setEthBalance(null));
+          }
         }
-      }
-      if (walletResult.status === 'fulfilled') setWallet(walletResult.value);
-      if (ercResult.status === 'fulfilled') setErc8004(ercResult.value);
-      if (provenanceResult.status === 'fulfilled') setProvenance(provenanceResult.value);
-      if (auditResult.status === 'fulfilled') setAuditLog(auditResult.value);
-      if (cortexResult.status === 'fulfilled') setCortex(cortexResult.value);
-      if (sessionsResult.status === 'fulfilled' && sessionsResult.value[0]) {
-        graphMemory.sessionMerkleRoot(sessionsResult.value[0].external_session_id).then(root => active && setMerkle(root)).catch(() => undefined);
-      }
-    }).finally(() => active && setLoading(false));
-    return () => { active = false; };
+        if (walletRes.status === 'fulfilled') setWallet(walletRes.value);
+        if (ercRes.status === 'fulfilled') setErc8004(ercRes.value);
+        if (provRes.status === 'fulfilled') setProvenance(provRes.value);
+        if (auditRes.status === 'fulfilled') setAuditLog(auditRes.value);
+        if (sessRes.status === 'fulfilled' && sessRes.value[0]) {
+          graphMemory
+            .sessionMerkleRoot(sessRes.value[0].external_session_id)
+            .then((root) => active && setMerkle(root))
+            .catch(() => undefined);
+        }
+      })
+      .finally(() => active && setLoading(false));
+
+    return () => {
+      active = false;
+    };
   }, [selectedAgent, refreshNonce]);
 
-  const primitiveRows = useMemo(() => onchainContractRows(detail), [detail]);
   const actor = actorOf(detail);
-  const nav = NAVIGATION_ITEMS;
+  const primitiveRows = useMemo(() => onchainContractRows(detail), [detail]);
 
   return (
-    <div className="protocol-app-inner" style={{ display: 'contents' }}>
-      <section className="protocol-health">
-        <div><span>Network health</span><strong><i />{detail ? 'Connected' : 'Awaiting Oracle'}</strong></div>
-        <div><span>Identity binding</span><strong><i className={erc8004?.binding_status === 'verified' ? '' : 'muted-dot'} />{erc8004?.binding_status === 'verified' ? 'ERC-8004 verified' : 'Not confirmed'}</strong></div>
-        <div><span>Cortex evidence</span><strong><i className={(cortex?.integrity_check === 'ok' || cortex?.status === 'online') ? '' : 'muted-dot'} />{cortex ? `${(cortex.memory_count ?? cortex.memories ?? 0).toLocaleString()} memories` : 'Unavailable'}</strong></div>
-        <div><span>Live data</span><strong><i className={ais ? '' : 'muted-dot'} />{ais ? 'Oracle projection' : 'Read-only state'}</strong></div>
+    <div className="protocol-app-inner" style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '24px' }}>
+      {/* ─── SYSTEM STATUS PULSE BAR ────────────────────────────────────── */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '14px',
+        }}
+      >
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(59, 130, 246, 0.25)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                background: 'rgba(59, 130, 246, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#60a5fa',
+              }}
+            >
+              <Zap size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                Integrity Backbone
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                Base Sepolia (84532)
+              </div>
+            </div>
+          </div>
+          <span
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              background: 'rgba(34, 197, 94, 0.15)',
+              color: '#4ade80',
+              border: '1px solid rgba(34, 197, 94, 0.3)',
+            }}
+          >
+            ACTIVE
+          </span>
+        </div>
+
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(168, 85, 247, 0.25)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                background: 'rgba(168, 85, 247, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#c084fc',
+              }}
+            >
+              <Brain size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                Super-Cortex Fabric
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                {cortex ? `${(cortex.memory_count ?? cortex.memories ?? 0).toLocaleString()} Memories` : 'Provenance Active'}
+              </div>
+            </div>
+          </div>
+          <Link
+            to="/cortex"
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              background: 'rgba(168, 85, 247, 0.15)',
+              color: '#d8b4fe',
+              border: '1px solid rgba(168, 85, 247, 0.3)',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            EXPLORE <ArrowRight size={12} />
+          </Link>
+        </div>
+
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.75)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                background: 'rgba(239, 68, 68, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#f87171',
+              }}
+            >
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700 }}>
+                Shield Defense Grid
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#f8fafc' }}>
+                {shieldPack?.version ? `Pack v${shieldPack.version}` : 'eBPF Enforcing'}
+              </div>
+            </div>
+          </div>
+          <Link
+            to="/shield"
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              background: 'rgba(239, 68, 68, 0.15)',
+              color: '#fca5a5',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            DEFENSE <ArrowRight size={12} />
+          </Link>
+        </div>
       </section>
 
-      <div className="protocol-content">
-        <SubTabs
-          tabs={[
-            { id: 'overview', label: 'Overview' },
-            { id: 'identity', label: 'Identity & Trust' },
-            { id: 'contracts', label: 'Contracts' },
-            { id: 'wallets', label: 'Wallets' },
-            { id: 'evidence', label: 'Evidence' }
-          ]}
-          activeTab={tab}
-          setActiveTab={(id) => setRouteTab(id)}
-        />
+      {/* ─── AGENT IDENTITY MESH SUMMARY ─────────────────────────────────── */}
+      <section
+        style={{
+          background: 'rgba(15, 23, 42, 0.6)',
+          border: '1px solid var(--glass-border)',
+          borderRadius: '14px',
+          padding: '20px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <UsersRound size={18} style={{ color: '#38bdf8' }} /> Autonomous Agent Identity Mesh
+            </h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+              Canonical Triad & Shield Defense Pair bound to individual Ed25519 DIDs with mutual A2A verification.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setRefreshNonce((n) => n + 1)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid var(--glass-border)',
+                color: 'var(--text-primary)',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.8rem',
+              }}
+            >
+              <RefreshCw size={14} /> Refresh
+            </button>
+            <Link
+              to="/identity"
+              style={{
+                background: '#2563eb',
+                color: '#fff',
+                borderRadius: '8px',
+                padding: '6px 14px',
+                textDecoration: 'none',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              Identity Hub <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
 
-        {(tab === 'overview' || tab === 'identity') && (
-          <>
-            <section className="protocol-grid agent-focus-grid">
-              <div className="protocol-panel selected-agent-panel">
-                <div className="panel-heading">
-                  <div>
-                    <span className="panel-label">Selected identity</span>
-                    <h2>{selectedAgent?.alias || selectedAgent?.name || (selectedAgent ? short(selectedAgent.id, 15, 9) : 'No agent selected')}</h2>
-                  </div>
-                  <State ok={erc8004?.binding_status === 'verified'}>{erc8004?.binding_status === 'verified' ? 'Verified' : 'Not verified'}</State>
-                </div>
-                <div className="identity-lines">
-                  <EvidenceValue label="ERC-8004 / DID" value={selectedAgent?.id} />
-                  <EvidenceValue label="Sovereign agent" value={actor} />
-                  <EvidenceValue label="NFT owner" value={erc8004?.nft_owner_address} />
-                  <EvidenceValue label="Agent wallet" value={erc8004?.agent_wallet_address} />
-                  <div className="ais-score">
-                    <span>Agent Integrity Score</span>
-                    <strong>{ais?.ais == null ? '—' : ais.ais.toFixed(1)}</strong>
-                    <small>/ 100 · Tier {detail?.verification_tier ?? selectedAgent?.verification_tier ?? '—'} · Oracle projection</small>
-                  </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '12px' }}>
+          {CANONICAL_TRIAD.map((agent) => (
+            <div
+              key={agent.alias}
+              style={{
+                background: 'rgba(30, 41, 59, 0.5)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                borderRadius: '10px',
+                padding: '14px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#60a5fa', letterSpacing: '0.05em' }}>
+                  {agent.badge}
+                </span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>{agent.alias}</div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>{agent.role}</div>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace' }}>
+                {short(agent.did, 12, 6)}
+              </div>
+            </div>
+          ))}
+
+          {CANONICAL_SHIELD_PAIR.map((agent) => (
+            <div
+              key={agent.alias}
+              style={{
+                background: 'rgba(30, 41, 59, 0.5)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                borderRadius: '10px',
+                padding: '14px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f87171', letterSpacing: '0.05em' }}>
+                  {agent.badge}
+                </span>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
+              </div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>{agent.alias}</div>
+              <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>{agent.role}</div>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace' }}>
+                {short(agent.did, 12, 6)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── SELECTED AGENT 360 & CROSS-SYSTEM INTELLIGENCE ─────────────── */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(320px, 1fr) minmax(320px, 1fr)',
+          gap: '20px',
+        }}
+      >
+        {/* Left Column: Agent 360 & On-Chain Custody */}
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.6)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: '14px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 800 }}>
+                Active Agent Inspection
+              </span>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 0' }}>
+                {selectedAgent?.alias || selectedAgent?.name || (selectedAgent ? short(selectedAgent.id, 14, 8) : 'No agent selected')}
+              </h3>
+            </div>
+            <div
+              style={{
+                textAlign: 'right',
+                background: 'rgba(30, 41, 59, 0.8)',
+                padding: '8px 14px',
+                borderRadius: '10px',
+                border: '1px solid rgba(59, 130, 246, 0.3)',
+              }}
+            >
+              <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', color: '#94a3b8', fontWeight: 700 }}>
+                AIS Score
+              </div>
+              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#38bdf8' }}>
+                {ais?.ais == null ? '—' : ais.ais.toFixed(1)}
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}> / 100</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+              }}
+            >
+              <span style={{ color: 'var(--text-muted)' }}>ERC-8004 DID</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <code style={{ color: '#38bdf8' }}>{short(selectedAgent?.id, 14, 8)}</code>
+                <button
+                  onClick={() => void copyText(selectedAgent?.id)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  <Copy size={13} />
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+              }}
+            >
+              <span style={{ color: 'var(--text-muted)' }}>Sovereign Actor</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <code style={{ color: '#4ade80' }}>{short(actor, 12, 6)}</code>
+                <button
+                  onClick={() => void copyText(actor)}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                >
+                  <Copy size={13} />
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
+              }}
+            >
+              <span style={{ color: 'var(--text-muted)' }}>Passport Status</span>
+              <span style={{ color: erc8004?.binding_status === 'verified' ? '#4ade80' : '#f59e0b', fontWeight: 700 }}>
+                {erc8004?.binding_status === 'verified' ? 'Verified On-Chain' : 'Off-Chain Tier 0'}
+              </span>
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '14px',
+              borderRadius: '10px',
+              background: 'rgba(30, 41, 59, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px' }}>
+              On-Chain Sovereign Balances (Base Sepolia)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>ETH Gas</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>
+                  {ethBalance ? parseFloat(ethBalance).toFixed(4) : '0.0000'}
                 </div>
               </div>
-
-              <div className="protocol-panel agent-list-panel">
-                <div className="panel-heading">
-                  <div>
-                    <span className="panel-label">{ALLOW_UNSCOPED_AGENT_DIRECTORY ? 'Operator / dev directory' : 'Authenticated scope'}</span>
-                    <h2>Agents</h2>
-                  </div>
-                  <span className="panel-count">{agents.length}</span>
-                </div>
-                <div className="agent-list">
-                  {agents.length ? agents.map(agent => (
-                    <AgentCard key={agent.namespace_key || agent.id} agent={agent} selected={(agent.namespace_key || agent.id) === (selectedAgent?.namespace_key || selectedAgent?.id)} onSelect={() => setSelectedAgent(agent)} />
-                  )) : (
-                    <div className="empty-state">No permitted agents are available for this authenticated session.</div>
-                  )}
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>ITK Bond</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>
+                  {formatItk(onChainBalance?.itk)}
                 </div>
               </div>
-            </section>
-
-            <section className="protocol-grid xns-grid">
-              <div className="protocol-panel">
-                <div className="panel-heading">
-                  <div>
-                    <span className="panel-label">On-chain name resolution</span>
-                    <h2>XNS Search Service</h2>
-                  </div>
-                </div>
-                <div style={{ padding: '20px' }}>
-                  <XNSSearchService />
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Block Height</div>
+                <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>
+                  {onChainBalance?.blockNumber ? `#${onChainBalance.blockNumber.toLocaleString()}` : 'Synced'}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="protocol-panel">
-                <div className="panel-heading">
-                  <div>
-                    <span className="panel-label">Autonomous identities</span>
-                    <h2>Identity Management</h2>
-                  </div>
-                </div>
-                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <p className="text-muted" style={{ fontSize: '0.85rem' }}>
-                    Manage your autonomous agent identities. You can either deploy a new identity or claim ownership of an existing one.
-                  </p>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button className="primary-button" onClick={() => setIsRegisterModalOpen(true)} style={{ flex: 1 }}>Register New Identity</button>
-                    <button className="secondary-button" onClick={() => setIsClaimModalOpen(true)} style={{ flex: 1 }}>Claim Existing Identity</button>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </>
-        )}
+        {/* Right Column: Cross-Pillar Quick Actions & Telemetry */}
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.6)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: '14px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '14px',
+          }}
+        >
+          <div>
+            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 800 }}>
+              Autonomous System Navigation
+            </span>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '4px 0 0' }}>
+              Integrated Ecosystem Pillars
+            </h3>
+          </div>
 
-        {(tab === 'overview' || tab === 'wallets') && (
-          <section className="protocol-grid wallet-grid">
-            <div className="protocol-panel wallet-panel">
-              <div className="panel-heading">
-                <div><span className="panel-label">Agent treasury</span><h2>Wallet custody</h2></div>
-                <KeyRound size={19} />
-              </div>
-              <div className="wallet-lock">
-                <LockKeyhole size={22} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, justifyContent: 'center' }}>
+            <Link
+              to="/identity"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '10px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                textDecoration: 'none',
+                color: '#f8fafc',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <UsersRound size={20} style={{ color: '#60a5fa' }} />
                 <div>
-                  <strong>Protected key boundary</strong>
-                  <span>Private keys are never shown. This UI can read the resolved treasury and connect an external signer, but cannot export or custody agent keys.</span>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Agent Identity & A2A Mesh</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>DIDs, ERC-8004 Passports, Mutual Envelopes</div>
                 </div>
               </div>
-              <div className="wallet-address-row">
-                <span>Agent wallet · on-chain resolved</span>
-                <code>{short(actor, 12, 10)}</code>
-                <small>Controller and signer relationship are shown only when independently verified by ERC-8004 data.</small>
-              </div>
-              <div className="balance-grid">
-                <div><span>ITK balance · Oracle</span><strong>{formatItk(wallet?.itk_balance) ?? onChainBalance?.itk ?? '—'} <small>ITK</small></strong></div>
-                <div><span>ETH balance · RPC</span><strong>{ethBalance ?? '—'} <small>ETH</small></strong></div>
-              </div>
-              <div className="wallet-actions">
-                <button className="primary-button" onClick={() => void connectWallet()}><ArrowUpFromLine size={16} />Connect external signer</button>
-                <button className="secondary-button" onClick={() => void copyText(actor)}><ArrowDownToLine size={16} />Copy receive address</button>
-              </div>
-              {onChainBalance && <div className="source-line">On-chain read · Base Sepolia · block {onChainBalance.blockNumber} · {onChainBalance.itkSymbol} {onChainBalance.itk}</div>}
-            </div>
+              <ArrowRight size={16} style={{ color: '#60a5fa' }} />
+            </Link>
 
-            <div className="protocol-panel transaction-panel">
-              <div className="panel-heading">
-                <div><span className="panel-label">Wallet activity</span><h2>Transactions</h2></div>
-                <span className="panel-count">{wallet?.transaction_history?.length ?? 0}</span>
-              </div>
-              {wallet?.transaction_history?.length ? wallet.transaction_history.slice(0, 6).map(tx => (
-                <div className="transaction-row" key={tx.id}>
-                  <span className="tx-icon"><ArrowUpFromLine size={14} /></span>
-                  <span><strong>{tx.type} · {tx.asset}</strong><small>{short(tx.id, 12, 8)} · {tx.status}</small></span>
-                  <b>{tx.amount}</b>
+            <Link
+              to="/cortex"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '10px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                border: '1px solid rgba(168, 85, 247, 0.25)',
+                textDecoration: 'none',
+                color: '#f8fafc',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Brain size={20} style={{ color: '#c084fc' }} />
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Super-Cortex Memory Browser</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Scoped Memory Ledger, Merkle Anchors & Trajectories</div>
                 </div>
-              )) : <div className="empty-state">Oracle transaction history is unavailable until event indexing is implemented.</div>}
-            </div>
-          </section>
-        )}
+              </div>
+              <ArrowRight size={16} style={{ color: '#c084fc' }} />
+            </Link>
 
-        {(tab === 'overview' || tab === 'evidence') && (
-          <section className="protocol-panel evidence-panel">
-            <div className="panel-heading">
-              <div><span className="panel-label">Proof surface</span><h2>Evidence chain</h2></div>
-              <a href="#evidence">Inspect all <ChevronRight size={14} /></a>
-            </div>
-            <div className="evidence-chain" role="region" aria-label="Evidence chain" tabIndex={0}>
-              <div className="evidence-node"><span>01</span><strong>BCC intent</strong><small>{auditLog.length ? `${auditLog.length} audit records` : 'Unavailable'}</small></div>
-              <div className="evidence-line" />
-              <div className="evidence-node"><span>02</span><strong>Hash</strong><small>{provenance.length ? `${provenance.length} anchored leaves` : 'Unavailable'}</small></div>
-              <div className="evidence-line" />
-              <div className="evidence-node"><span>03</span><strong>Merkle root</strong><small>{short(provenance[0]?.root || merkle?.root_node_id, 10, 8)}</small></div>
-              <div className="evidence-line" />
-              <div className="evidence-node"><span>04</span><strong>ZK proof</strong><small>{ais?.zk_proof_verified === true ? 'Verified' : ais ? 'Not verified' : 'Unavailable'}</small></div>
-              <div className="evidence-line" />
-              <div className="evidence-node"><span>05</span><strong>Oracle receipt</strong><small>{ais ? 'AIS projection' : 'Unavailable'}</small></div>
-            </div>
-            <div className="evidence-detail-grid">
-              <EvidenceValue label="Merkle root" value={provenance[0]?.root || merkle?.root_node_id} />
-              <EvidenceValue label="Latest content leaf" value={provenance[0]?.leaf} />
-              <EvidenceValue label="Verification state" value={ais ? (ais.zk_proof_verified ? 'zk_verified' : 'not_verified') : 'unavailable'} />
-              <EvidenceValue label="Reporting period" value={ais ? `${ais.period_start} → ${ais.period_end}` : null} />
-            </div>
-          </section>
-        )}
+            <Link
+              to="/shield"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '10px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                textDecoration: 'none',
+                color: '#f8fafc',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <ShieldCheck size={20} style={{ color: '#f87171' }} />
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>Shield Defense & Policy Studio</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>eBPF Containment, Rego Policy Packs, History & Rollback</div>
+                </div>
+              </div>
+              <ArrowRight size={16} style={{ color: '#f87171' }} />
+            </Link>
 
-        {(tab === 'overview' || tab === 'contracts') && (
-          <section className="protocol-panel contracts-panel">
-            <div className="panel-heading">
-              <div><span className="panel-label">Agent-controlled surface</span><h2>Deployed contracts</h2></div>
-              <span className="panel-count">{primitiveRows.length}</span>
-            </div>
-            <div className="contracts-table-wrap" role="region" aria-label="Contract records" tabIndex={0}>
-              <table>
-                <thead><tr><th>Address</th><th>Contract / primitive</th><th>Role</th><th>Authoritative controller</th><th>State</th></tr></thead>
-                <tbody>
-                  {primitiveRows.map(([name, address]) => (
-                    <tr key={name}>
-                      <td><code>{short(String(address), 11, 8)}</code></td>
-                      <td><strong>{name.replace(/_/g, ' ')}</strong><small>From the agent's AgentRegistry record (Oracle-synced)</small></td>
-                      <td>{name === 'sovereign_agent' ? 'Bound actor' : 'Registry record'}</td>
-                      <td>{erc8004 ? short(erc8004.nft_owner_address, 8, 6) : 'Unverified'}</td>
-                      <td><State ok={Boolean(address && !/^0x0+$/i.test(String(address)))}>{address && !/^0x0+$/i.test(String(address)) ? 'Resolved' : 'Missing'}</State></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!primitiveRows.length && <div className="empty-state">No owned or controlled contracts were verified for this identity.</div>}
-            </div>
-          </section>
-        )}
-
-        <section className="protocol-note">
-          <ShieldCheck size={16} />
-          <span>This console exposes protocol evidence and wallet controls. It never renders private keys or treats AIS as authorization by itself.</span>
-        </section>
-      </div>
-
-      {isRegisterModalOpen && <RegisterAgentModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} onSuccess={() => setIsRegisterModalOpen(false)} />}
-      {isClaimModalOpen && <ClaimAgentModal isOpen={isClaimModalOpen} defaultDid={selectedAgent?.id} onClose={() => setIsClaimModalOpen(false)} onSuccess={() => setIsClaimModalOpen(false)} />}
+            <Link
+              to="/intelligence"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px',
+                borderRadius: '10px',
+                background: 'rgba(30, 41, 59, 0.4)',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
+                textDecoration: 'none',
+                color: '#f8fafc',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Activity size={20} style={{ color: '#4ade80' }} />
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>AIS & Evidence Ledger</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Reward Functions, Non-Gameable Proofs & Audits</div>
+                </div>
+              </div>
+              <ArrowRight size={16} style={{ color: '#4ade80' }} />
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

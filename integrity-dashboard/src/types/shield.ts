@@ -102,6 +102,34 @@ export interface ShieldPolicyBundle {
     rules: number;
 }
 
+export interface ShieldPolicyPackManifest {
+    name: string;
+    version: string;
+    pack_format?: string;
+    decision_contract?: string;
+    entrypoint?: string;
+    pack_hash: string;
+    signer_key?: string;
+    signature?: string;
+    event_classes?: string[];
+    controls?: Record<string, unknown>;
+}
+
+export interface ShieldPolicyHistoryEntry {
+    id: number;
+    device_id: string;
+    policy_version: string;
+    policy_hash: string;
+    created_at: string;
+}
+
+export interface ShieldOpaStatus {
+    healthy: boolean;
+    active_policy_version?: string;
+    active_policy_hash?: string;
+    last_error?: string | null;
+}
+
 // shield/backend/store.py's enforcement_outcomes table -- "what actually happened when a
 // decision's chosen action was carried out" (forward-link counterpart to a ShieldDecision,
 // keyed by the same event_id). Real per-device execution results, not a decision itself.
