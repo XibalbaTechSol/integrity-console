@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {
   Globe, ShieldCheck, Wallet, ArrowUpRight, Copy, Check,
-  Send, DollarSign, Star, ExternalLink, Activity, Cpu
+  Send, DollarSign, Star, ExternalLink, Activity, Cpu, MessageSquare
 } from 'lucide-react';
 import { type Agent0Record } from '../../services/agent0';
 import { EXPLORER_URL } from '../../constants';
 
 interface Props {
   record: Agent0Record;
+  onOpenMessenger?: (record: Agent0Record) => void;
   onDispatchTask?: (record: Agent0Record) => void;
   onSendPayment?: (record: Agent0Record) => void;
   onSubmitFeedback?: (record: Agent0Record) => void;
@@ -15,6 +16,7 @@ interface Props {
 
 export function Agent0PassportCard({
   record,
+  onOpenMessenger,
   onDispatchTask,
   onSendPayment,
   onSubmitFeedback,
@@ -181,11 +183,28 @@ export function Agent0PassportCard({
       {/* Action Buttons Row */}
       <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.25rem' }}>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {onOpenMessenger && (
+            <button
+              type="button"
+              onClick={() => onOpenMessenger(record)}
+              className="primary-button"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px',
+                background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
+                border: 'none', color: '#fff', cursor: 'pointer'
+              }}
+            >
+              <MessageSquare size={13} />
+              <span>Talk via A2A</span>
+            </button>
+          )}
+
           {onDispatchTask && (
             <button
               type="button"
               onClick={() => onDispatchTask(record)}
-              className="primary-button"
+              className="secondary-button"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                 padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px'
