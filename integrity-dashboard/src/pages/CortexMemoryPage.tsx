@@ -27,6 +27,10 @@ const SCOPES = [
 ];
 
 export function CortexMemoryPage() {
+  const isRender = typeof window !== 'undefined' && window.location.hostname.includes('onrender.com');
+  const cortexStudioUrl = import.meta.env.VITE_CORTEX_URL || (isRender ? 'https://cortex-managed-pilot.onrender.com' : 'http://127.0.0.1:4174');
+  const cortexStudioEndpoint = cortexStudioUrl.replace(/^https?:\/\//, '');
+
   const [selectedScope, setSelectedScope] = useState<string>('shared');
   const [stats, setStats] = useState<GraphMemoryStats | null>(null);
   const [status, setStatus] = useState<StoreStatus | null>(null);
@@ -115,7 +119,7 @@ export function CortexMemoryPage() {
                 Super-Cortex Cognitive Fabric
               </span>
               <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-                Port 4174 · AIS Merkle Ledger · Zero-Inference Enclave
+                {cortexStudioEndpoint} · AIS Merkle Ledger · Zero-Inference Enclave
               </span>
             </div>
             <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, letterSpacing: '-0.02em', color: '#f8fafc' }}>
@@ -128,7 +132,7 @@ export function CortexMemoryPage() {
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <a
-              href="http://127.0.0.1:4174"
+              href={cortexStudioUrl}
               target="_blank"
               rel="noreferrer"
               style={{
@@ -181,7 +185,7 @@ export function CortexMemoryPage() {
             <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Service Endpoint</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: (status?.status === 'ok' || !error) ? '#34d399' : '#f87171' }} />
-              <strong style={{ color: '#f8fafc', fontSize: '0.88rem' }}>127.0.0.1:4174</strong>
+              <strong style={{ color: '#f8fafc', fontSize: '0.88rem' }}>{cortexStudioEndpoint}</strong>
             </div>
           </div>
           <div>
@@ -323,7 +327,7 @@ export function CortexMemoryPage() {
             <div>
               <strong>Super-Cortex Connection:</strong> {error}
               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
-                Ensure local service is running at <code>http://127.0.0.1:4174</code> with SQLite provenance database at <code>~/.super-cortex/provenance.db</code>.
+                Ensure service is reachable at <code>{cortexStudioUrl}</code> with SQLite provenance database at <code>~/.super-cortex/provenance.db</code>.
               </p>
             </div>
           </div>
