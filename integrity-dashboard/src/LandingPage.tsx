@@ -3,11 +3,9 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   ChevronDown,
-  Activity,
   Database,
   Gauge,
   Radio,
-  ShieldAlert,
   SlidersHorizontal,
   Cpu,
   Check,
@@ -18,6 +16,10 @@ import {
   Phone,
   Globe,
   ExternalLink,
+  ShieldCheck,
+  Key,
+  Network,
+  Wallet,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSettings } from './context/SettingsContext';
@@ -93,56 +95,42 @@ const PhaseChip: React.FC<{ state: PhaseState }> = ({ state }) => {
   );
 };
 
-/** The console surfaces that actually exist as routes in App.tsx. No prototype links to redirects. */
+/** The 5 Canonical Console Surfaces in App.tsx with integrated legacy route mappings. */
 const CONSOLE_SURFACES = [
   {
     route: '/dashboard',
-    name: 'Overview and identity',
-    icon: Database,
-    body: 'Register and claim agent identity, and read the protocol overview. Identity lives here, not on the registry — a point the route map now enforces.',
-  },
-  {
-    route: '/agent0',
-    name: 'Agent0 Passport & Discovery',
-    icon: Cpu,
-    body: 'On-chain ERC-8004 registry on Base Sepolia (84532), RFC 8785 canonical JSON DID backlinks, Agent-to-Agent (A2A) capability delegation, and x402 micropayments.',
-  },
-  {
-    route: '/agents',
-    name: 'Agent registry',
-    icon: Radio,
-    body: 'Every enrolled agent, its DID, its handle and its current standing. The vehicle manifest.',
-  },
-  {
-    route: '/ais',
-    name: 'AIS and telemetry',
-    icon: Gauge,
-    body: "Oracle-computed AIS per agent, with the derivation shown. Display only — scoring authority stays in scoring-core, and the console never recomputes it.",
-  },
-  {
-    route: '/evidence',
-    name: 'Evidence and correlation',
-    icon: Activity,
-    // Verified against src/pages/CorrelationPage.tsx: its four columns are exactly
-    // Runtime, Shield / policy, Signed intent, Outcome. An earlier draft claimed
-    // "receipts, epochs and anchored roots" here, which the component does not render.
-    body: 'Correlates runtime activity, the Shield policy decision, the signed intent and the outcome into one row, so "what did it do, and why was it admitted" is a single read rather than a reconstruction.',
-  },
-  {
-    route: '/system',
-    name: 'System control',
+    name: 'Command Center & Fleet Telemetry',
     icon: SlidersHorizontal,
-    body: 'Service health, policy packs, developer tooling and operational state for the deployment the console is pointed at.',
+    body: 'Centralized telemetry, fleet operational status, real-time agent registration events, and top-level protocol verification metrics across all nodes.',
+    tag: 'Fleet Telemetry',
   },
   {
-    route: '/health',
-    name: 'Integrity Health',
-    icon: ShieldAlert,
-    // Verified against src/pages/HealthPage.tsx panel titles: Smart BAA registry, HIPAA
-    // gateway concept and safeguards, clinical allowlist, patient consent contracts,
-    // record interaction logs, agent circuit breakers. "Synthetic FHIR" was not among
-    // them, so the earlier wording is corrected rather than repeated.
-    body: 'The first pack, as a working concept: a SmartBAA registry, a clinical allowlist, patient consent gates, interaction logs and agent circuit breakers. A concept and safeguard model over non-production data — explicitly not a HIPAA certification.',
+    route: '/identity',
+    name: 'Agent Identity Hub & Agent0 Explorer',
+    icon: Cpu,
+    body: 'Unified identity plane: Off-chain Ed25519 DIDs, on-chain ERC-8004 Public Passports on Base Sepolia (84532), Agent-to-Agent (A2A) discovery, and policy-confined SovereignAgent wallets.',
+    tag: 'ERC-8004 / DID',
+  },
+  {
+    route: '/cortex',
+    name: 'Super-Cortex Cognitive Neural Memory',
+    icon: Database,
+    body: 'Interactive 3D knowledge graph, episodic memory provenance, session Merkle audit trees, hybrid vector/lexical retrieval, and zero-drift knowledge synchronization.',
+    tag: 'Memory & AIS Merkle',
+  },
+  {
+    route: '/shield',
+    name: 'Xibalba Shield & Fleet Defense',
+    icon: ShieldCheck,
+    body: 'On-device eBPF kernel security, LSM execution containment, signed syscall spans, and synthetic HIPAA/SOC-2 safeguard gates verifying offline.',
+    tag: 'eBPF / Security',
+  },
+  {
+    route: '/intelligence',
+    name: 'AIS & Steering Evidence Plane',
+    icon: Gauge,
+    body: 'Authoritative Autonomous Integrity Score computation, geometric mean telemetry derivations, signed receipt correlation, and Base Sepolia epoch anchoring.',
+    tag: 'Scoring & Evidence',
   },
 ] as const;
 
@@ -182,95 +170,182 @@ export default function LandingPage() {
 
   const rewardFormula = `R_{\\text{total}} = R_{\\text{task}} + \\lambda \\cdot \\text{AIS}`;
   const aisFormula = `\\text{AIS}_{\\text{raw}} = S_{\\text{entropy}}^{0.30} \\cdot S_{\\text{grounding}}^{0.30} \\cdot S_{\\text{sacrifice}}^{0.20} \\cdot S_{\\text{compliance}}^{0.20}`;
+  const stateSpaceFormula = `\\dot{x}(t) = A x(t) + B u(t) + w(t), \\quad y(t) = C x(t) + v(t)`;
 
   return (
     <div className="landing-page" style={{ color: 'var(--text-primary)' }}>
-      {/* 1. Navigation */}
+      {/* 1. Header Navigation */}
       <header
         className="landing-header"
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: '1.5rem 3rem',
-          background: 'rgba(13, 24, 36, 0.82)',
-          backdropFilter: 'blur(10px)',
+          padding: '0.9rem 2.5rem',
+          background: 'rgba(9, 17, 27, 0.88)',
+          backdropFilter: 'blur(16px)',
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          borderBottom: '1px solid var(--border-color)',
-          gap: '1.5rem',
+          borderBottom: '1px solid rgba(54, 167, 255, 0.18)',
+          gap: '1.25rem',
           flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <img src="https://xibalbatechsol.github.io/XibalbaSolutionsLogo.png" alt="Xibalba Solutions" style={{ height: '40px' }} />
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px' }}>Integrity Protocol</span>
-        </div>
-        <div className="landing-nav" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#open-loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>The Problem</a>
-          <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>The Loop</a>
-          <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Feedback</a>
-          <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Status</a>
-          <a href="#contact" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Contact</a>
-          <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>FAQ</a>
-          <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>Wiki</Link>
-          <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+        <Link
+          to="/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.85rem',
+            textDecoration: 'none',
+            color: 'inherit',
+          }}
+          aria-label="Integrity Protocol Home"
+        >
+          <img
+            src="/logo.png"
+            alt="Integrity Protocol"
+            style={{ height: '36px', width: 'auto', display: 'block', objectFit: 'contain' }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '0.5px', lineHeight: 1.1 }}>
+              Integrity Protocol
+            </span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--theme-accent)', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              Autonomous Control Layer
+            </span>
+          </div>
+        </Link>
+
+        <nav
+          className="landing-nav"
+          style={{
+            display: 'flex',
+            gap: '1.5rem',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+          aria-label="Main Navigation"
+        >
+          <a href="#open-loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            The Problem
+          </a>
+          <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            The Loop
+          </a>
+          <a href="#agent0" style={{ color: 'var(--theme-accent)', textDecoration: 'none', fontWeight: 600, fontSize: '0.92rem' }}>
+            Agent0
+          </a>
+          <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            Feedback
+          </a>
+          <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            Status
+          </a>
+          <a href="#console" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            Surfaces
+          </a>
+          <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            FAQ
+          </a>
+          <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
+            Wiki
+          </Link>
+          <a
+            href="https://xibalbasolutions.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+          >
             Company <ExternalLink size={12} />
           </a>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <a href="https://github.com/xibalbatechsol" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500 }}>GitHub</a>
-          <Link to="/auth" className="primary-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem' }}>
+        </nav>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <a
+            href="https://github.com/xibalbatechsol"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}
+          >
+            GitHub
+          </a>
+          <Link
+            to="/auth"
+            className="primary-button"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '0.65rem 1.35rem',
+              fontSize: '0.92rem',
+              fontWeight: 700,
+              boxShadow: '0 0 20px rgba(54, 167, 255, 0.25)',
+            }}
+          >
             Launch Console <ArrowRight size={16} />
           </Link>
         </div>
       </header>
 
-      {/* 2. Hero */}
+      {/* 2. Hero Section */}
       <section style={{ textAlign: 'center', padding: '6rem 2rem 7rem 2rem', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, rgba(54, 167, 255, 0.16) 0%, transparent 70%)', zIndex: -1 }} />
 
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition}>
-          <p style={{ fontSize: '1rem', color: 'var(--theme-accent)', fontWeight: 700, letterSpacing: '2px', marginBottom: '1.25rem', textTransform: 'uppercase' }}>
-            The control layer for AI
-          </p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.9rem', borderRadius: '999px', background: 'rgba(54, 167, 255, 0.1)', border: '1px solid rgba(54, 167, 255, 0.25)', marginBottom: '1.25rem' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--theme-accent)' }} />
+            <span style={{ fontSize: '0.85rem', color: 'var(--theme-accent)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+              The Control &amp; Identity Layer for Autonomous Agents
+            </span>
+          </div>
+
           <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.25rem)', marginBottom: '1.5rem', fontWeight: 800, lineHeight: 1.08, maxWidth: '980px', margin: '0 auto 1.5rem auto' }}>
-            {/* "open-loop." is kept whole: the default break lands on the hyphen and
-                renders the headline as "open-" / "loop.", which reads as a typo. */}
             Nothing reaches orbit <span style={{ whiteSpace: 'nowrap' }}>open-loop.</span>
           </h1>
+
           <p style={{ fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto 1.5rem auto', lineHeight: 1.6 }}>
             A rocket doesn't make orbit because someone aimed it well. It makes orbit because a controller measures
             where the vehicle actually is, thousands of times a second, compares that to the trajectory it committed
             to, and corrects — with authority bounded by hardware that can end the flight.
           </p>
-          <p style={{ fontSize: '1.3rem', color: 'var(--text-primary)', maxWidth: '820px', margin: '0 auto 3rem auto', lineHeight: 1.6, fontWeight: 500 }}>
-            Guardrails are artificial thermodynamic friction; RL agents mathematically optimize around them. Integrity Protocol establishes the Autonomous Integrity Score (AIS) as the native reward function and anchors verifiable geometric graph navigation across the machine economy.
+
+          <p style={{ fontSize: '1.2rem', color: 'var(--text-primary)', maxWidth: '840px', margin: '0 auto 2.5rem auto', lineHeight: 1.6, fontWeight: 500 }}>
+            Prompt guardrails are artificial thermodynamic friction: reinforcement learning agents mathematically optimize around them. Integrity Protocol establishes the Autonomous Integrity Score (AIS) as the native reward function, integrates Agent0 on-chain ERC-8004 identity with Base Sepolia sovereign actor wallets, and enforces fail-closed state bounds across the machine economy.
           </p>
-          <div className="landing-hero-actions" style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/auth" className="primary-button" style={{ padding: '1.25rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+
+          <div className="landing-hero-actions" style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/auth" className="primary-button" style={{ padding: '1.15rem 2.25rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 0 25px rgba(54, 167, 255, 0.35)' }}>
               Launch Console <ArrowRight size={18} />
             </Link>
-            <a href="#loop" className="secondary-button" style={{ padding: '1.25rem 2.5rem', fontSize: '1.1rem', textDecoration: 'none' }}>
-              See the loop
+            <a href="#loop" className="secondary-button" style={{ padding: '1.15rem 2.25rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              See the control loop
+            </a>
+            <a href="#agent0" className="secondary-button" style={{ padding: '1.15rem 2.25rem', fontSize: '1.1rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', borderColor: 'rgba(54, 167, 255, 0.4)' }}>
+              <Cpu size={18} color="var(--theme-accent)" /> Agent0 Architecture
             </a>
           </div>
+
           <p style={{ marginTop: '2.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
             {MANDATED_SELF_DESCRIPTION}
           </p>
         </motion.div>
       </section>
 
-      {/* 3. The open-loop problem */}
+      {/* 3. The Open-Loop Problem */}
       <section id="open-loop" style={{ padding: '6rem 3rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
             <h2 style={{ fontSize: 'clamp(1.9rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>Three things an open loop cannot do</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
-              Control theory is unsentimental about this. A plant with real authority, driven open-loop, diverges —
-              and the error stays unobservable until it is an outcome. Every current approach to agent safety is
-              missing at least one of the three elements that make a loop a loop.
+              Control theory is unsentimental about this. In any physical or economic plant, state evolution follows:
+            </p>
+            <div className="landing-formula" role="region" aria-label="State-space plant formula" tabIndex={0} style={{ maxWidth: '640px', margin: '1.25rem auto', background: 'var(--bg-color)', padding: '0.85rem 1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+              <BlockMath math={stateSpaceFormula} />
+            </div>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.05rem', lineHeight: 1.6 }}>
+              A plant driven open-loop by stochastic LLM generations diverges exponentially under environmental disturbances. Every current agent safety layer is missing at least one of the three components that make a loop closed and stable.
             </p>
           </motion.div>
 
@@ -320,7 +395,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 4. The loop, closed */}
+      {/* 4. The Loop, Closed */}
       <section id="loop" style={{ padding: '6rem 3rem', maxWidth: '1200px', margin: '0 auto' }}>
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <h2 style={{ fontSize: 'clamp(1.9rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>The loop, closed</h2>
@@ -416,7 +491,133 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 5. Feedback with bounded authority */}
+      {/* 5. Agent0 Architecture Section */}
+      <section id="agent0" style={{ padding: '6rem 3rem', background: 'linear-gradient(180deg, rgba(13, 24, 38, 0.95) 0%, rgba(8, 16, 26, 1) 100%)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <span style={{ display: 'inline-block', marginBottom: '0.75rem', color: 'var(--theme-accent)', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+              Decentralized Agency &amp; Cryptographic Identity
+            </span>
+            <h2 style={{ fontSize: 'clamp(2rem, 4.5vw, 2.8rem)', marginBottom: '1rem', fontWeight: 800 }}>
+              Agent0: Public Passports &amp; Confined Sovereignty
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.12rem', lineHeight: 1.65 }}>
+              Decentralized autonomous agents operating open-loop are systemic financial hazards. Agent0 provides the three-tier identity and containment bridge that transforms autonomous actors into verifiable, feedback-steered participants in the machine economy.
+            </p>
+          </motion.div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem', marginBottom: '3.5rem' }}>
+            {/* Tier 0 */}
+            <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--theme-accent)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(54, 167, 255, 0.12)', borderRadius: 'var(--radius)', color: 'var(--theme-accent)' }}>
+                  <Key size={22} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--theme-accent)', fontWeight: 700 }}>Tier 0 Root</div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Off-Chain Ed25519 DID</h3>
+                </div>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1 }}>
+                Gasless, sub-millisecond local cryptographic sovereignty. The agent generates a pure Ed25519 keypair formatted as <code style={{ color: 'var(--theme-accent)' }}>did:integrity:&lt;sha256&gt;</code>. Private keys remain strictly isolated outside execution harness roots; every intent, tool invocation, and runtime span is locally signed without RPC latency or gas expenditure.
+              </p>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Offline-first execution · Pure Ed25519 · Zero gas
+              </div>
+            </motion.div>
+
+            {/* Tier 1 */}
+            <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--warning)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(255, 170, 0, 0.12)', borderRadius: 'var(--radius)', color: 'var(--warning)' }}>
+                  <Wallet size={22} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--warning)', fontWeight: 700 }}>Tier 1 Actuator</div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Confined Sovereign Wallets</h3>
+                </div>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1 }}>
+                On-chain AgentRegistry on Base Sepolia (EVM 84532) with policy-confined actor wallets. Outgoing contract transactions, treasury transfers, and token approvals are strictly bound by on-chain hook policies (<code style={{ color: 'var(--warning)' }}>wallet_confined: true</code>). Unbounded financial drain or malicious approvals revert on-chain before post-state commit.
+              </p>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                Base Sepolia (84532) · SovereignAgent · Fail-closed policy
+              </div>
+            </motion.div>
+
+            {/* Tier 2 */}
+            <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--success)', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(0, 255, 200, 0.12)', borderRadius: 'var(--radius)', color: 'var(--success)' }}>
+                  <Network size={22} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--success)', fontWeight: 700 }}>Tier 2 Economy</div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem' }}>ERC-8004 Public Passports</h3>
+                </div>
+              </div>
+              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, flex: 1 }}>
+                Global discoverability conforming to the ERC-8004 Agent Passport standard with RFC 8785 Canonical JSON DID backlinks (<code style={{ color: 'var(--success)' }}>services[name=DID]</code>). Powers Agent-to-Agent (A2A) capability delegation, verifiable reputation lookups, and x402 escrow micropayments for inference and compute.
+              </p>
+              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px dashed var(--border-color)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                ERC-8004 · A2A Delegation · x402 Micropayments
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Detailed Agent0 Loop Integration Callout */}
+          <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ padding: '2.5rem', background: 'rgba(54, 167, 255, 0.04)', border: '1px solid rgba(54, 167, 255, 0.2)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ marginTop: 0, fontSize: '1.4rem', color: 'var(--text-primary)', marginBottom: '1rem' }}>
+                  How Agent0 Closes the Machine Economic Loop
+                </h3>
+                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                  Autonomous agents cannot safely interact with decentralized finance, APIs, or each other without bounded actuation:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                    <Check size={18} color="var(--success)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>Cryptographic DID Service Backlinks:</strong> Two-way verification ensures an on-chain token cannot impersonate an agent without the off-chain DID keypair's explicit signature.
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                    <Check size={18} color="var(--success)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>Agent-to-Agent Delegation:</strong> Peer agents inspect standing, AIS tier, and historical epoch proofs before issuing subtask mandates.
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                    <Check size={18} color="var(--success)" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
+                    <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>x402 Micropayments:</strong> Escrowed funds release only upon presentation of a cryptographically valid outcome receipt anchored by the Oracle.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', fontFamily: 'monospace', fontSize: '0.82rem', overflowX: 'auto', lineHeight: 1.6 }}>
+                <div style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>// ERC-8004 Canonical Passport Representation</div>
+                <div>{'{'}</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"standard"</span>: <span style={{ color: 'var(--success)' }}>"ERC-8004"</span>,</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"chainId"</span>: <span style={{ color: 'var(--warning)' }}>84532</span>, <span style={{ color: 'var(--text-secondary)' }}>// Base Sepolia</span></div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"agentWallet"</span>: <span style={{ color: 'var(--success)' }}>"0x7F2e...A19c"</span>,</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"walletConfined"</span>: <span style={{ color: 'var(--theme-accent)' }}>true</span>,</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"services"</span>: [{'{'}</div>
+                <div style={{ paddingLeft: '2.5rem' }}><span style={{ color: 'var(--theme-accent)' }}>"name"</span>: <span style={{ color: 'var(--success)' }}>"DID"</span>,</div>
+                <div style={{ paddingLeft: '2.5rem' }}><span style={{ color: 'var(--theme-accent)' }}>"endpoint"</span>: <span style={{ color: 'var(--success)' }}>"did:integrity:b1a7...39a"</span></div>
+                <div style={{ paddingLeft: '1.25rem' }}>{'}'}],</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"standing"</span>: <span style={{ color: 'var(--success)' }}>"Tier 1 (Verified)"</span>,</div>
+                <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"aisFloor"</span>: <span style={{ color: 'var(--warning)' }}>0.842</span></div>
+                <div>{'}'}</div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 6. Feedback with Bounded Authority */}
       <section id="ais" style={{ padding: '6rem 3rem', background: 'var(--bg-card, var(--surface-color))', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -501,7 +702,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 6. Mission status */}
+      {/* 7. Mission Status */}
       <section id="status" style={{ padding: '6rem 3rem' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
@@ -587,7 +788,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. Inside the Console */}
+      {/* 8. Inside the Console */}
       <section id="console" style={{ padding: '6rem 3rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -600,36 +801,46 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))', gap: '2rem' }}>
-            {CONSOLE_SURFACES.map(({ route, name, icon: Icon, body }) => (
+            {CONSOLE_SURFACES.map(({ route, name, icon: Icon, body, tag }) => (
               <motion.div variants={fadeInUp} key={route} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', marginBottom: '1rem' }}>
-                  <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
-                    <Icon size={22} color="var(--theme-accent)" />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.85rem', marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                    <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
+                      <Icon size={22} color="var(--theme-accent)" />
+                    </div>
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{name}</h3>
+                      <code style={{ fontSize: '0.85rem', color: 'var(--theme-accent)' }}>{route}</code>
+                    </div>
                   </div>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.15rem' }}>{name}</h3>
-                    <code style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{route}</code>
-                  </div>
+                  <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(54, 167, 255, 0.08)', border: '1px solid rgba(54, 167, 255, 0.2)', color: 'var(--theme-accent)', fontWeight: 600 }}>
+                    {tag}
+                  </span>
                 </div>
                 <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, flex: 1, margin: 0 }}>{body}</p>
               </motion.div>
             ))}
           </motion.div>
 
-          <motion.p
+          {/* Unified route mapping note for backwards route reconciliation */}
+          <motion.div
             initial={fadeInUp.initial}
             whileInView={fadeInUp.whileInView}
             viewport={fadeInUp.viewport}
             transition={fadeInUp.transition}
-            style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '2.5rem', marginBottom: 0 }}
+            style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.88rem', marginTop: '2.5rem', marginBottom: 0, lineHeight: 1.6 }}
           >
-            Console surfaces require an account. Shield and Cortex are separate products with their own operator
-            interfaces; the Console links agents and evidence across them rather than embedding them.
-          </motion.p>
+            <p style={{ margin: '0 0 0.5rem' }}>
+              Console surfaces require an operator account. Shield and Cortex are specialized operational engines with dedicated containment interfaces; the Console unifies identities, execution spans, and receipts across them.
+            </p>
+            <p style={{ margin: 0, opacity: 0.8, fontSize: '0.8rem' }}>
+              Canonical routing map: <code style={{ fontSize: '0.78rem' }}>/dashboard</code> (Overview), <code style={{ fontSize: '0.78rem' }}>/agents</code> &amp; <code style={{ fontSize: '0.78rem' }}>/agent0</code> (&rarr; <code style={{ fontSize: '0.78rem' }}>/identity</code>), <code style={{ fontSize: '0.78rem' }}>/ais</code> &amp; <code style={{ fontSize: '0.78rem' }}>/evidence</code> (&rarr; <code style={{ fontSize: '0.78rem' }}>/intelligence</code>), <code style={{ fontSize: '0.78rem' }}>/system</code> (&rarr; <code style={{ fontSize: '0.78rem' }}>/dashboard</code>), <code style={{ fontSize: '0.78rem' }}>/health</code> (&rarr; <code style={{ fontSize: '0.78rem' }}>/shield</code>).
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* 8. FAQ */}
+      {/* 9. FAQ */}
       <section id="faq" style={{ padding: '6rem 3rem', maxWidth: '850px', margin: '0 auto' }}>
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <h2 style={{ fontSize: 'clamp(1.9rem, 4vw, 2.5rem)', marginBottom: '1rem' }}>Questions a control engineer would ask</h2>
@@ -684,6 +895,17 @@ export default function LandingPage() {
           </motion.div>
           <motion.div variants={fadeInUp}>
             <FAQItem
+              question="How does Agent0 connect on-chain agency with closed-loop controls?"
+              answer={
+                <p>
+                  Agent0 bridges decentralized Web3 execution with mathematical feedback control. An agent operates Tier 0
+                  sovereign signing via local Ed25519 DIDs (<code style={{ fontSize: '0.85rem' }}>did:integrity:&lt;sha256&gt;</code>) without gas or latency. When interacting on-chain, Tier 1 SovereignAgent wallets on Base Sepolia bind transaction execution to post-state policy hooks. Finally, Tier 2 ERC-8004 Public Passports link these on-chain identities back to the canonical DID document, enabling peer agents to verify standing and AIS tier before delegating tasks.
+                </p>
+              }
+            />
+          </motion.div>
+          <motion.div variants={fadeInUp}>
+            <FAQItem
               question="Is this HIPAA compliant?"
               answer={
                 <p>
@@ -731,7 +953,7 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 9. Contact */}
+      {/* 10. Direct Pilot Contact */}
       <section id="contact" style={{ padding: '5rem 2rem', background: 'var(--surface-color)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
@@ -851,7 +1073,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 10. Specification */}
+      {/* 11. Protocol Specification */}
       <section id="specification" style={{ padding: '5rem 2rem', background: 'linear-gradient(135deg, rgba(54, 167, 255, 0.08), rgba(0, 255, 200, 0.035))', borderBottom: '1px solid var(--border-color)' }}>
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ maxWidth: '1000px', margin: '0 auto', padding: 'clamp(2rem, 5vw, 4rem)', textAlign: 'center' }}>
           <span style={{ display: 'inline-block', marginBottom: '1rem', color: 'var(--theme-accent)', fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
@@ -883,7 +1105,7 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 11. Footer */}
+      {/* 12. Footer */}
       <footer style={{ padding: '6rem 3rem 2.5rem 3rem', background: 'var(--bg-color)' }}>
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '5rem' }}>
           <h2 style={{ fontSize: 'clamp(1.9rem, 4.5vw, 2.5rem)', marginBottom: '1.5rem' }}>Close the loop.</h2>
@@ -899,10 +1121,10 @@ export default function LandingPage() {
         {/* Corporate Footer Grid */}
         <div style={{ maxWidth: '1200px', margin: '0 auto', borderTop: '1px solid var(--border-color)', paddingTop: '3.5rem', paddingBottom: '3rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2.5rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-              <img src="https://xibalbatechsol.github.io/XibalbaSolutionsLogo.png" alt="Xibalba Solutions" style={{ height: '32px' }} />
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', textDecoration: 'none', color: 'inherit' }}>
+              <img src="/logo.png" alt="Integrity Protocol" style={{ height: '32px', width: 'auto' }} />
               <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Integrity Protocol</span>
-            </div>
+            </Link>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6, margin: '0 0 1rem 0' }}>
               The deterministic control and attestation layer for autonomous agent execution. Developed by Xibalba Solutions LLC.
             </p>
@@ -916,10 +1138,12 @@ export default function LandingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
               <a href="#open-loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>The Problem</a>
               <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>The Loop</a>
+              <a href="#agent0" style={{ color: 'var(--theme-accent)', textDecoration: 'none', fontWeight: 600 }}>Agent0 Architecture</a>
               <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Feedback &amp; AIS</a>
               <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Deployment Status</a>
+              <a href="#console" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Console Surfaces</a>
               <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>FAQ</a>
-              <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Protocol Wiki</Link>
+              <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Integrity Wiki</Link>
             </div>
           </div>
 
