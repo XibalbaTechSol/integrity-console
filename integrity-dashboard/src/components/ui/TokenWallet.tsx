@@ -293,11 +293,11 @@ export const TokenWallet = () => {
                     position: 'relative', 
                     overflow: 'hidden',
                     background: 'linear-gradient(180deg, rgba(240, 180, 41, 0.08) 0%, var(--navy-deep) 100%)',
-                    borderRadius: 'var(--r-lg)'
+                    borderRadius: 0
                 }}
             >
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-2)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', background: 'var(--theme-accent-muted)', padding: '6px 12px', borderRadius: 'var(--r-xl)', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', background: 'var(--theme-accent-muted)', padding: '6px 12px', borderRadius: 0, border: '1px solid var(--border)' }}>
                         <Fingerprint size={12} style={{ color: 'var(--theme-accent)' }} />
                         <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--theme-accent)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
                             Balance held by this agent
@@ -306,7 +306,7 @@ export const TokenWallet = () => {
 
                     <div style={{ margin: 'var(--space-6) 0' }}>
                         {isFetching ? (
-                            <div className="skeleton" style={{ height: '80px', width: '280px', margin: '0 auto var(--space-4)', borderRadius: 'var(--r-md)' }} />
+                            <div className="skeleton" style={{ height: '80px', width: '280px', margin: '0 auto var(--space-4)', borderRadius: 0 }} />
                         ) : (
                             <div style={{ fontSize: '4.5rem', fontWeight: 700, color: 'var(--ink, white)', fontFamily: 'var(--font-mono, monospace)', fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
                                 {parseFloat(balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -325,18 +325,18 @@ export const TokenWallet = () => {
                         <span style={{ fontSize: '0.65rem', color: 'var(--theme-accent)', fontWeight: 800, letterSpacing: '0.05em' }}>BASE SEPOLIA</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: '12px 20px', background: 'var(--glass-surface-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => { if(address) navigator.clipboard.writeText(address); }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: '12px 20px', background: 'var(--glass-surface-light)', borderRadius: 0, border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => { if(address) navigator.clipboard.writeText(address); }}>
                         <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{address ? `${address.substring(0, 12)}...${address.substring(34)}` : 'No Sovereign Agent Anchored'}</span>
                         <Copy size={14} style={{ color: 'var(--theme-accent)', opacity: 0.6 }} />
                     </div>
                     {selectedAgent && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: '12px 20px', background: 'rgba(240, 180, 41, 0.05)', borderRadius: 'var(--r-md)', border: '1px solid var(--theme-accent)', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(selectedAgent.eth_address); }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: '12px 20px', background: 'rgba(240, 180, 41, 0.05)', borderRadius: 0, border: '1px solid var(--theme-accent)', cursor: 'pointer' }} onClick={() => { navigator.clipboard.writeText(selectedAgent.eth_address); }}>
                             <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--theme-accent)' }}>Agent {selectedAgent.alias}: {`${selectedAgent.eth_address.substring(0, 12)}...${selectedAgent.eth_address.substring(34)}`}</span>
                             <Copy size={14} style={{ color: 'var(--theme-accent)', opacity: 0.6 }} />
                         </div>
                     )}
                     {!isProfileLoading && profileBalance != null && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px 20px', marginTop: 'var(--space-2)', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-md)', border: '1px dashed var(--border)', width: '100%', maxWidth: '360px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px 20px', marginTop: 'var(--space-2)', background: 'rgba(255,255,255,0.02)', borderRadius: 0, border: '1px dashed var(--border)', width: '100%', maxWidth: '360px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-2)' }}>
                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Your custodial app-wallet balance (separate ledger, not this agent's on-chain ITK)</span>
                                 <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{(profileBalance ?? 0).toLocaleString()} ITK</span>
@@ -359,7 +359,7 @@ export const TokenWallet = () => {
                             onClick={() => setActiveModal(btn.id as any)}
                             style={{ background: 'none', border: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}
                         >
-                            <div style={{ width: '56px', height: '56px', borderRadius: 'var(--radius)', background: 'var(--theme-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', boxShadow: 'none' }}>
+                            <div style={{ width: '56px', height: '56px', borderRadius: 0, background: 'var(--theme-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', boxShadow: 'none' }}>
                                 <btn.icon size={24} strokeWidth={2.5} />
                             </div>
                             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'white', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{btn.label}</span>
@@ -369,7 +369,7 @@ export const TokenWallet = () => {
             </motion.div>
 
             {/* Asset & Activity Feed */}
-            <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 'var(--r-md)' }}>
+            <div className="enterprise-card" style={{ padding: 0, overflow: 'hidden', borderRadius: 0 }}>
                 <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'var(--glass-surface-light)' }}>
                     {['assets', 'activity'].map(tab => (
                         <button 
@@ -385,9 +385,9 @@ export const TokenWallet = () => {
                 <div style={{ padding: 'var(--space-6)' }}>
                     {activeTab === 'assets' ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--glass-surface-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--glass-surface-light)', borderRadius: 0, border: '1px solid var(--border)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-                                    <div style={{ width: '48px', height: '48px', background: 'var(--theme-accent)', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
+                                    <div style={{ width: '48px', height: '48px', background: 'var(--theme-accent)', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black' }}>
                                         <Coins size={24} />
                                     </div>
                                     <div>
@@ -400,9 +400,9 @@ export const TokenWallet = () => {
                                     <div style={{ fontSize: '0.65rem', color: 'var(--text-secondary)', fontWeight: 800, letterSpacing: '0.05em' }}>BASE_SEPOLIA</div>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--glass-surface-light)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--glass-surface-light)', borderRadius: 0, border: '1px solid var(--border)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-                                    <div style={{ width: '48px', height: '48px', background: 'var(--surface-raised)', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-muted)' }}>
+                                    <div style={{ width: '48px', height: '48px', background: 'var(--surface-raised)', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink-muted)' }}>
                                         <Flame size={22} />
                                     </div>
                                     <div>
@@ -426,14 +426,14 @@ export const TokenWallet = () => {
                                 </div>
                             )}
                             {isFetching ? (
-                                [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '70px', borderRadius: 'var(--r-md)' }} />)
+                                [1, 2, 3].map(i => <div key={i} className="skeleton" style={{ height: '70px', borderRadius: 0 }} />)
                             ) : txHistory.length > 0 ? txHistory.map((tx, i) => {
                                 const isHash = /^0x[0-9a-fA-F]{64}$/.test(tx.hash);
                                 const Wrapper = isHash ? 'a' : 'div';
                                 return (
-                                <Wrapper key={i} {...(isHash ? { href: `https://sepolia.basescan.org/tx/${tx.hash}`, target: '_blank', rel: 'noreferrer' } : {})} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', textDecoration: 'none' }}>
+                                <Wrapper key={i} {...(isHash ? { href: `https://sepolia.basescan.org/tx/${tx.hash}`, target: '_blank', rel: 'noreferrer' } : {})} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'rgba(255,255,255,0.02)', borderRadius: 0, border: '1px solid var(--border)', textDecoration: 'none' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
-                                        <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: tx.isOut ? 'rgba(255, 107, 122, 0.1)' : 'rgba(66, 214, 139, 0.1)', color: tx.isOut ? 'var(--danger)' : 'var(--emerald)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ width: '40px', height: '40px', borderRadius: 0, background: tx.isOut ? 'rgba(255, 107, 122, 0.1)' : 'rgba(66, 214, 139, 0.1)', color: tx.isOut ? 'var(--danger)' : 'var(--emerald)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             {tx.isOut ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
                                         </div>
                                         <div>
@@ -504,7 +504,7 @@ export const TokenWallet = () => {
                                                 if (e.target.value) setRecipient(e.target.value);
                                             }}
                                             value={recipient}
-                                            style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', color: 'white', outline: 'none', marginBottom: '12px', fontSize: '0.8rem', fontFamily: 'monospace' }}
+                                            style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 0, color: 'white', outline: 'none', marginBottom: '12px', fontSize: '0.8rem', fontFamily: 'monospace' }}
                                         >
                                             <option value="" style={{ background: 'var(--navy-deep)' }}>-- Enter Custom Address or Select Agent --</option>
                                             {(agents || []).map((agent: any) => (
@@ -517,11 +517,11 @@ export const TokenWallet = () => {
                                         <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                             Recipient Address
                                         </label>
-                                        <input type="text" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="0x..." style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', color: 'white', fontFamily: 'JetBrains Mono, monospace', outline: 'none' }} required />
+                                        <input type="text" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="0x..." style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 0, color: 'white', fontFamily: 'JetBrains Mono, monospace', outline: 'none' }} required />
                                     </div>
                                     <div style={{ marginBottom: 'var(--space-8)' }}>
                                         <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Amount (ITK)</label>
-                                        <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', color: 'white', fontFamily: 'JetBrains Mono, monospace', outline: 'none' }} required />
+                                        <input type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" style={{ width: '100%', padding: '16px', background: 'var(--glass-surface-light)', border: '1px solid var(--border)', borderRadius: 0, color: 'white', fontFamily: 'JetBrains Mono, monospace', outline: 'none' }} required />
                                     </div>
                                     <button type="submit" disabled={isLoading} className="primary-button" style={{ width: '100%', padding: '16px', fontSize: '0.9rem', fontWeight: 800 }}>
                                         {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'CONFIRM TRANSACTION'}
@@ -533,13 +533,13 @@ export const TokenWallet = () => {
                                 <div style={{ textAlign: 'center' }}>
                                     <h3 style={{ marginTop: 0, marginBottom: 'var(--space-8)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--ink, white)' }}>Receive Assets</h3>
                                     {address ? (
-                                        <div style={{ background: 'white', padding: 'var(--space-6)', borderRadius: 'var(--r-md)', display: 'inline-block', marginBottom: 'var(--space-8)', boxShadow: '0 0 30px rgba(240, 180, 41, 0.2)' }}>
+                                        <div style={{ background: 'white', padding: 'var(--space-6)', borderRadius: 0, display: 'inline-block', marginBottom: 'var(--space-8)', boxShadow: '0 0 30px rgba(240, 180, 41, 0.2)' }}>
                                             <canvas ref={qrCanvasRef} width={200} height={200} />
                                         </div>
                                     ) : (
                                         <div style={{ padding: 'var(--space-8)', color: 'var(--text-muted)', fontSize: '0.85rem' }}>No SovereignAgent resolved for this agent yet.</div>
                                     )}
-                                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: 'var(--space-4)', marginBottom: 'var(--space-8)' }}>
+                                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: 0, padding: 'var(--space-4)', marginBottom: 'var(--space-8)' }}>
                                         <div className="mono" style={{ fontSize: '0.85rem', color: 'white', wordBreak: 'break-all' }}>{address || '—'}</div>
                                     </div>
                                     <button disabled={!address} onClick={() => { navigator.clipboard.writeText(address); addToast?.('success', 'Address copied'); }} className="primary-button" style={{ width: '100%', padding: '16px' }}>COPY ADDRESS</button>

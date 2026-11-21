@@ -161,10 +161,10 @@ export const TelemetryGraphs = () => {
   }, [selectedAgents, activeMetrics]);
 
   return (
-    <div className="enterprise-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '40px', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+    <div className="enterprise-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '40px', borderRadius: 0, overflow: 'hidden' }}>
       <div className="card-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: isMobile ? '16px' : '24px 32px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px', background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 0%, transparent 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: 'rgba(66, 214, 139, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)', boxShadow: '0 0 20px rgba(66, 214, 139, 0.2)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: 0, background: 'rgba(66, 214, 139, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--success)', boxShadow: '0 0 20px rgba(66, 214, 139, 0.2)' }}>
             <Activity size={20} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -188,7 +188,7 @@ export const TelemetryGraphs = () => {
                   background: isChecked ? 'rgba(66, 214, 139, 0.08)' : 'rgba(255,255,255,0.02)', 
                   border: `1px solid ${isChecked ? 'var(--success)' : 'rgba(255,255,255,0.1)'}`,
                   padding: '4px 10px', 
-                  borderRadius: 'var(--radius)', 
+                  borderRadius: 0, 
                   fontSize: '0.7rem', 
                   color: isChecked ? 'var(--success)' : 'rgba(255,255,255,0.5)', 
                   cursor: 'pointer',
@@ -230,7 +230,7 @@ export const TelemetryGraphs = () => {
                   border: `1px solid ${isActive ? m.color : 'rgba(255,255,255,0.1)'}`,
                   color: isActive ? '#fff' : 'rgba(255,255,255,0.5)',
                   padding: '6px 14px',
-                  borderRadius: 'var(--radius)',
+                  borderRadius: 0,
                   fontSize: '0.7rem',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -241,7 +241,7 @@ export const TelemetryGraphs = () => {
                   gap: '6px'
                 }}
               >
-                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: isActive ? m.color : 'transparent', border: `1px solid ${m.color}` }} />
+                <div style={{ width: '8px', height: '8px', borderRadius: 0, background: isActive ? m.color : 'transparent', border: `1px solid ${m.color}` }} />
                 {m.label}
               </button>
             );
@@ -251,7 +251,7 @@ export const TelemetryGraphs = () => {
         {/* Main Area Chart */}
         <div style={{ width: '100%', height: '400px', position: 'relative' }}>
           {loading && data.length === 0 ? (
-            <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: 'var(--radius)' }} />
+            <div className="skeleton" style={{ width: '100%', height: '100%', borderRadius: 0 }} />
           ) : selectedAgents.length > 0 && activeSeries.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={formattedChartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
@@ -277,7 +277,7 @@ export const TelemetryGraphs = () => {
                 <YAxis stroke="rgba(255,255,255,0.2)" fontSize={10} />
                 <Tooltip
                   labelFormatter={(ts) => fmtTimeFull(ts as number)}
-                  contentStyle={{ background: 'rgba(8, 17, 27, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 'var(--radius)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+                  contentStyle={{ background: 'rgba(8, 17, 27, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 0, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
                   itemStyle={{ fontSize: '0.8rem', fontWeight: 600 }}
                   labelStyle={{ color: 'rgba(255,255,255,0.5)', marginBottom: '8px', fontSize: '0.7rem' }}
                 />
@@ -304,7 +304,7 @@ export const TelemetryGraphs = () => {
               </AreaChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px dashed rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', borderRadius: 0, border: '1px dashed rgba(255,255,255,0.1)' }}>
               Select at least one agent node to render telemetry streams.
             </div>
           )}

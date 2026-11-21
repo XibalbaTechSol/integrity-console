@@ -173,7 +173,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
         style={{
           background: 'var(--surface-color, #111215)',
           border: '1px solid var(--border-color, #272a31)',
-          borderRadius: '14px',
+          borderRadius: 0,
           width: '100%',
           maxWidth: '740px',
           height: '85vh',
@@ -202,7 +202,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
               style={{
                 width: '40px',
                 height: '40px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.2))',
                 border: '1px solid rgba(99,102,241,0.4)',
                 display: 'flex',
@@ -220,7 +220,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
                   style={{
                     fontSize: '0.72rem',
                     padding: '0.15rem 0.45rem',
-                    borderRadius: '4px',
+                    borderRadius: 0,
                     background: 'rgba(0, 229, 255, 0.1)',
                     color: 'var(--accent-color, #00e5ff)',
                     fontFamily: 'monospace',
@@ -233,7 +233,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
                     style={{
                       fontSize: '0.68rem',
                       padding: '0.15rem 0.45rem',
-                      borderRadius: '4px',
+                      borderRadius: 0,
                       background: 'rgba(16, 185, 129, 0.1)',
                       color: '#10b981',
                       display: 'inline-flex',
@@ -259,7 +259,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
               style={{
                 background: 'none',
                 border: '1px solid var(--border-color, #333)',
-                borderRadius: '6px',
+                borderRadius: 0,
                 padding: '0.4rem',
                 color: 'var(--text-secondary, #888)',
                 cursor: 'pointer',
@@ -274,7 +274,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
               style={{
                 background: 'none',
                 border: '1px solid var(--border-color, #333)',
-                borderRadius: '6px',
+                borderRadius: 0,
                 padding: '0.4rem',
                 color: 'var(--text-secondary, #888)',
                 cursor: 'pointer',
@@ -327,7 +327,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981' }}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 0, background: '#10b981' }} />
             <span>eBPF Hardware Gated</span>
           </div>
         </div>
@@ -355,7 +355,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
                   style={{
                     alignSelf: 'center',
                     padding: '0.35rem 0.85rem',
-                    borderRadius: '20px',
+                    borderRadius: 0,
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid rgba(255,255,255,0.06)',
                     fontSize: '0.75rem',
@@ -401,7 +401,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
                 <div
                   style={{
                     padding: '0.85rem 1.1rem',
-                    borderRadius: '12px',
+                    borderRadius: 0,
                     borderTopRightRadius: isUser ? '2px' : '12px',
                     borderTopLeftRadius: !isUser ? '2px' : '12px',
                     background: isUser
@@ -426,7 +426,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
                             marginTop: '0.5rem',
                             background: '#090a0d',
                             padding: '0.6rem 0.8rem',
-                            borderRadius: '6px',
+                            borderRadius: 0,
                             border: '1px solid #222',
                             fontFamily: 'monospace',
                             fontSize: '0.78rem',
@@ -453,7 +453,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
               style={{
                 alignSelf: 'flex-start',
                 padding: '0.75rem 1rem',
-                borderRadius: '12px',
+                borderRadius: 0,
                 borderTopLeftRadius: '2px',
                 background: 'var(--surface-color, #1a1c22)',
                 border: '1px solid var(--border-color, #2d313a)',
@@ -497,7 +497,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
               style={{
                 padding: '0.3rem 0.65rem',
                 fontSize: '0.74rem',
-                borderRadius: '20px',
+                borderRadius: 0,
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid var(--border-color, #333)',
                 color: '#aaa',
@@ -532,7 +532,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
             style={{
               flex: 1,
               padding: '0.7rem 1rem',
-              borderRadius: '8px',
+              borderRadius: 0,
               border: '1px solid var(--border-color, #333)',
               background: '#090a0d',
               color: '#fff',
@@ -546,7 +546,7 @@ export function Agent0MessengerModal({ isOpen, onClose, targetAgent }: Props) {
             className="primary-button"
             style={{
               padding: '0.7rem 1.1rem',
-              borderRadius: '8px',
+              borderRadius: 0,
               display: 'flex',
               alignItems: 'center',
               gap: '0.4rem',

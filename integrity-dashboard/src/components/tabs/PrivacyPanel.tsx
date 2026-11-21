@@ -116,7 +116,7 @@ export function PrivacyPanel() {
         </div>
 
         {/* Privacy Mode */}
-        <div style={{ padding: 'var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+        <div style={{ padding: 'var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 0, border: '1px solid var(--border-color)' }}>
           <h4 style={{ marginBottom: 'var(--space-2)', fontSize: '0.9rem', fontWeight: 600 }}>Privacy Mode</h4>
           <p className="text-muted" style={{ fontSize: '0.75rem', marginBottom: 'var(--space-4)' }}>
             Specify the degree of cryptographic abstraction used for agent verification on-chain.
@@ -130,7 +130,7 @@ export function PrivacyPanel() {
                 padding: 'var(--space-4)',
                 background: privacyMode === 'public' ? 'var(--primary-dim)' : 'var(--bg-primary)',
                 border: `1px solid ${privacyMode === 'public' ? 'var(--primary)' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-sm)',
+                borderRadius: 0,
                 cursor: 'pointer'
               }}
             >
@@ -155,7 +155,7 @@ export function PrivacyPanel() {
                 padding: 'var(--space-4)',
                 background: privacyMode === 'pseudonymous' ? 'var(--primary-dim)' : 'var(--bg-primary)',
                 border: `1px solid ${privacyMode === 'pseudonymous' ? 'var(--primary)' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-sm)',
+                borderRadius: 0,
                 cursor: 'pointer'
               }}
             >
@@ -180,7 +180,7 @@ export function PrivacyPanel() {
                 padding: 'var(--space-4)',
                 background: privacyMode === 'zero_knowledge' ? 'var(--primary-dim)' : 'var(--bg-primary)',
                 border: `1px solid ${privacyMode === 'zero_knowledge' ? 'var(--primary)' : 'var(--border-color)'}`,
-                borderRadius: 'var(--radius-sm)',
+                borderRadius: 0,
                 cursor: 'pointer'
               }}
             >
@@ -204,7 +204,7 @@ export function PrivacyPanel() {
           <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>Data Publishing Consents</h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 0, border: '1px solid var(--border-color)' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Publish Telemetry Logs</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Enable streaming system performance logs and entropy signals.</div>
@@ -217,7 +217,7 @@ export function PrivacyPanel() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 0, border: '1px solid var(--border-color)' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Publish Transaction History</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Expose task executions, outcome compliance, and dispute history.</div>
@@ -230,7 +230,7 @@ export function PrivacyPanel() {
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px var(--space-4)', background: 'var(--bg-secondary)', borderRadius: 0, border: '1px solid var(--border-color)' }}>
               <div>
                 <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Publish Staking Data</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Allow public verification of locked collateral and sacrifice score.</div>

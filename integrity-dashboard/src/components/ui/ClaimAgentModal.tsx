@@ -60,7 +60,7 @@ export function ClaimAgentModal({ isOpen, defaultDid = '', onClose, onSuccess }:
         style={{ position: 'absolute', inset: 0, background: 'var(--navy-deep)', opacity: 0.85, backdropFilter: 'blur(8px)' }} />
 
       <motion.div role="dialog" aria-modal="true" aria-label="Claim on-chain agent" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
-        style={{ position: 'relative', width: '100%', maxWidth: '500px', background: 'var(--bg-secondary)', border: '1px solid var(--theme-accent-muted)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}>
+        style={{ position: 'relative', width: '100%', maxWidth: '500px', background: 'var(--bg-secondary)', border: '1px solid var(--theme-accent-muted)', borderRadius: 0, overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}>
         <div style={{ padding: 'var(--space-6)', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--navy-light)' }}>
           <div className="flex items-center gap-3">
             <Shield size={20} color="var(--theme-accent)" />
@@ -83,14 +83,14 @@ export function ClaimAgentModal({ isOpen, defaultDid = '', onClose, onSuccess }:
           </button>
 
           {error && (
-            <div role="alert" style={{ padding: 'var(--space-4)', background: 'rgba(255, 107, 122, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger)', display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.8rem', color: 'var(--danger)' }}>
+            <div role="alert" style={{ padding: 'var(--space-4)', background: 'rgba(255, 107, 122, 0.08)', borderRadius: 0, border: '1px solid var(--danger)', display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.8rem', color: 'var(--danger)' }}>
               <XCircle size={18} style={{ flex: 'none' }} /> {error}
             </div>
           )}
 
           {record && (
             <div className="flex-col gap-3">
-              <div style={{ padding: 'var(--space-4)', background: 'rgba(66, 214, 139, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ padding: 'var(--space-4)', background: 'rgba(66, 214, 139, 0.1)', borderRadius: 0, border: '1px solid var(--success)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <CheckCircle size={20} color="var(--success)" />
                 <div style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600 }}>
                   {record.active ? 'Active' : 'Retired'} on-chain record synced at block {record.synced_block}.

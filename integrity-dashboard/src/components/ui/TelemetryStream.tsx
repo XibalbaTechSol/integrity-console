@@ -104,7 +104,7 @@ export const TelemetryStream = () => {
             {/* Header */}
             <div className="card-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: isMobile ? '16px' : '24px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius)', background: 'rgba(240, 180, 41, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: 0, background: 'rgba(240, 180, 41, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)' }}>
                         <Activity size={20} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -138,7 +138,7 @@ export const TelemetryStream = () => {
                     <select aria-label="Filter telemetry by agent"
                         value={selectedAgentFilter}
                         onChange={e => setSelectedAgentFilter(e.target.value)}
-                        style={{ background: 'var(--surface-sunken)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: 'var(--radius)', outline: 'none' }}
+                        style={{ background: 'var(--surface-sunken)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: 0, outline: 'none' }}
                     >
                         {uniqueAgents.map(name => (
                             <option key={name} value={name}>{name}</option>
@@ -151,7 +151,7 @@ export const TelemetryStream = () => {
                     <select aria-label="Filter telemetry by type"
                         value={selectedTypeFilter}
                         onChange={e => setSelectedTypeFilter(e.target.value)}
-                        style={{ background: 'var(--surface-sunken)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: 'var(--radius)', outline: 'none' }}
+                        style={{ background: 'var(--surface-sunken)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: 0, outline: 'none' }}
                     >
                         <option value="All">All Types</option>
                         <option value="RECORDED">RECORDED</option>
@@ -205,7 +205,7 @@ export const TelemetryStream = () => {
                                     style={{ 
                                         marginBottom: '12px',
                                         border: `1px solid ${isWarning ? 'rgba(255, 107, 122, 0.2)' : isExpanded ? 'rgba(240, 180, 41, 0.3)' : 'rgba(255,255,255,0.03)'}`,
-                                        borderRadius: 'var(--radius)',
+                                        borderRadius: 0,
                                         background: isExpanded ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.005)',
                                         overflow: 'hidden',
                                         transition: 'all 0.2s'
@@ -245,7 +245,7 @@ export const TelemetryStream = () => {
                                             <span style={{ fontWeight: 700 }}>GROUNDING: <span style={{ color: 'white' }}>{data.metadata?.hgi_raw != null ? Number(data.metadata.hgi_raw).toFixed(3) : '—'}</span></span>
                                             <span style={{ fontWeight: 700 }}>GPU-HRS: <span style={{ color: 'white' }}>{data.metadata?.gpu_hours_verified != null ? Number(data.metadata.gpu_hours_verified).toFixed(2) : '—'}</span></span>
                                             {data.metadata?.zk_verified && (
-                                                <span style={{ color: 'var(--success)', fontWeight: 800, fontSize: '0.65rem', border: '1px solid rgba(66, 214, 139, 0.3)', padding: '1px 6px', borderRadius: 'var(--radius)', background: 'rgba(66, 214, 139, 0.05)' }}>[ZK]</span>
+                                                <span style={{ color: 'var(--success)', fontWeight: 800, fontSize: '0.65rem', border: '1px solid rgba(66, 214, 139, 0.3)', padding: '1px 6px', borderRadius: 0, background: 'rgba(66, 214, 139, 0.05)' }}>[ZK]</span>
                                             )}
                                         </div>
 
@@ -270,7 +270,7 @@ export const TelemetryStream = () => {
                                             >
                                                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
                                                     {/* Cryptographic Provenance */}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: 'var(--radius)', padding: '12px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: 0, padding: '12px' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.7rem', color: 'var(--theme-accent)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                                             <Lock size={12} /> Cryptographic Provenance
                                                         </div>
@@ -285,7 +285,7 @@ export const TelemetryStream = () => {
                                                     </div>
 
                                                     {/* Policy & Auditing State */}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: 'var(--radius)', padding: '12px' }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.03)', borderRadius: 0, padding: '12px' }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.7rem', color: 'var(--accent-hover)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                                             <Shield size={12} /> Scoring Signals
                                                         </div>

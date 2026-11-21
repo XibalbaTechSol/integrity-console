@@ -142,7 +142,7 @@ export function AgentIdentityHubPage() {
       <div style={{
         background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.08) 0%, rgba(99, 102, 241, 0.06) 100%)',
         border: '1px solid rgba(0, 229, 255, 0.2)',
-        borderRadius: '16px',
+        borderRadius: 0,
         padding: '2.25rem',
         display: 'flex',
         flexDirection: 'column',
@@ -157,7 +157,7 @@ export function AgentIdentityHubPage() {
                 background: 'rgba(0, 229, 255, 0.15)',
                 color: '#00e5ff',
                 padding: '0.2rem 0.65rem',
-                borderRadius: '4px',
+                borderRadius: 0,
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
@@ -185,7 +185,7 @@ export function AgentIdentityHubPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1.1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'linear-gradient(135deg, #00e5ff, #0284c7)',
                 color: '#03121d',
                 fontWeight: 700,
@@ -204,7 +204,7 @@ export function AgentIdentityHubPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(255, 255, 255, 0.05)',
                 color: '#f8fafc',
                 fontWeight: 600,
@@ -222,7 +222,7 @@ export function AgentIdentityHubPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(255, 255, 255, 0.05)',
                 color: '#f8fafc',
                 fontWeight: 600,
@@ -265,7 +265,7 @@ export function AgentIdentityHubPage() {
             <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Active Passport Token</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
               <strong style={{ color: '#38bdf8', fontSize: '0.95rem' }}>Token #10774</strong>
-              <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>
+              <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.7rem', padding: '0.1rem 0.4rem', borderRadius: 0 }}>
                 xibalba.agy
               </span>
             </div>
@@ -296,7 +296,7 @@ export function AgentIdentityHubPage() {
               The three authoritative autonomous harnesses operating across the Xibalba monorepo.
             </p>
           </div>
-          <span style={{ fontSize: '0.8rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
+          <span style={{ fontSize: '0.8rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '0.25rem 0.6rem', borderRadius: 0 }}>
             3 Active Harnesses
           </span>
         </div>
@@ -310,7 +310,7 @@ export function AgentIdentityHubPage() {
                 style={{
                   background: isSelected ? 'rgba(0, 229, 255, 0.05)' : 'rgba(15, 23, 42, 0.6)',
                   border: isSelected ? '1px solid #00e5ff' : '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '14px',
+                  borderRadius: 0,
                   padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
@@ -326,7 +326,7 @@ export function AgentIdentityHubPage() {
                     <div style={{
                       width: '42px',
                       height: '42px',
-                      borderRadius: '10px',
+                      borderRadius: 0,
                       background: agent.harness === 'antigravity'
                         ? 'linear-gradient(135deg, #00e5ff, #0284c7)'
                         : agent.harness === 'claude_code'
@@ -351,7 +351,7 @@ export function AgentIdentityHubPage() {
                             fontSize: '0.72rem',
                             fontWeight: 700,
                             padding: '0.1rem 0.4rem',
-                            borderRadius: '3px'
+                            borderRadius: 0
                           }}>
                             #{agent.tokenId}
                           </span>
@@ -370,7 +370,7 @@ export function AgentIdentityHubPage() {
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     padding: '0.2rem 0.5rem',
-                    borderRadius: '4px'
+                    borderRadius: 0
                   }}>
                     <CheckCircle2 size={13} /> Tier {agent.tier}
                   </span>
@@ -384,7 +384,7 @@ export function AgentIdentityHubPage() {
                 {/* Cryptographic Parameters */}
                 <div style={{
                   background: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: '8px',
+                  borderRadius: 0,
                   padding: '0.75rem 0.9rem',
                   display: 'flex',
                   flexDirection: 'column',
@@ -454,7 +454,7 @@ export function AgentIdentityHubPage() {
                       justifyContent: 'center',
                       gap: '0.4rem',
                       padding: '0.55rem',
-                      borderRadius: '6px',
+                      borderRadius: 0,
                       background: isSelected ? 'rgba(0, 229, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                       color: isSelected ? '#00e5ff' : '#f8fafc',
                       fontWeight: 600,
@@ -469,7 +469,7 @@ export function AgentIdentityHubPage() {
                     onClick={() => setActiveTab('a2a')}
                     style={{
                       padding: '0.55rem 0.85rem',
-                      borderRadius: '6px',
+                      borderRadius: 0,
                       background: 'rgba(255, 255, 255, 0.04)',
                       color: '#94a3b8',
                       fontSize: '0.82rem',
@@ -500,7 +500,7 @@ export function AgentIdentityHubPage() {
                 Autonomous security pair enforcing local kernel-level execution containment and centralized cloud policy intelligence.
               </p>
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+            <span style={{ fontSize: '0.75rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.1)', padding: '0.2rem 0.5rem', borderRadius: 0 }}>
               2 Active Agents
             </span>
           </div>
@@ -514,7 +514,7 @@ export function AgentIdentityHubPage() {
                   style={{
                     background: isSelected ? 'rgba(16, 185, 129, 0.05)' : 'rgba(15, 23, 42, 0.6)',
                     border: isSelected ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '14px',
+                    borderRadius: 0,
                     padding: '1.35rem',
                     display: 'flex',
                     flexDirection: 'column',
@@ -528,7 +528,7 @@ export function AgentIdentityHubPage() {
                       <div style={{
                         width: '40px',
                         height: '40px',
-                        borderRadius: '10px',
+                        borderRadius: 0,
                         background: agent.handle === 'shield.local'
                           ? 'linear-gradient(135deg, #10b981, #059669)'
                           : 'linear-gradient(135deg, #06b6d4, #0284c7)',
@@ -558,7 +558,7 @@ export function AgentIdentityHubPage() {
                       fontSize: '0.72rem',
                       fontWeight: 600,
                       padding: '0.15rem 0.45rem',
-                      borderRadius: '4px'
+                      borderRadius: 0
                     }}>
                       <CheckCircle2 size={12} /> Tier {agent.tier}
                     </span>
@@ -570,7 +570,7 @@ export function AgentIdentityHubPage() {
 
                   <div style={{
                     background: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '8px',
+                    borderRadius: 0,
                     padding: '0.7rem 0.85rem',
                     display: 'flex',
                     flexDirection: 'column',
@@ -611,7 +611,7 @@ export function AgentIdentityHubPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '0.5rem',
-                        borderRadius: '6px',
+                        borderRadius: 0,
                         background: isSelected ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
                         color: isSelected ? '#34d399' : '#f8fafc',
                         fontWeight: 600,
@@ -646,7 +646,7 @@ export function AgentIdentityHubPage() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.65rem 1.15rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             border: 'none',
             background: activeTab === 'fleet' ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
             color: activeTab === 'fleet' ? '#00e5ff' : '#94a3b8',
@@ -666,7 +666,7 @@ export function AgentIdentityHubPage() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.65rem 1.15rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             border: 'none',
             background: activeTab === 'agent0' ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
             color: activeTab === 'agent0' ? '#00e5ff' : '#94a3b8',
@@ -686,7 +686,7 @@ export function AgentIdentityHubPage() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.65rem 1.15rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             border: 'none',
             background: activeTab === 'a2a' ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
             color: activeTab === 'a2a' ? '#00e5ff' : '#94a3b8',
@@ -706,7 +706,7 @@ export function AgentIdentityHubPage() {
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.65rem 1.15rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             border: 'none',
             background: activeTab === 'architecture' ? 'rgba(0, 229, 255, 0.12)' : 'transparent',
             color: activeTab === 'architecture' ? '#00e5ff' : '#94a3b8',
@@ -727,10 +727,10 @@ export function AgentIdentityHubPage() {
               Namespaces visible through authenticated Cortex session ({agents.length} total)
             </span>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#34d399', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', color: '#34d399', padding: '0.2rem 0.5rem', borderRadius: 0 }}>
                 {agents.filter(a => a.writable !== false).length} Writable
               </span>
-              <span style={{ fontSize: '0.75rem', background: 'rgba(148, 163, 184, 0.1)', color: '#94a3b8', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+              <span style={{ fontSize: '0.75rem', background: 'rgba(148, 163, 184, 0.1)', color: '#94a3b8', padding: '0.2rem 0.5rem', borderRadius: 0 }}>
                 {agents.filter(a => a.writable === false).length} Read-Only
               </span>
             </div>
@@ -750,7 +750,7 @@ export function AgentIdentityHubPage() {
                   style={{
                     background: isSelected ? 'rgba(0, 229, 255, 0.06)' : 'rgba(15, 23, 42, 0.4)',
                     border: isSelected ? '1px solid #00e5ff' : '1px solid rgba(255, 255, 255, 0.06)',
-                    borderRadius: '10px',
+                    borderRadius: 0,
                     padding: '1.2rem',
                     cursor: 'pointer',
                     display: 'flex',
@@ -763,7 +763,7 @@ export function AgentIdentityHubPage() {
                       <div style={{
                         width: '28px',
                         height: '28px',
-                        borderRadius: '6px',
+                        borderRadius: 0,
                         background: 'rgba(0, 229, 255, 0.15)',
                         color: '#00e5ff',
                         display: 'flex',
@@ -783,7 +783,7 @@ export function AgentIdentityHubPage() {
                       color: agent.writable !== false ? '#34d399' : '#f59e0b',
                       background: agent.writable !== false ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
                       padding: '0.15rem 0.4rem',
-                      borderRadius: '3px'
+                      borderRadius: 0
                     }}>
                       {agent.writable !== false ? 'Writable' : 'Read-only'}
                     </span>
@@ -820,7 +820,7 @@ export function AgentIdentityHubPage() {
           <div style={{
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(14, 165, 233, 0.06) 100%)',
             border: '1px solid rgba(16, 185, 129, 0.2)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '2rem',
             display: 'flex',
             flexDirection: 'column',
@@ -833,7 +833,7 @@ export function AgentIdentityHubPage() {
                     background: 'rgba(16, 185, 129, 0.15)',
                     color: '#34d399',
                     padding: '0.2rem 0.6rem',
-                    borderRadius: '4px',
+                    borderRadius: 0,
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     letterSpacing: '0.08em',
@@ -859,7 +859,7 @@ export function AgentIdentityHubPage() {
                   background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: 0,
                   padding: '0.7rem 1.4rem',
                   fontSize: '0.9rem',
                   fontWeight: 600,
@@ -882,7 +882,7 @@ export function AgentIdentityHubPage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.75rem',
               display: 'flex',
               flexDirection: 'column',
@@ -899,7 +899,7 @@ export function AgentIdentityHubPage() {
                   background: 'rgba(16, 185, 129, 0.15)',
                   color: '#34d399',
                   padding: '0.2rem 0.6rem',
-                  borderRadius: '999px',
+                  borderRadius: 0,
                   fontSize: '0.75rem',
                   fontWeight: 700
                 }}>
@@ -907,7 +907,7 @@ export function AgentIdentityHubPage() {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: 0, border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>shield.local</div>
                   <div style={{ fontSize: '0.75rem', color: '#34d399' }}>Jev Classifier · Edge Daemon</div>
@@ -941,7 +941,7 @@ export function AgentIdentityHubPage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(0, 229, 255, 0.3)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.75rem',
               display: 'flex',
               flexDirection: 'column',
@@ -958,7 +958,7 @@ export function AgentIdentityHubPage() {
                   background: 'rgba(0, 229, 255, 0.15)',
                   color: '#00e5ff',
                   padding: '0.2rem 0.6rem',
-                  borderRadius: '999px',
+                  borderRadius: 0,
                   fontSize: '0.75rem',
                   fontWeight: 700
                 }}>
@@ -966,7 +966,7 @@ export function AgentIdentityHubPage() {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.3)', padding: '1rem', borderRadius: 0, border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontWeight: 700, color: '#f8fafc', fontSize: '0.95rem' }}>xibalba.agy</div>
                   <div style={{ fontSize: '0.75rem', color: '#00e5ff' }}>Orchestrator</div>
@@ -993,7 +993,7 @@ export function AgentIdentityHubPage() {
         <div style={{
           background: 'rgba(15, 23, 42, 0.5)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
+          borderRadius: 0,
           padding: '2rem',
           display: 'flex',
           flexDirection: 'column',
@@ -1009,7 +1009,7 @@ export function AgentIdentityHubPage() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <span style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 700, textTransform: 'uppercase' }}>Tier 0</span>
               <h4 style={{ margin: '0.4rem 0', color: '#f8fafc' }}>Pure Ed25519 DID</h4>
               <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
@@ -1017,7 +1017,7 @@ export function AgentIdentityHubPage() {
               </p>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 700, textTransform: 'uppercase' }}>Tier 1</span>
               <h4 style={{ margin: '0.4rem 0', color: '#f8fafc' }}>On-Chain SovereignAgent</h4>
               <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>
@@ -1025,7 +1025,7 @@ export function AgentIdentityHubPage() {
               </p>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '1.25rem', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
               <span style={{ fontSize: '0.75rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase' }}>Tier 2</span>
               <h4 style={{ margin: '0.4rem 0', color: '#f8fafc' }}>ERC-8004 Public Passport</h4>
               <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>

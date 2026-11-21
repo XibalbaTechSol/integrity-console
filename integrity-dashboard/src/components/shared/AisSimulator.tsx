@@ -35,7 +35,7 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
         <span style={{ color: 'var(--text-muted)' }}>{label}</span>
         <span style={{ fontWeight: 700, color }}>{value.toFixed(1)}</span>
       </div>
-      <div style={{ height: '8px', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+      <div style={{ height: '8px', borderRadius: 0, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${(value / MAX_COMPONENT_SCORE) * 100}%`, background: color, transition: 'width 0.15s ease' }} />
       </div>
     </div>
@@ -127,7 +127,7 @@ export function AisSimulator() {
 
   return (
     <div style={{
-      background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)',
+      background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 0,
       padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-5)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
@@ -181,7 +181,7 @@ export function AisSimulator() {
                   key={i}
                   onClick={() => setTier(i)}
                   style={{
-                    flex: 1, padding: '6px 4px', fontSize: '0.6rem', borderRadius: 'var(--radius)', cursor: 'pointer',
+                    flex: 1, padding: '6px 4px', fontSize: '0.6rem', borderRadius: 0, cursor: 'pointer',
                     border: `1px solid ${tier === i ? 'var(--theme-accent)' : 'var(--glass-border)'}`,
                     background: tier === i ? 'var(--theme-accent-muted)' : 'transparent',
                     color: tier === i ? 'var(--theme-accent)' : 'var(--text-muted)',
@@ -202,7 +202,7 @@ export function AisSimulator() {
           <Bar label="S_compliance" value={breakdown.s_compliance} color={aisSeries.compliance} />
 
           <div style={{
-            marginTop: '8px', padding: '16px', borderRadius: 'var(--radius-md)',
+            marginTop: '8px', padding: '16px', borderRadius: 0,
             background: 'rgba(0,0,0,0.25)', border: '1px solid var(--glass-border)',
             display: 'flex', flexDirection: 'column', gap: '6px',
           }}>
@@ -245,7 +245,7 @@ export function AisSimulator() {
                     fontFamily: 'monospace',
                     fontWeight: 700,
                     padding: '2px 8px',
-                    borderRadius: '9999px',
+                    borderRadius: 0,
                     border: '1px solid',
                     ...(breakdown.controlZone === 'green'
                       ? { background: 'rgba(16, 185, 129, 0.15)', borderColor: 'rgba(16, 185, 129, 0.4)', color: '#6ee7b7' }

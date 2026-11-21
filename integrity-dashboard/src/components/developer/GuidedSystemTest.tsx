@@ -89,7 +89,7 @@ function ActionStep({
             gap: 'var(--space-2)',
             background: 'var(--primary)',
             border: 'none',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: 0,
             padding: '0.5rem 1rem',
             color: 'var(--bg-primary, #000)',
             fontWeight: 600,
@@ -259,7 +259,7 @@ export function GuidedSystemTest() {
                 gap: 'var(--space-2)',
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--glass-border)',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 0,
                 padding: 'var(--space-2) var(--space-3)',
                 fontSize: '0.8rem',
               }}
@@ -370,7 +370,7 @@ export function GuidedSystemTest() {
             type="button"
             onClick={() => void loadActivity()}
             disabled={activityLoading}
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '0.3rem 0.7rem', color: 'var(--text-primary)', fontSize: '0.75rem', cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', background: 'transparent', border: '1px solid var(--glass-border)', borderRadius: 0, padding: '0.3rem 0.7rem', color: 'var(--text-primary)', fontSize: '0.75rem', cursor: 'pointer' }}
           >
             <RefreshCw size={12} className={activityLoading ? 'spin' : ''} />
             Refresh
