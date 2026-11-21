@@ -175,32 +175,10 @@ export default function LandingPage() {
   return (
     <div className="landing-page" style={{ color: 'var(--text-primary)' }}>
       {/* 1. Header Navigation */}
-      <header
-        className="landing-header"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '0.9rem 2.5rem',
-          background: 'rgba(9, 17, 27, 0.88)',
-          backdropFilter: 'blur(16px)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          borderBottom: '1px solid rgba(54, 167, 255, 0.18)',
-          gap: '1.25rem',
-          flexWrap: 'wrap',
-        }}
-      >
+      <header className="landing-header">
         <Link
           to="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.85rem',
-            textDecoration: 'none',
-            color: 'inherit',
-          }}
+          className="landing-brand"
           aria-label="Integrity Protocol Home"
         >
           <img
@@ -220,49 +198,29 @@ export default function LandingPage() {
 
         <nav
           className="landing-nav"
-          style={{
-            display: 'flex',
-            gap: '1.5rem',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-          }}
           aria-label="Main Navigation"
         >
-          <a href="#open-loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            The Problem
-          </a>
-          <a href="#loop" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            The Loop
-          </a>
-          <a href="#agent0" style={{ color: 'var(--theme-accent)', textDecoration: 'none', fontWeight: 600, fontSize: '0.92rem' }}>
+          <a href="#open-loop">The Problem</a>
+          <a href="#loop">The Loop</a>
+          <a href="#agent0" style={{ color: 'var(--theme-accent)', fontWeight: 600 }}>
             Agent0
           </a>
-          <a href="#ais" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            Feedback
-          </a>
-          <a href="#status" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            Status
-          </a>
-          <a href="#console" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            Surfaces
-          </a>
-          <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            FAQ
-          </a>
-          <Link to="/wiki" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem' }}>
-            Wiki
-          </Link>
+          <a href="#ais">Feedback</a>
+          <a href="#status">Status</a>
+          <a href="#console">Surfaces</a>
+          <a href="#faq">FAQ</a>
+          <Link to="/wiki">Wiki</Link>
           <a
             href="https://xibalbasolutions.com"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.92rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
           >
             Company <ExternalLink size={12} />
           </a>
         </nav>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+        <div className="landing-actions">
           <a
             href="https://github.com/xibalbatechsol"
             target="_blank"
@@ -282,6 +240,7 @@ export default function LandingPage() {
               fontSize: '0.92rem',
               fontWeight: 700,
               boxShadow: '0 0 20px rgba(54, 167, 255, 0.25)',
+              whiteSpace: 'nowrap',
             }}
           >
             Launch Console <ArrowRight size={16} />
@@ -305,14 +264,15 @@ export default function LandingPage() {
             Nothing reaches orbit <span style={{ whiteSpace: 'nowrap' }}>open-loop.</span>
           </h1>
 
-          <p style={{ fontSize: '1.3rem', color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto 1.5rem auto', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '840px', margin: '0 auto 2.5rem auto', lineHeight: 1.65 }}>
             A rocket doesn't make orbit because someone aimed it well. It makes orbit because a controller measures
             where the vehicle actually is, thousands of times a second, compares that to the trajectory it committed
             to, and corrects — with authority bounded by hardware that can end the flight.
-          </p>
-
-          <p style={{ fontSize: '1.2rem', color: 'var(--text-primary)', maxWidth: '840px', margin: '0 auto 2.5rem auto', lineHeight: 1.6, fontWeight: 500 }}>
-            Prompt guardrails are artificial thermodynamic friction: reinforcement learning agents mathematically optimize around them. Integrity Protocol establishes the Autonomous Integrity Score (AIS) as the native reward function, integrates Agent0 on-chain ERC-8004 identity with Base Sepolia sovereign actor wallets, and enforces fail-closed state bounds across the machine economy.
+            <br /><br />
+            Prompt guardrails are artificial thermodynamic friction: reinforcement learning agents mathematically optimize
+            around them. Integrity Protocol establishes the Autonomous Integrity Score (AIS) as the native reward
+            function, integrates Agent0 on-chain ERC-8004 identity with Base Sepolia sovereign actor wallets, and enforces
+            fail-closed state bounds across the machine economy.
           </p>
 
           <div className="landing-hero-actions" style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -1151,7 +1111,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', fontSize: '0.85rem' }}>
               <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Xibalba Solutions LLC</a>
               <a href="https://github.com/xibalbatechsol/xibalba-shield" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Xibalba Shield (EDR)</a>
-              <a href="https://github.com/xibalbatechsol/xibalba-cortex" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Super-Cortex Memory</a>
+              <a href="https://github.com/XibalbaTechSol/super-cortex" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Super-Cortex Memory</a>
               <a href="https://github.com/xibalbatechsol/integrity-core" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Integrity Core (SDK)</a>
               <a href="https://github.com/xibalbatechsol" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>GitHub Organization</a>
             </div>
