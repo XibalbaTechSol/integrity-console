@@ -57,6 +57,7 @@ test.describe('/ (LandingPage)', () => {
     // In-page section anchors
     await expect(header.getByRole('link', { name: 'The Problem' })).toHaveAttribute('href', '#open-loop');
     await expect(header.getByRole('link', { name: 'The Loop' })).toHaveAttribute('href', '#loop');
+    await expect(header.getByRole('link', { name: 'Agent0' })).toHaveAttribute('href', '#agent0');
     await expect(header.getByRole('link', { name: 'Feedback' })).toHaveAttribute('href', '#ais');
     await expect(header.getByRole('link', { name: 'Status' })).toHaveAttribute('href', '#status');
     await expect(header.getByRole('link', { name: 'FAQ' })).toHaveAttribute('href', '#faq');
@@ -267,7 +268,7 @@ test.describe('/ (LandingPage)', () => {
     // below-the-fold sections stuck at opacity:0 (reproduced and confirmed — see
     // e2e/landing.spec.ts history). scrollIntoViewIfNeeded per section, each followed
     // by a real wait, mirrors how a user's scroll actually triggers the reveal.
-    const sectionIds = ['#open-loop', '#loop', '#ais', '#status', '#console', '#faq', '#contact', '#specification'];
+    const sectionIds = ['#open-loop', '#loop', '#agent0', '#ais', '#status', '#console', '#faq', '#contact', '#specification'];
     for (const id of sectionIds) {
       await page.locator(id).scrollIntoViewIfNeeded();
       await page.waitForTimeout(250);
@@ -284,7 +285,7 @@ test.describe('/ (LandingPage)', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    const sectionIds = ['#open-loop', '#loop', '#ais', '#status', '#console', '#specification'];
+    const sectionIds = ['#open-loop', '#loop', '#agent0', '#ais', '#status', '#console', '#specification'];
     for (const id of sectionIds) {
       await page.locator(id).scrollIntoViewIfNeeded();
       await page.waitForTimeout(200);
