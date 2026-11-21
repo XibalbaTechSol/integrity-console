@@ -29,7 +29,7 @@ export function Sidebar() {
 
   return (
     <aside className="protocol-sidebar" >
-      <Link className="protocol-brand" to="/dashboard"><img src="/logo.png" alt="Integrity" /><span>PROTOCOL CORE</span></Link>
+      <Link className="protocol-brand" to="/" aria-label="Go to landing page"><img src="/logo.png" alt="Integrity" /><span>PROTOCOL CORE</span></Link>
       <div className="protocol-network"><span>Network</span><strong><i />Base Sepolia</strong></div>
       <nav aria-label="Protocol navigation" tabIndex={0}>
         {nav.map(item => {
