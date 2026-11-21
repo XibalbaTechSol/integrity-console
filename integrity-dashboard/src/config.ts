@@ -30,7 +30,7 @@ export const SHIELD_BACKEND_TOKEN = import.meta.env.VITE_SHIELD_BACKEND_TOKEN ||
 // "open console" deep links from the dashboard's summary cards. Each is a fully separate
 // app with its own cookie-authenticated login; the dashboard never proxies their UI.
 export const SHIELD_UI_URL = import.meta.env.VITE_SHIELD_UI_URL || (IS_HOSTED_USERAPI ? 'https://xibalba-shield.onrender.com' : 'https://localhost:9444');
-export const CORTEX_UI_URL = import.meta.env.VITE_CORTEX_UI_URL || (IS_HOSTED_USERAPI ? 'https://cortex-managed-pilot.onrender.com' : 'https://localhost:9443');
+export const CORTEX_UI_URL = import.meta.env.VITE_CORTEX_UI_URL || (IS_HOSTED_USERAPI ? 'https://cortex-managed-pilot.onrender.com' : 'http://127.0.0.1:4174');
 // Shield tenants are control-plane namespaces, not agent DIDs. Keep the mapping
 // deployment-configurable; falling back to the selected agent remains useful for
 // isolated demo tenants but must never be mistaken for production identity mapping.
