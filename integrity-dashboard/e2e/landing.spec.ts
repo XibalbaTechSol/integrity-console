@@ -31,8 +31,8 @@ import { AS_OF, AS_OF_COMMIT, MISSION_PHASES, MANDATED_SELF_DESCRIPTION } from '
 // `docs/EXECUTION_PLAN.md` (now a redirect stub) to
 // `docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md`, and the old plan's checkbox count went
 // with it. Update protocolStatus.ts in the same commit.
-const EXPECTED_AS_OF = '2026-11-04';
-const EXPECTED_AS_OF_COMMIT = '5626041b';
+const EXPECTED_AS_OF = '2026-11-20';
+const EXPECTED_AS_OF_COMMIT = 'dac28c5a';
 const EXPECTED_STAGES = [
   'Integration and static fire',
   'First flight, synthetic propellant',
@@ -213,20 +213,20 @@ test.describe('/ (LandingPage)', () => {
     }
   });
 
-  test('specification section names SPEC.md as normative and the PDF as archived', async ({ page }) => {
+  test('specification section names SPEC.md as normative and links the specification PDF', async ({ page }) => {
     await page.goto('/');
     const spec = page.locator('#specification');
     await spec.scrollIntoViewIfNeeded();
     // The previous page claimed "v0.4 is normative", which DOCUMENT_STATUS.yaml contradicts.
-    await expect(spec).toContainText('v1.0.0-draft');
+    await expect(spec).toContainText('v1.0.0');
     await expect(spec).not.toContainText('v0.4');
     await expect(spec.getByRole('link', { name: /Read docs\/SPEC\.md/ })).toHaveAttribute(
       'href',
       'https://github.com/XibalbaTechSol/integrity-core/blob/main/docs/SPEC.md'
     );
-    await expect(spec.getByRole('link', { name: /Archived v0\.3 PDF/ })).toHaveAttribute(
+    await expect(spec.getByRole('link', { name: /Protocol Specification v1\.0\.0 \(PDF\)/ })).toHaveAttribute(
       'href',
-      '/integrity-protocol-specification-v0.3.pdf'
+      '/integrity-protocol-specification.pdf'
     );
   });
 

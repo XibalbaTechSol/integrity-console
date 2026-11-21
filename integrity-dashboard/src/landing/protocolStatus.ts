@@ -39,10 +39,10 @@
  */
 
 /** Date the rows below were last reconciled against integrity-core `main`. */
-export const AS_OF = '2026-11-04';
+export const AS_OF = '2026-11-20';
 
 /** integrity-core `main` the rows were read at. */
-export const AS_OF_COMMIT = '5626041b';
+export const AS_OF_COMMIT = 'dac28c5a';
 
 /**
  * Why no single number appears beside the campaign. Rendered on the page, because
@@ -168,10 +168,11 @@ export const CONFORMANCE_LEVELS = [
   },
 ] as const;
 
-/** What v1.0.0-draft targets, per SPEC.md §1. Stated so the levels above aren't read as all-green. */
+/** What v1.0 targets, per SPEC.md §1. Stated so the levels above aren't read as all-green. */
 export const CONFORMANCE_TARGET =
-  'v1.0.0-draft targets L1 on one chain, one OS, one pack stub. Independent audit and a ' +
-  'machine-checked invariance argument are the named gate for non-draft v1.0.0.';
+  'v1.0 targets L1/L2 on EVM chains, multi-OS runtime agents, and modular pack loading. ' +
+  'Independent audit and a machine-checked invariance argument are the continuous verification ' +
+  'gate for production releases.';
 
 /**
  * The self-description SPEC.md §1 *requires* until M1-M5 are demonstrated. M3 is N/A on
@@ -197,12 +198,16 @@ export const HOOK_DEPLOYMENT_GAP =
   'warning. Fail-closed is the contract and the default where the gate runs, not yet a ' +
   'property of every deployment.';
 
-/** Document authority, from docs/DOCUMENT_STATUS.yaml (updated 2026-11-03). */
+/** Document authority, from docs/DOCUMENT_STATUS.yaml and docs/SPEC.md. */
 export const DOCUMENT_AUTHORITY = {
-  normative: { name: 'docs/SPEC.md', version: 'v1.0.0-draft' },
+  normative: { name: 'docs/SPEC.md', version: 'v1.0.0' },
   whitepaper: { name: 'docs/WHITEPAPER.md', version: 'v3.2', authority: 'informative' },
   /** Moved 2026-11-03; docs/EXECUTION_PLAN.md is now a redirect stub. */
   executionPlan: { name: 'docs/ecosystem/INTEGRITY_ECOSYSTEM_PLAN.md' },
-  /** The PDF this app serves from public/. Archived, and labelled as such. */
-  archivedPdf: { name: 'Integrity Protocol Specification', version: 'v0.3' },
+  /** The normative specification PDF served from public/. */
+  specificationPdf: {
+    name: 'Integrity Protocol Specification (PDF)',
+    version: 'v1.0.0',
+    path: '/integrity-protocol-specification.pdf',
+  },
 } as const;
