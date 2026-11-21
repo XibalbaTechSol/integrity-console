@@ -104,6 +104,11 @@ test.describe('/ (LandingPage)', () => {
     await page.locator('#loop').scrollIntoViewIfNeeded();
     const gap = page.getByTestId('hook-deployment-gap');
     await expect(gap).toBeVisible();
+    // The gap disclosure is collapsed by default; expand summary to inspect caveats
+    const summary = gap.locator('summary');
+    if (await summary.count() > 0) {
+      await summary.click();
+    }
     // SPEC.md calls this "Deployed-vs-live gap, disclosed, not glossed over". The page
     // sells a fail-closed gate, so the three ways that is not yet universally true must
     // travel with the claim rather than being left to the reader to discover.
@@ -118,7 +123,7 @@ test.describe('/ (LandingPage)', () => {
   test('AIS formula renders as real KaTeX markup, not raw LaTeX text', async ({ page }) => {
     await page.goto('/');
     await page.locator('#ais').scrollIntoViewIfNeeded();
-    const formulaBlock = page.locator('#ais .katex');
+    const formulaBlock = page.locator('#ais .katex').first();
     await expect(formulaBlock).toBeVisible();
     // KaTeX always emits an accessibility-only MathML annotation containing the raw
     // TeX source (`.katex-mathml`, visually hidden via CSS clip) alongside the visible
@@ -126,7 +131,12 @@ test.describe('/ (LandingPage)', () => {
     // is a katex-error span (react-katex's failure mode) or the raw \text{} source
     // being visible to the naked eye. Assert both.
     await expect(page.locator('#ais .katex-error')).toHaveCount(0);
-    await expect(page.locator('#ais .katex-html')).not.toContainText('\\text{AIS}');
+    const katexHtmlBlocks = page.locator('#ais .katex-html');
+    const count = await katexHtmlBlocks.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
+      await expect(katexHtmlBlocks.nth(i)).not.toContainText('\\text{AIS}');
+    }
   });
 
   test('AIS section publishes the four prohibitions, not just the formula', async ({ page }) => {
@@ -190,7 +200,7 @@ test.describe('/ (LandingPage)', () => {
     // page's "View Shield Prototype" / "View Finance Prototype" links pointed at routes
     // that App.tsx now resolves with <Navigate>.
     for (const route of ['/dashboard', '/agents', '/ais', '/evidence', '/system', '/health']) {
-      await expect(consoleSection.getByText(route, { exact: true })).toBeVisible();
+      await expect(consoleSection.getByText(route, { exact: true }).first()).toBeVisible();
     }
     await expect(consoleSection.getByRole('link', { name: /Prototype/ })).toHaveCount(0);
   });

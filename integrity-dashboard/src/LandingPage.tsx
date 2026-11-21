@@ -168,8 +168,8 @@ export default function LandingPage() {
     transition: { staggerChildren: 0.2, delayChildren: 0.1 },
   };
 
-  const rewardFormula = `R_{\\text{total}} = R_{\\text{task}} + \\lambda \\cdot \\text{AIS}`;
-  const aisFormula = `\\text{AIS}_{\\text{raw}} = S_{\\text{entropy}}^{0.30} \\cdot S_{\\text{grounding}}^{0.30} \\cdot S_{\\text{sacrifice}}^{0.20} \\cdot S_{\\text{compliance}}^{0.20}`;
+  const rewardFormula = `R_{\\text{total}} = (R_{\\text{step}} + R_{\\text{goal}}) \\times \\text{AIS}, \\quad \\text{AIS} \\in [0, 1]`;
+  const aisFormula = `\\text{AIS}_{\\text{base}} = \\left[ \\prod_{i \\in \\{E, G, S, C\\}} \\Theta(S_i - S_i^{\\text{floor}}) \\right] \\cdot \\prod_{i} S_i^{w_i}`;
   const stateSpaceFormula = `\\dot{x}(t) = A x(t) + B u(t) + w(t), \\quad y(t) = C x(t) + v(t)`;
 
   return (
@@ -437,14 +437,44 @@ export default function LandingPage() {
               <h3 style={{ margin: '0 0 0.75rem', fontSize: '1.2rem' }}>{row.component}</h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.65, margin: 0 }}>{row.body}</p>
               {'gap' in row && row.gap && (
-                <div
+                <details
                   data-testid="hook-deployment-gap"
-                  style={{ marginTop: '1rem', paddingLeft: '0.85rem', borderLeft: '3px solid var(--warning)' }}
+                  style={{
+                    marginTop: '1.25rem',
+                    borderRadius: 'var(--radius)',
+                    border: '1px solid rgba(255, 170, 0, 0.25)',
+                    background: 'rgba(255, 170, 0, 0.04)',
+                    overflow: 'hidden',
+                  }}
                 >
-                  <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.88rem' }}>
-                    <strong style={{ color: 'var(--text-primary)' }}>Deployed vs. specified:</strong> {row.gap}
-                  </p>
-                </div>
+                  <summary
+                    style={{
+                      padding: '0.55rem 0.85rem',
+                      cursor: 'pointer',
+                      fontSize: '0.82rem',
+                      fontWeight: 600,
+                      color: 'var(--warning, #eab308)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      userSelect: 'none',
+                      outline: 'none',
+                    }}
+                  >
+                    <span>Deployed vs. specified gap (click to view)</span>
+                  </summary>
+                  <div
+                    style={{
+                      padding: '0.65rem 0.85rem 0.75rem',
+                      borderTop: '1px solid rgba(255, 170, 0, 0.15)',
+                      background: 'rgba(0, 0, 0, 0.15)',
+                    }}
+                  >
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: '0.84rem' }}>
+                      <strong style={{ color: 'var(--text-primary)' }}>Deployed vs. specified:</strong> {row.gap}
+                    </p>
+                  </div>
+                </details>
               )}
             </motion.div>
           ))}
@@ -591,22 +621,19 @@ export default function LandingPage() {
 
           <div className="landing-ais-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '3rem', alignItems: 'start' }}>
             <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} className="card" style={{ padding: '2.5rem' }}>
-              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.3rem' }}>The Native Reward Function</h3>
+              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.3rem' }}>The Native Multiplicative Reward</h3>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1rem', fontSize: '0.95rem' }}>
-                Guardrails are artificial thermodynamic friction. Reinforcement learning agents optimize around external barriers. Integrity Protocol defines AIS as the native reward function:
+                Prompt guardrails are artificial thermodynamic friction: reinforcement learning agents mathematically optimize around external barriers when reward is additive. Integrity Protocol defines reward multiplicatively via AIS:
               </p>
               <div className="landing-formula" role="region" aria-label="Total reward formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={rewardFormula} />
               </div>
-              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.2rem' }}>A weighted geometric mean</h3>
+              <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.2rem' }}>Gated Weighted Geometric Mean</h3>
               <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={aisFormula} />
               </div>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
-                Geometric, not arithmetic — so a single exact-zero component annihilates the raw score instead of
-                being averaged away. That property closed a real scoring exploit, in which a content-free submission
-                claiming compute time outscored an honest agent. The result is then clamped to the agent's tier
-                ceiling.
+                Geometric, not arithmetic — an arithmetic mean permits dangerous compensation (excelling on cheap axes to offset policy violations). The weighted geometric mean couples axes non-linearly, while the conjunctive Heaviside step gate <span style={{ color: 'var(--theme-accent)' }}>&Theta;(S<sub>i</sub> &minus; S<sub>i</sub><sup>floor</sup>)</span> enforces that breaching any single component floor strictly zeroes the entire score.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {[
