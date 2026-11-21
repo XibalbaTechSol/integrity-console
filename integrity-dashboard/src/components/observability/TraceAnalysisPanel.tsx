@@ -109,7 +109,7 @@ const RiskBadge = ({ score }: { score: number }) => {
       fontSize: '0.6rem',
       fontWeight: 800,
       padding: '2px 6px',
-      borderRadius: 'var(--radius)',
+      borderRadius: 0,
       background: `color-mix(in srgb, ${color} 20%, transparent)`,
       border: `1px solid ${color}`,
       color: color,
@@ -134,7 +134,7 @@ const TraceTreeNode = ({ node, depth = 0, onTimeTravel }: { node: TraceNode, dep
           padding: '8px',
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid var(--glass-border)',
-          borderRadius: 'var(--radius-sm)',
+          borderRadius: 0,
           cursor: 'pointer',
           transition: 'all 0.2s'
         }}
@@ -164,7 +164,7 @@ const TraceTreeNode = ({ node, depth = 0, onTimeTravel }: { node: TraceNode, dep
               border: '1px solid var(--glass-border)',
               color: 'var(--text-muted)',
               padding: '2px 6px',
-              borderRadius: 'var(--radius)',
+              borderRadius: 0,
               fontSize: '0.6rem',
               cursor: 'pointer',
               display: 'flex',
@@ -287,7 +287,7 @@ export function TraceAnalysisPanel() {
         padding: 'var(--space-4)',
         background: 'var(--bg-secondary)',
         border: '1px solid var(--glass-border)',
-        borderRadius: 'var(--radius-md)'
+        borderRadius: 0
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>SESSION:</span>
@@ -315,7 +315,7 @@ export function TraceAnalysisPanel() {
             minHeight: '300px',
             padding: 'var(--space-4)',
             background: 'rgba(0,0,0,0.2)',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: 0,
             border: '1px solid var(--glass-border)'
           }}>
             {rewindSpan ? (
@@ -369,7 +369,7 @@ export function TraceAnalysisPanel() {
                 <div style={{
                   width: '48px',
                   height: '48px',
-                  borderRadius: '50%',
+                  borderRadius: 0,
                   background: 'var(--bg-secondary)',
                   display: 'flex',
                   alignItems: 'center',

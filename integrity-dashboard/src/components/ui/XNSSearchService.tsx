@@ -119,7 +119,7 @@ export const XNSSearchService: React.FC = () => {
                 gap: '8px',
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid var(--border)',
-                borderRadius: 'var(--r-md)',
+                borderRadius: 0,
                 padding: '4px 4px 4px 12px',
                 alignItems: 'center'
             }}>
@@ -148,7 +148,7 @@ export const XNSSearchService: React.FC = () => {
                     onClick={() => runSearch(query)}
                     disabled={isLoading || !query.trim()}
                     className="primary-button"
-                    style={{ borderRadius: 'var(--radius)' }}
+                    style={{ borderRadius: 0 }}
                 >
                     {isLoading ? <Loader2 size={14} className="pulse" /> : <ArrowRight size={14} />}
                 </button>
@@ -162,7 +162,7 @@ export const XNSSearchService: React.FC = () => {
                     padding: '12px',
                     background: 'rgba(255, 107, 122, 0.08)',
                     border: '1px solid rgba(255, 107, 122, 0.2)',
-                    borderRadius: 'var(--r-md)',
+                    borderRadius: 0,
                     fontSize: '0.75rem',
                     color: 'rgba(255,255,255,0.7)'
                 }}>
@@ -179,7 +179,7 @@ export const XNSSearchService: React.FC = () => {
                     padding: '12px',
                     background: 'rgba(66, 214, 139, 0.08)',
                     border: '1px solid rgba(66, 214, 139, 0.2)',
-                    borderRadius: 'var(--r-md)',
+                    borderRadius: 0,
                     fontSize: '0.75rem',
                     color: 'rgba(255,255,255,0.85)'
                 }}>
@@ -193,7 +193,7 @@ export const XNSSearchService: React.FC = () => {
                     padding: '16px',
                     background: 'var(--glass-surface-light)',
                     border: '1px solid var(--border)',
-                    borderRadius: 'var(--r-md)',
+                    borderRadius: 0,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px'
@@ -255,7 +255,7 @@ export const XNSSearchService: React.FC = () => {
                     padding: '16px',
                     background: 'var(--glass-surface-light)',
                     border: '1px solid var(--border)',
-                    borderRadius: 'var(--r-md)',
+                    borderRadius: 0,
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '12px'
@@ -265,7 +265,7 @@ export const XNSSearchService: React.FC = () => {
                             <div style={{
                                 width: '32px',
                                 height: '32px',
-                                borderRadius: 'var(--radius)',
+                                borderRadius: 0,
                                 background: 'rgba(66, 214, 139, 0.1)',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -293,11 +293,11 @@ export const XNSSearchService: React.FC = () => {
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 0, border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '4px' }}>VERIFICATION</div>
                             <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--accent-hover)' }}>Tier {result.verification_tier ?? 0}</div>
                          </div>
-                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                         <div style={{ padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: 0, border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '4px' }}>IDENTIFIED BY</div>
                             <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--theme-accent)' }}>
                                 {result.handle ? 'XNS handle' : 'DID'}

@@ -13,7 +13,7 @@ export const SeededDataBadge = ({ label = 'Seeded demo data' }: { label?: string
         style={{
             display: 'inline-flex', alignItems: 'center', gap: '6px',
             padding: '3px 10px', background: 'rgba(240, 180, 41, 0.1)',
-            border: '1px solid var(--warning)', borderRadius: 'var(--radius)',
+            border: '1px solid var(--warning)', borderRadius: 0,
             fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em',
             color: 'var(--warning)', textTransform: 'uppercase',
         }}

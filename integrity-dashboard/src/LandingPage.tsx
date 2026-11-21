@@ -81,7 +81,7 @@ const PhaseChip: React.FC<{ state: PhaseState }> = ({ state }) => {
         alignItems: 'center',
         gap: '0.35rem',
         padding: '0.2rem 0.6rem',
-        borderRadius: 'var(--radius)',
+        borderRadius: 0,
         border: `1px solid ${chip.color}`,
         color: chip.color,
         fontSize: '0.75rem',
@@ -253,8 +253,8 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at center, rgba(54, 167, 255, 0.16) 0%, transparent 70%)', zIndex: -1 }} />
 
         <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.9rem', borderRadius: '999px', background: 'rgba(54, 167, 255, 0.1)', border: '1px solid rgba(54, 167, 255, 0.25)', marginBottom: '1.25rem' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--theme-accent)' }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 0.9rem', borderRadius: 0, background: 'rgba(54, 167, 255, 0.1)', border: '1px solid rgba(54, 167, 255, 0.25)', marginBottom: '1.25rem' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: 0, background: 'var(--theme-accent)' }} />
             <span style={{ fontSize: '0.85rem', color: 'var(--theme-accent)', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
               The Control &amp; Identity Layer for Autonomous Agents
             </span>
@@ -301,7 +301,7 @@ export default function LandingPage() {
             <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.1rem', lineHeight: 1.6 }}>
               Control theory is unsentimental about this. In any physical or economic plant, state evolution follows:
             </p>
-            <div className="landing-formula" role="region" aria-label="State-space plant formula" tabIndex={0} style={{ maxWidth: '640px', margin: '1.25rem auto', background: 'var(--bg-color)', padding: '0.85rem 1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', overflowX: 'auto' }}>
+            <div className="landing-formula" role="region" aria-label="State-space plant formula" tabIndex={0} style={{ maxWidth: '640px', margin: '1.25rem auto', background: 'var(--bg-color)', padding: '0.85rem 1.25rem', borderRadius: 0, border: '1px solid var(--border-color)', overflowX: 'auto' }}>
               <BlockMath math={stateSpaceFormula} />
             </div>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '820px', margin: '0 auto', fontSize: '1.05rem', lineHeight: 1.6 }}>
@@ -312,7 +312,7 @@ export default function LandingPage() {
           <motion.div variants={stagger} initial="initial" whileInView="whileInView" viewport={stagger.viewport} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
             <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--danger)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'var(--danger-wash)', borderRadius: 'var(--radius)', color: 'var(--danger)' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--danger-wash)', borderRadius: 0, color: 'var(--danger)' }}>
                   <Radio size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No state estimate</h3>
@@ -326,7 +326,7 @@ export default function LandingPage() {
 
             <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--warning)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'var(--warning-wash)', borderRadius: 'var(--radius)', color: 'var(--warning)' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--warning-wash)', borderRadius: 0, color: 'var(--warning)' }}>
                   <SlidersHorizontal size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No bounded actuator</h3>
@@ -340,7 +340,7 @@ export default function LandingPage() {
 
             <motion.div variants={fadeInUp} className="card" style={{ borderTop: '4px solid var(--accent)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.75rem', background: 'var(--accent-wash)', borderRadius: 'var(--radius)', color: 'var(--accent)' }}>
+                <div style={{ padding: '0.75rem', background: 'var(--accent-wash)', borderRadius: 0, color: 'var(--accent)' }}>
                   <Database size={24} />
                 </div>
                 <h3 style={{ margin: 0 }}>No flight recorder</h3>
@@ -441,7 +441,7 @@ export default function LandingPage() {
                   data-testid="hook-deployment-gap"
                   style={{
                     marginTop: '1.25rem',
-                    borderRadius: 'var(--radius)',
+                    borderRadius: 0,
                     border: '1px solid rgba(255, 170, 0, 0.25)',
                     background: 'rgba(255, 170, 0, 0.04)',
                     overflow: 'hidden',
@@ -500,7 +500,7 @@ export default function LandingPage() {
             {/* Tier 0 */}
             <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--theme-accent)', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.65rem', background: 'rgba(54, 167, 255, 0.12)', borderRadius: 'var(--radius)', color: 'var(--theme-accent)' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(54, 167, 255, 0.12)', borderRadius: 0, color: 'var(--theme-accent)' }}>
                   <Key size={22} />
                 </div>
                 <div>
@@ -519,7 +519,7 @@ export default function LandingPage() {
             {/* Tier 1 */}
             <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--warning)', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.65rem', background: 'rgba(255, 170, 0, 0.12)', borderRadius: 'var(--radius)', color: 'var(--warning)' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(255, 170, 0, 0.12)', borderRadius: 0, color: 'var(--warning)' }}>
                   <Wallet size={22} />
                 </div>
                 <div>
@@ -538,7 +538,7 @@ export default function LandingPage() {
             {/* Tier 2 */}
             <motion.div variants={fadeInUp} initial="initial" whileInView="whileInView" viewport={{ once: true }} className="card" style={{ borderTop: '4px solid var(--success)', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ padding: '0.65rem', background: 'rgba(0, 255, 200, 0.12)', borderRadius: 'var(--radius)', color: 'var(--success)' }}>
+                <div style={{ padding: '0.65rem', background: 'rgba(0, 255, 200, 0.12)', borderRadius: 0, color: 'var(--success)' }}>
                   <Network size={22} />
                 </div>
                 <div>
@@ -587,7 +587,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', fontFamily: 'monospace', fontSize: '0.82rem', overflowX: 'auto', lineHeight: 1.6 }}>
+              <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 0, border: '1px solid var(--border-color)', fontFamily: 'monospace', fontSize: '0.82rem', overflowX: 'auto', lineHeight: 1.6 }}>
                 <div style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>// ERC-8004 Canonical Passport Representation</div>
                 <div>{'{'}</div>
                 <div style={{ paddingLeft: '1.25rem' }}><span style={{ color: 'var(--theme-accent)' }}>"standard"</span>: <span style={{ color: 'var(--success)' }}>"ERC-8004"</span>,</div>
@@ -625,11 +625,11 @@ export default function LandingPage() {
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '1rem', fontSize: '0.95rem' }}>
                 Prompt guardrails are artificial thermodynamic friction: reinforcement learning agents mathematically optimize around external barriers when reward is additive. Integrity Protocol defines reward multiplicatively via AIS:
               </p>
-              <div className="landing-formula" role="region" aria-label="Total reward formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+              <div className="landing-formula" role="region" aria-label="Total reward formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 0, border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={rewardFormula} />
               </div>
               <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.2rem' }}>Gated Weighted Geometric Mean</h3>
-              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
+              <div className="landing-formula" role="region" aria-label="Agentic Integrity Score formula" tabIndex={0} style={{ background: 'var(--bg-color)', padding: '1.25rem', borderRadius: 0, border: '1px solid var(--border-color)', marginBottom: '1.5rem', overflowX: 'auto' }}>
                 <BlockMath math={aisFormula} />
               </div>
               <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
@@ -702,7 +702,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div initial={fadeInUp.initial} whileInView={fadeInUp.whileInView} viewport={fadeInUp.viewport} transition={fadeInUp.transition} style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', background: 'var(--surface-color)', maxWidth: '760px' }}>
+            <div style={{ display: 'inline-flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.75rem 2rem', padding: '1rem 1.75rem', border: '1px solid var(--border-color)', borderRadius: 0, background: 'var(--surface-color)', maxWidth: '760px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>
                 {PROGRESS_NOTE}
               </span>
@@ -720,7 +720,7 @@ export default function LandingPage() {
                   style={{
                     width: '42px',
                     height: '42px',
-                    borderRadius: '50%',
+                    borderRadius: 0,
                     background: 'var(--surface-color)',
                     border: `2px solid ${PHASE_CHIP[phase.state].color}`,
                     display: 'flex',
@@ -792,7 +792,7 @@ export default function LandingPage() {
               <motion.div variants={fadeInUp} key={route} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.85rem', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                    <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: 'var(--radius)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
+                    <div style={{ background: 'var(--bg-color)', width: '44px', height: '44px', borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
                       <Icon size={22} color="var(--theme-accent)" />
                     </div>
                     <div>
@@ -800,7 +800,7 @@ export default function LandingPage() {
                       <code style={{ fontSize: '0.85rem', color: 'var(--theme-accent)' }}>{route}</code>
                     </div>
                   </div>
-                  <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: '4px', background: 'rgba(54, 167, 255, 0.08)', border: '1px solid rgba(54, 167, 255, 0.2)', color: 'var(--theme-accent)', fontWeight: 600 }}>
+                  <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.5rem', borderRadius: 0, background: 'rgba(54, 167, 255, 0.08)', border: '1px solid rgba(54, 167, 255, 0.2)', color: 'var(--theme-accent)', fontWeight: 600 }}>
                     {tag}
                   </span>
                 </div>
@@ -963,8 +963,8 @@ export default function LandingPage() {
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  <a href="mailto:jacob@xibalbasolutions.com" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                  <a href="mailto:jacob@xibalbasolutions.com" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 0, background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: 0, background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
                       <Mail size={20} />
                     </div>
                     <div>
@@ -973,8 +973,8 @@ export default function LandingPage() {
                     </div>
                   </a>
 
-                  <a href="tel:+12628641589" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                  <a href="tel:+12628641589" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 0, background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: 0, background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
                       <Phone size={20} />
                     </div>
                     <div>
@@ -983,8 +983,8 @@ export default function LandingPage() {
                     </div>
                   </a>
 
-                  <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 'var(--radius)', background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
+                  <a href="https://xibalbasolutions.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none', color: 'inherit', padding: '1rem', borderRadius: 0, background: 'var(--bg-color)', border: '1px solid var(--border-color)', transition: 'border-color 0.2s' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: 0, background: 'rgba(54, 167, 255, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--theme-accent)', flexShrink: 0 }}>
                       <Globe size={20} />
                     </div>
                     <div>
@@ -1010,7 +1010,7 @@ export default function LandingPage() {
               </p>
 
               {contactSubmitted ? (
-                <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(0, 255, 200, 0.08)', borderRadius: 'var(--radius)', border: '1px solid rgba(0, 255, 200, 0.3)' }}>
+                <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(0, 255, 200, 0.08)', borderRadius: 0, border: '1px solid rgba(0, 255, 200, 0.3)' }}>
                   <div style={{ color: 'var(--success)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Inquiry Prepared</div>
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, margin: '0 0 1.5rem 0' }}>
                     Your message draft has been dispatched to <strong>jacob@xibalbasolutions.com</strong>. We typically respond within 24 business hours.
@@ -1024,20 +1024,20 @@ export default function LandingPage() {
                   <div className="landing-form-row" style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
                     <div style={{ flex: 1, minWidth: '180px' }}>
                       <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Full Name *</label>
-                      <input id="contact-name" required value={contactName} onChange={(e) => setContactName(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
+                      <input id="contact-name" required value={contactName} onChange={(e) => setContactName(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Jane Okonkwo" />
                     </div>
                     <div style={{ flex: 1, minWidth: '180px' }}>
                       <label htmlFor="contact-organization" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Organization *</label>
-                      <input id="contact-organization" required value={contactOrg} onChange={(e) => setContactOrg(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Autonomous Systems" />
+                      <input id="contact-organization" required value={contactOrg} onChange={(e) => setContactOrg(e.target.value)} type="text" style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="Acme Autonomous Systems" />
                     </div>
                   </div>
                   <div>
                     <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Work Email *</label>
-                    <input id="contact-email" required value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
+                    <input id="contact-email" required value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} type="email" style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }} placeholder="jane@acmecorp.com" />
                   </div>
                   <div>
                     <label htmlFor="contact-use-case" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Where you'd start</label>
-                    <select id="contact-use-case" value={contactUseCase} onChange={(e) => setContactUseCase(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
+                    <select id="contact-use-case" value={contactUseCase} onChange={(e) => setContactUseCase(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}>
                       <option>Record only — signed evidence and anchoring (L0)</option>
                       <option>Constrain and record — hook plus pack (L1)</option>
                       <option>Integrity Health pack, synthetic data</option>
@@ -1048,7 +1048,7 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Message *</label>
-                    <textarea id="contact-message" required rows={3} value={contactMessage} onChange={(e) => setContactMessage(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What agents or tool actions are you putting inside a verifiable control loop?"></textarea>
+                    <textarea id="contact-message" required rows={3} value={contactMessage} onChange={(e) => setContactMessage(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit', resize: 'vertical' }} placeholder="What agents or tool actions are you putting inside a verifiable control loop?"></textarea>
                   </div>
                   <button type="submit" className="primary-button" style={{ padding: '0.9rem', fontSize: '0.95rem', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                     Send Pilot Inquiry <ArrowRight size={16} />

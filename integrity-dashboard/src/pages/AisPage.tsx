@@ -42,7 +42,7 @@ const FormulaCard = ({ title, description, formula, icon, accent = 'var(--primar
       padding: 'var(--space-6)',
       background: 'var(--bg-secondary)',
       border: '1px solid var(--glass-border)',
-      borderRadius: 'var(--radius-md)',
+      borderRadius: 0,
       transition: 'transform 0.2s, box-shadow 0.2s',
       cursor: 'default',
     }}
@@ -60,7 +60,7 @@ const FormulaCard = ({ title, description, formula, icon, accent = 'var(--primar
         style={{
           width: '36px',
           height: '36px',
-          borderRadius: 'var(--radius-md)',
+          borderRadius: 0,
           background: `color-mix(in srgb, ${accent} 15%, transparent)`,
           border: `1px solid color-mix(in srgb, ${accent} 35%, transparent)`,
           display: 'flex',
@@ -85,7 +85,7 @@ const FormulaCard = ({ title, description, formula, icon, accent = 'var(--primar
         marginTop: 'auto',
         padding: '14px 16px',
         background: 'var(--bg-card)',
-        borderRadius: 'var(--radius-sm)',
+        borderRadius: 0,
         border: '1px dashed var(--glass-border)',
         display: 'block',
         minWidth: 0,
@@ -439,7 +439,7 @@ export function AisPage() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', minWidth: 0, minHeight: 0, background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', padding: 'var(--space-6)', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', minWidth: 0, minHeight: 0, background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', padding: 'var(--space-6)', borderRadius: 0 }}>
                 <div style={{ width: '100%', height: '240px', minWidth: 0, minHeight: 0, position: 'relative' }}>
                   <IntegrityRadar agent={selectedAgent} />
                 </div>
@@ -453,7 +453,7 @@ export function AisPage() {
           style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--glass-border)',
-            borderRadius: 'var(--radius-md)',
+            borderRadius: 0,
             padding: '12px 16px',
             display: 'flex',
             alignItems: 'center',
@@ -478,7 +478,7 @@ export function AisPage() {
                   onClick={() => module.set(!module.state)}
                   style={{
                     padding: '6px 12px',
-                    borderRadius: 'var(--radius-sm)',
+                    borderRadius: 0,
                     border: `1px solid ${module.state ? 'var(--primary)' : 'var(--glass-border)'}`,
                     background: module.state ? 'var(--primary-dim)' : 'transparent',
                     color: module.state ? 'var(--primary)' : 'var(--text-muted)',
@@ -498,7 +498,7 @@ export function AisPage() {
                   onClick={() => toggleCustomField(field.id)}
                   style={{
                     padding: '6px 12px',
-                    borderRadius: 'var(--radius-sm)',
+                    borderRadius: 0,
                     border: `1px solid ${field.active ? 'var(--theme-accent)' : 'var(--glass-border)'}`,
                     background: field.active ? 'rgba(240, 180, 41, 0.1)' : 'transparent',
                     color: field.active ? 'var(--theme-accent)' : 'var(--text-muted)',
@@ -545,7 +545,7 @@ export function AisPage() {
               maxWidth: '400px',
               background: 'var(--bg-card)',
               border: '1px solid var(--primary)',
-              borderRadius: 'var(--radius-lg)',
+              borderRadius: 0,
               padding: '24px',
               display: 'flex',
               flexDirection: 'column',

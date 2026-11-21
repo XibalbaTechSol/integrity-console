@@ -43,7 +43,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
       <div className="modal-content" style={{
         background: 'var(--surface-color, #121316)',
         border: '1px solid var(--border-color, #2a2d35)',
-        borderRadius: '12px', width: '100%', maxWidth: '500px',
+        borderRadius: 0, width: '100%', maxWidth: '500px',
         padding: '2rem', color: 'var(--text-primary, #fff)', position: 'relative'
       }}>
         <button
@@ -61,7 +61,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{
-            padding: '0.6rem', borderRadius: '8px',
+            padding: '0.6rem', borderRadius: 0,
             background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b'
           }}>
             <Star size={24} />
@@ -85,7 +85,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
               type="button"
               className="primary-button"
               onClick={onClose}
-              style={{ padding: '0.55rem 1.25rem', borderRadius: '6px' }}
+              style={{ padding: '0.55rem 1.25rem', borderRadius: 0 }}
             >
               Done
             </button>
@@ -125,7 +125,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -135,7 +135,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
             {error && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)',
+                padding: '0.75rem', borderRadius: 0, background: 'rgba(239, 68, 68, 0.1)',
                 color: '#ef4444', fontSize: '0.85rem'
               }}>
                 <AlertTriangle size={16} />
@@ -149,7 +149,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
                 className="secondary-button"
                 onClick={onClose}
                 disabled={loading}
-                style={{ padding: '0.65rem 1.25rem', borderRadius: '6px' }}
+                style={{ padding: '0.65rem 1.25rem', borderRadius: 0 }}
               >
                 Cancel
               </button>
@@ -158,7 +158,7 @@ export function Agent0FeedbackModal({ isOpen, onClose, targetAgent }: Props) {
                 className="primary-button"
                 disabled={loading}
                 style={{
-                  padding: '0.65rem 1.25rem', borderRadius: '6px',
+                  padding: '0.65rem 1.25rem', borderRadius: 0,
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}
               >

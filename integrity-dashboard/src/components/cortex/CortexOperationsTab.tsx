@@ -17,13 +17,13 @@ type ProjectionId = 'memories' | 'entities' | 'relations';
 const cardStyle = {
   background: 'var(--surface-color)',
   border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius-md)',
+  borderRadius: 0,
   padding: 'var(--space-5)',
 } as const;
 
 const buttonStyle = {
   border: '1px solid var(--border-color)',
-  borderRadius: 'var(--radius)',
+  borderRadius: 0,
   background: 'var(--bg-color)',
   color: 'var(--text-primary)',
   padding: '0.65rem 0.9rem',
@@ -143,13 +143,13 @@ export default function CortexOperationsTab() {
         <h2 style={{ marginTop: 0, fontSize: '1.1rem' }}>Evidence-backed retrieval</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '.85rem' }}>Rank fusion may degrade when vector or graph evidence is unavailable; channel state and the persisted trace remain visible.</p>
         <form onSubmit={runRetrieval} style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <input aria-label="Cortex retrieval query" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search canonical memory" style={{ flex: '1 1 280px', minWidth: 0, padding: '.75rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} />
+          <input aria-label="Cortex retrieval query" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search canonical memory" style={{ flex: '1 1 280px', minWidth: 0, padding: '.75rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)' }} />
           <button disabled={busy === 'retrieval' || !query.trim()} style={buttonStyle}><Search size={16} /> {busy === 'retrieval' ? 'Tracing…' : 'Retrieve'}</button>
         </form>
         {retrieval && (
           <div style={{ marginTop: 18 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', fontSize: '.75rem', color: 'var(--text-secondary)' }}>
-              {Object.entries(retrieval.channel_status).map(([channel, status]) => <span key={channel} style={{ padding: '4px 8px', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)' }}>{channel}: {status}</span>)}
+              {Object.entries(retrieval.channel_status).map(([channel, status]) => <span key={channel} style={{ padding: '4px 8px', border: '1px solid var(--border-color)', borderRadius: 0 }}>{channel}: {status}</span>)}
             </div>
             <p style={{ fontSize: '.75rem', color: 'var(--text-muted)' }}>Trace {shortHash(retrieval.trace_id)} · root {shortHash(retrieval.root_hash)}{trace?.checkpoint_id ? ` · checkpoint ${shortHash(trace.checkpoint_id)}` : ' · no projection checkpoint linked'}</p>
             {proof && <p style={{ fontSize: '.75rem', color: 'var(--success)' }}>Rank 1 inclusion proof: {proof.siblings.length} sibling hashes · root {shortHash(proof.root)}</p>}
@@ -213,7 +213,7 @@ export default function CortexOperationsTab() {
         </div>
         {reconciliation && <p style={{ color: reconciliation.equal ? 'var(--success)' : 'var(--warning)' }}>Last reconciliation: {reconciliation.equal ? 'canonical root matches' : `${reconciliation.action}; ${reconciliation.missing.length} missing, ${reconciliation.extra.length} extra`}.</p>}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-          {checkpoints.slice(0, 6).map(checkpoint => <article key={checkpoint.id} style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', padding: 12 }}><strong>{checkpoint.leaf_count} leaves</strong><small style={{ display: 'block', color: checkpoint.status === 'active' ? 'var(--success)' : 'var(--warning)' }}>{checkpoint.status}</small><code style={{ fontSize: '.68rem' }}>{shortHash(checkpoint.root_hash)}</code></article>)}
+          {checkpoints.slice(0, 6).map(checkpoint => <article key={checkpoint.id} style={{ border: '1px solid var(--border-color)', borderRadius: 0, padding: 12 }}><strong>{checkpoint.leaf_count} leaves</strong><small style={{ display: 'block', color: checkpoint.status === 'active' ? 'var(--success)' : 'var(--warning)' }}>{checkpoint.status}</small><code style={{ fontSize: '.68rem' }}>{shortHash(checkpoint.root_hash)}</code></article>)}
           {checkpoints.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No checkpoints recorded for this projection.</p>}
         </div>
       </section>

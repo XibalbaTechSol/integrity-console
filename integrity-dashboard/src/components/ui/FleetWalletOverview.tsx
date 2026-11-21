@@ -50,7 +50,7 @@ export function FleetWalletOverview() {
 
   return (
     <div className="fleet-wallet-overview" style={{
-      background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)',
+      background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 0,
       padding: 'var(--space-6)', marginBottom: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
@@ -66,7 +66,7 @@ export function FleetWalletOverview() {
             <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fleet total ITK</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--theme-accent)' }}>{(totalItk ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
           </div>
-          <button aria-label="Refresh wallet overview" onClick={load} disabled={loading} style={{ background: 'none', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-md)', padding: '6px', color: 'var(--text-muted)', cursor: 'pointer' }}>
+          <button aria-label="Refresh wallet overview" onClick={load} disabled={loading} style={{ background: 'none', border: '1px solid var(--glass-border)', borderRadius: 0, padding: '6px', color: 'var(--text-muted)', cursor: 'pointer' }}>
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
         </div>
@@ -89,12 +89,12 @@ export function FleetWalletOverview() {
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-3)',
                 padding: 'var(--space-3) var(--space-2)', background: r.namespaceKey === (selectedAgent?.namespace_key || selectedAgent?.id) ? 'var(--theme-accent-muted)' : 'transparent',
-                border: 'none', borderBottom: '1px solid var(--glass-border)', borderRadius: 'var(--radius-sm)',
+                border: 'none', borderBottom: '1px solid var(--glass-border)', borderRadius: 0,
                 cursor: 'pointer', textAlign: 'left', color: 'inherit', width: '100%',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--theme-accent-muted)', color: 'var(--theme-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: 0, background: 'var(--theme-accent-muted)', color: 'var(--theme-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Coins size={16} />
                 </div>
                 <div style={{ minWidth: 0 }}>

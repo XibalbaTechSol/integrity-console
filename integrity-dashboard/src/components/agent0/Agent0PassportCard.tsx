@@ -37,7 +37,7 @@ export function Agent0PassportCard({
     <div className="agent0-passport-card" style={{
       background: 'var(--surface-color, #131418)',
       border: '1px solid var(--border-color, #272a31)',
-      borderRadius: '12px', padding: '1.5rem',
+      borderRadius: 0, padding: '1.5rem',
       display: 'flex', flexDirection: 'column', gap: '1.25rem',
       position: 'relative', overflow: 'hidden'
     }}>
@@ -45,7 +45,7 @@ export function Agent0PassportCard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
           <div style={{
-            width: '44px', height: '44px', borderRadius: '10px',
+            width: '44px', height: '44px', borderRadius: 0,
             background: 'linear-gradient(135deg, rgba(0,229,255,0.15), rgba(99,102,241,0.15))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: '1px solid rgba(0,229,255,0.3)', color: 'var(--accent-color, #00e5ff)'
@@ -56,7 +56,7 @@ export function Agent0PassportCard({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 600 }}>{record.name}</h3>
               <span style={{
-                fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: '4px',
+                fontSize: '0.72rem', padding: '0.15rem 0.5rem', borderRadius: 0,
                 background: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary, #aaa)',
                 fontFamily: 'monospace'
               }}>
@@ -74,7 +74,7 @@ export function Agent0PassportCard({
           {hasTwoWayBinding ? (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-              padding: '0.25rem 0.6rem', borderRadius: '4px',
+              padding: '0.25rem 0.6rem', borderRadius: 0,
               background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)',
               color: '#10b981', fontSize: '0.75rem', fontWeight: 600
             }}>
@@ -83,7 +83,7 @@ export function Agent0PassportCard({
           ) : (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-              padding: '0.25rem 0.6rem', borderRadius: '4px',
+              padding: '0.25rem 0.6rem', borderRadius: 0,
               background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
               color: '#f59e0b', fontSize: '0.75rem'
             }}>
@@ -94,7 +94,7 @@ export function Agent0PassportCard({
           {record.isConfinedWallet && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-              padding: '0.25rem 0.6rem', borderRadius: '4px',
+              padding: '0.25rem 0.6rem', borderRadius: 0,
               background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)',
               color: '#a78bfa', fontSize: '0.75rem', fontWeight: 600
             }}>
@@ -105,7 +105,7 @@ export function Agent0PassportCard({
           {record.x402Support && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-              padding: '0.25rem 0.6rem', borderRadius: '4px',
+              padding: '0.25rem 0.6rem', borderRadius: 0,
               background: 'rgba(0, 229, 255, 0.1)', border: '1px solid rgba(0, 229, 255, 0.3)',
               color: 'var(--accent-color, #00e5ff)', fontSize: '0.75rem', fontWeight: 600
             }}>
@@ -118,7 +118,7 @@ export function Agent0PassportCard({
       {/* Identity & Technical Details Grid */}
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem',
-        padding: '0.85rem', background: 'rgba(0,0,0,0.25)', borderRadius: '8px',
+        padding: '0.85rem', background: 'rgba(0,0,0,0.25)', borderRadius: 0,
         border: '1px solid rgba(255,255,255,0.04)', fontSize: '0.82rem'
       }}>
         {record.integrityDid && (
@@ -190,7 +190,7 @@ export function Agent0PassportCard({
               className="primary-button"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px',
+                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: 0,
                 background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
                 border: 'none', color: '#fff', cursor: 'pointer'
               }}
@@ -207,7 +207,7 @@ export function Agent0PassportCard({
               className="secondary-button"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px'
+                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: 0
               }}
             >
               <Send size={13} />
@@ -222,7 +222,7 @@ export function Agent0PassportCard({
               className="secondary-button"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px'
+                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: 0
               }}
             >
               <DollarSign size={13} />
@@ -237,7 +237,7 @@ export function Agent0PassportCard({
               className="secondary-button"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: '6px'
+                padding: '0.5rem 0.85rem', fontSize: '0.82rem', borderRadius: 0
               }}
             >
               <Star size={13} />

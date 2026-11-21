@@ -221,7 +221,7 @@ export default function ProtocolDashboardPage() {
           style={{
             background: 'rgba(15, 23, 42, 0.75)',
             border: '1px solid rgba(59, 130, 246, 0.25)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -233,7 +233,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 width: '38px',
                 height: '38px',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(59, 130, 246, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
@@ -255,7 +255,7 @@ export default function ProtocolDashboardPage() {
           <span
             style={{
               padding: '4px 8px',
-              borderRadius: '6px',
+              borderRadius: 0,
               fontSize: '0.75rem',
               fontWeight: 700,
               background: 'rgba(34, 197, 94, 0.15)',
@@ -271,7 +271,7 @@ export default function ProtocolDashboardPage() {
           style={{
             background: 'rgba(15, 23, 42, 0.75)',
             border: '1px solid rgba(168, 85, 247, 0.25)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -283,7 +283,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 width: '38px',
                 height: '38px',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(168, 85, 247, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
@@ -306,7 +306,7 @@ export default function ProtocolDashboardPage() {
             to="/cortex"
             style={{
               padding: '4px 8px',
-              borderRadius: '6px',
+              borderRadius: 0,
               fontSize: '0.75rem',
               fontWeight: 700,
               background: 'rgba(168, 85, 247, 0.15)',
@@ -326,7 +326,7 @@ export default function ProtocolDashboardPage() {
           style={{
             background: 'rgba(15, 23, 42, 0.75)',
             border: '1px solid rgba(239, 68, 68, 0.25)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -338,7 +338,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 width: '38px',
                 height: '38px',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(239, 68, 68, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
@@ -361,7 +361,7 @@ export default function ProtocolDashboardPage() {
             to="/shield"
             style={{
               padding: '4px 8px',
-              borderRadius: '6px',
+              borderRadius: 0,
               fontSize: '0.75rem',
               fontWeight: 700,
               background: 'rgba(239, 68, 68, 0.15)',
@@ -383,7 +383,7 @@ export default function ProtocolDashboardPage() {
         style={{
           background: 'rgba(15, 23, 42, 0.6)',
           border: '1px solid var(--glass-border)',
-          borderRadius: '14px',
+          borderRadius: 0,
           padding: '20px',
         }}
       >
@@ -403,7 +403,7 @@ export default function ProtocolDashboardPage() {
                 background: 'rgba(255, 255, 255, 0.05)',
                 border: '1px solid var(--glass-border)',
                 color: 'var(--text-primary)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 padding: '6px 12px',
                 cursor: 'pointer',
                 display: 'flex',
@@ -419,7 +419,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 background: '#2563eb',
                 color: '#fff',
-                borderRadius: '8px',
+                borderRadius: 0,
                 padding: '6px 14px',
                 textDecoration: 'none',
                 fontWeight: 700,
@@ -441,7 +441,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 background: 'rgba(30, 41, 59, 0.5)',
                 border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '10px',
+                borderRadius: 0,
                 padding: '14px',
               }}
             >
@@ -449,7 +449,7 @@ export default function ProtocolDashboardPage() {
                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#60a5fa', letterSpacing: '0.05em' }}>
                   {agent.badge}
                 </span>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: 0, background: '#22c55e' }} />
               </div>
               <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>{agent.alias}</div>
               <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>{agent.role}</div>
@@ -465,7 +465,7 @@ export default function ProtocolDashboardPage() {
               style={{
                 background: 'rgba(30, 41, 59, 0.5)',
                 border: '1px solid rgba(239, 68, 68, 0.2)',
-                borderRadius: '10px',
+                borderRadius: 0,
                 padding: '14px',
               }}
             >
@@ -473,7 +473,7 @@ export default function ProtocolDashboardPage() {
                 <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#f87171', letterSpacing: '0.05em' }}>
                   {agent.badge}
                 </span>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: 0, background: '#22c55e' }} />
               </div>
               <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#f8fafc' }}>{agent.alias}</div>
               <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '8px' }}>{agent.role}</div>
@@ -498,7 +498,7 @@ export default function ProtocolDashboardPage() {
           style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid var(--glass-border)',
-            borderRadius: '14px',
+            borderRadius: 0,
             padding: '20px',
             display: 'flex',
             flexDirection: 'column',
@@ -519,7 +519,7 @@ export default function ProtocolDashboardPage() {
                 textAlign: 'right',
                 background: 'rgba(30, 41, 59, 0.8)',
                 padding: '8px 14px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 border: '1px solid rgba(59, 130, 246, 0.3)',
               }}
             >
@@ -540,7 +540,7 @@ export default function ProtocolDashboardPage() {
                 justifyContent: 'space-between',
                 padding: '10px 14px',
                 background: 'rgba(30, 41, 59, 0.4)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 fontSize: '0.85rem',
               }}
             >
@@ -562,7 +562,7 @@ export default function ProtocolDashboardPage() {
                 justifyContent: 'space-between',
                 padding: '10px 14px',
                 background: 'rgba(30, 41, 59, 0.4)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 fontSize: '0.85rem',
               }}
             >
@@ -584,7 +584,7 @@ export default function ProtocolDashboardPage() {
                 justifyContent: 'space-between',
                 padding: '10px 14px',
                 background: 'rgba(30, 41, 59, 0.4)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 fontSize: '0.85rem',
               }}
             >
@@ -598,7 +598,7 @@ export default function ProtocolDashboardPage() {
           <div
             style={{
               padding: '14px',
-              borderRadius: '10px',
+              borderRadius: 0,
               background: 'rgba(30, 41, 59, 0.4)',
               border: '1px solid rgba(255, 255, 255, 0.05)',
             }}
@@ -634,7 +634,7 @@ export default function ProtocolDashboardPage() {
           style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid var(--glass-border)',
-            borderRadius: '14px',
+            borderRadius: 0,
             padding: '20px',
             display: 'flex',
             flexDirection: 'column',
@@ -658,7 +658,7 @@ export default function ProtocolDashboardPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 background: 'rgba(30, 41, 59, 0.4)',
                 border: '1px solid rgba(59, 130, 246, 0.25)',
                 textDecoration: 'none',
@@ -682,7 +682,7 @@ export default function ProtocolDashboardPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 background: 'rgba(30, 41, 59, 0.4)',
                 border: '1px solid rgba(168, 85, 247, 0.25)',
                 textDecoration: 'none',
@@ -706,7 +706,7 @@ export default function ProtocolDashboardPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 background: 'rgba(30, 41, 59, 0.4)',
                 border: '1px solid rgba(239, 68, 68, 0.25)',
                 textDecoration: 'none',
@@ -730,7 +730,7 @@ export default function ProtocolDashboardPage() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '14px',
-                borderRadius: '10px',
+                borderRadius: 0,
                 background: 'rgba(30, 41, 59, 0.4)',
                 border: '1px solid rgba(34, 197, 94, 0.25)',
                 textDecoration: 'none',

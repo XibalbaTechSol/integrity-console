@@ -141,7 +141,7 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
     <div role="dialog" aria-modal="true" aria-label="Register agent" onClick={onClose}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 'var(--space-4)' }}>
       <div onClick={(e) => e.stopPropagation()}
-        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-6)', width: 'min(560px, 96vw)', maxHeight: '92vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', borderRadius: 0, padding: 'var(--space-6)', width: 'min(560px, 96vw)', maxHeight: '92vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>Register agent</h2>
           <button type="button" onClick={onClose} aria-label="Close" style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
@@ -195,8 +195,8 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
           {STEPS.map((s) => {
             const st = stepState(s.n, s.done);
             return (
-              <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
-                <span style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', background: st === 'done' ? 'var(--success)' : 'rgba(255,255,255,0.08)', color: st === 'done' ? '#001b0e' : 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700 }}>
+              <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', padding: 'var(--space-3)', borderRadius: 0, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)' }}>
+                <span style={{ width: 22, height: 22, borderRadius: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', background: st === 'done' ? 'var(--success)' : 'rgba(255,255,255,0.08)', color: st === 'done' ? '#001b0e' : 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 700 }}>
                   {st === 'busy' ? <Loader2 size={13} className="animate-spin" /> : st === 'done' ? <Check size={13} /> : s.n}
                 </span>
                 <span style={{ flex: 1, fontSize: '0.85rem', fontWeight: 600 }}>{s.label}</span>
@@ -220,7 +220,7 @@ export function RegisterAgentModal({ onClose, onSuccess }: Props) {
         )}
 
         {error && (
-          <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--danger)', background: 'var(--danger-dim)', padding: 'var(--space-2) var(--space-3)', borderRadius: 'var(--radius-sm)' }}>
+          <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--danger)', background: 'var(--danger-dim)', padding: 'var(--space-2) var(--space-3)', borderRadius: 0 }}>
             {error}
           </div>
         )}

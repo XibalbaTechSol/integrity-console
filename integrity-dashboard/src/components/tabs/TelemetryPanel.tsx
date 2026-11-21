@@ -11,7 +11,7 @@ export function TelemetryPanel() {
           position: 'absolute', inset: 0, opacity: 0.1, pointerEvents: 'none',
           backgroundImage: 'linear-gradient(rgba(66, 214, 139, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(66, 214, 139, 0.5) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
-          borderRadius: 'var(--radius)'
+          borderRadius: 0
       }} />
       
       <div style={{ margin: '0 auto', position: 'relative', zIndex: 1 }}>
@@ -21,7 +21,7 @@ export function TelemetryPanel() {
           </div>
 
           <div style={{ marginTop: '40px' }}>
-              <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 'var(--radius)', border: '1px solid rgba(255,255,255,0.05)', height: isMobile ? '600px' : '700px', overflow: 'hidden', padding: 0, boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+              <div style={{ background: 'rgba(0,0,0,0.4)', borderRadius: 0, border: '1px solid rgba(255,255,255,0.05)', height: isMobile ? '600px' : '700px', overflow: 'hidden', padding: 0, boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
                   <TelemetryStream />
               </div>
           </div>

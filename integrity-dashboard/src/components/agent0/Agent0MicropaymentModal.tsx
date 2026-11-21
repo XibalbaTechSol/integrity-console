@@ -43,7 +43,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
       <div className="modal-content" style={{
         background: 'var(--surface-color, #121316)',
         border: '1px solid var(--border-color, #2a2d35)',
-        borderRadius: '12px', width: '100%', maxWidth: '520px',
+        borderRadius: 0, width: '100%', maxWidth: '520px',
         padding: '2rem', color: 'var(--text-primary, #fff)', position: 'relative'
       }}>
         <button
@@ -61,7 +61,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{
-            padding: '0.6rem', borderRadius: '8px',
+            padding: '0.6rem', borderRadius: 0,
             background: 'rgba(0, 229, 255, 0.1)', color: 'var(--accent-color, #00e5ff)'
           }}>
             <DollarSign size={24} />
@@ -89,7 +89,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 className="secondary-button"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.55rem 1rem', borderRadius: '6px', textDecoration: 'none'
+                  padding: '0.55rem 1rem', borderRadius: 0, textDecoration: 'none'
                 }}
               >
                 <span>View Receipt</span> <ExternalLink size={13} />
@@ -98,7 +98,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 type="button"
                 className="primary-button"
                 onClick={onClose}
-                style={{ padding: '0.55rem 1rem', borderRadius: '6px' }}
+                style={{ padding: '0.55rem 1rem', borderRadius: 0 }}
               >
                 Close
               </button>
@@ -117,7 +117,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="0x..."
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.85rem', fontFamily: 'monospace'
                 }}
@@ -141,7 +141,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -151,7 +151,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
             {error && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)',
+                padding: '0.75rem', borderRadius: 0, background: 'rgba(239, 68, 68, 0.1)',
                 color: '#ef4444', fontSize: '0.85rem'
               }}>
                 <AlertTriangle size={16} />
@@ -165,7 +165,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 className="secondary-button"
                 onClick={onClose}
                 disabled={loading}
-                style={{ padding: '0.65rem 1.25rem', borderRadius: '6px' }}
+                style={{ padding: '0.65rem 1.25rem', borderRadius: 0 }}
               >
                 Cancel
               </button>
@@ -174,7 +174,7 @@ export function Agent0MicropaymentModal({ isOpen, onClose, targetAgent }: Props)
                 className="primary-button"
                 disabled={loading}
                 style={{
-                  padding: '0.65rem 1.25rem', borderRadius: '6px',
+                  padding: '0.65rem 1.25rem', borderRadius: 0,
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}
               >

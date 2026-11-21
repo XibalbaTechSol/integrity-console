@@ -49,7 +49,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
       <div className="modal-content" style={{
         background: 'var(--surface-color, #121316)',
         border: '1px solid var(--border-color, #2a2d35)',
-        borderRadius: '12px', width: '100%', maxWidth: '600px',
+        borderRadius: 0, width: '100%', maxWidth: '600px',
         maxHeight: '90vh', overflowY: 'auto', padding: '2rem',
         color: 'var(--text-primary, #fff)', position: 'relative'
       }}>
@@ -68,7 +68,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div style={{
-            padding: '0.6rem', borderRadius: '8px',
+            padding: '0.6rem', borderRadius: 0,
             background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8'
           }}>
             <Cpu size={24} />
@@ -84,7 +84,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
         {targetAgent && (
           <div style={{
             padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)',
-            borderRadius: '6px', border: '1px solid var(--border-color, #333)',
+            borderRadius: 0, border: '1px solid var(--border-color, #333)',
             marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
             <div>
@@ -102,7 +102,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{
               padding: '1rem', background: 'rgba(16, 185, 129, 0.08)',
-              border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px'
+              border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: 0
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: '#10b981' }}>
                 <CheckCircle2 size={18} />
@@ -115,7 +115,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
 
             {/* Terminal Trace */}
             <div style={{
-              background: '#090a0d', border: '1px solid #222', borderRadius: '8px',
+              background: '#090a0d', border: '1px solid #222', borderRadius: 0,
               padding: '1rem', fontFamily: 'monospace', fontSize: '0.78rem', color: '#888'
             }}>
               <div style={{ color: '#00e5ff', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -133,7 +133,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 type="button"
                 className="primary-button"
                 onClick={() => setReceipt(null)}
-                style={{ padding: '0.6rem 1.2rem', borderRadius: '6px' }}
+                style={{ padding: '0.6rem 1.2rem', borderRadius: 0 }}
               >
                 Dispatch Another Task
               </button>
@@ -141,7 +141,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 type="button"
                 className="secondary-button"
                 onClick={onClose}
-                style={{ padding: '0.6rem 1.2rem', borderRadius: '6px' }}
+                style={{ padding: '0.6rem 1.2rem', borderRadius: 0 }}
               >
                 Close
               </button>
@@ -157,7 +157,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 value={taskType}
                 onChange={(e) => setTaskType(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -179,7 +179,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -197,7 +197,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 value={escrowEth}
                 onChange={(e) => setEscrowEth(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -210,7 +210,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
             {error && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)',
+                padding: '0.75rem', borderRadius: 0, background: 'rgba(239, 68, 68, 0.1)',
                 color: '#ef4444', fontSize: '0.85rem'
               }}>
                 <AlertCircle size={16} />
@@ -224,7 +224,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 className="secondary-button"
                 onClick={onClose}
                 disabled={loading}
-                style={{ padding: '0.65rem 1.25rem', borderRadius: '6px' }}
+                style={{ padding: '0.65rem 1.25rem', borderRadius: 0 }}
               >
                 Cancel
               </button>
@@ -233,7 +233,7 @@ export function Agent0A2ADispatcher({ isOpen, onClose, targetAgent }: Props) {
                 className="primary-button"
                 disabled={loading}
                 style={{
-                  padding: '0.65rem 1.25rem', borderRadius: '6px',
+                  padding: '0.65rem 1.25rem', borderRadius: 0,
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}
               >

@@ -126,7 +126,7 @@ export default function SettingsPage() {
                 type="text" 
                 value={appName} 
                 onChange={e => updateSettings({ appName: e.target.value })}
-                style={{ width: '100%', padding: '1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
+                style={{ width: '100%', padding: '1rem', borderRadius: 0, border: '1px solid var(--border-color)', background: 'var(--bg-color)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
               />
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>This title appears in headers and notifications.</p>
             </div>
@@ -184,11 +184,11 @@ export default function SettingsPage() {
             <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Developer API Keys</h3>
 
             {!apiKeysAuthed ? (
-              <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius)', color: 'var(--text-secondary)' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--border-color)', borderRadius: 0, color: 'var(--text-secondary)' }}>
                 Sign in to manage real userapi-issued API keys.
               </div>
             ) : (
-              <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ background: 'var(--bg-color)', padding: '1.5rem', borderRadius: 0, border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <h4 style={{ margin: 0 }}>Create New Key</h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
                   Keys are issued by userapi with a fixed AIS trust ceiling — there's no per-key name or scoped permissions on the backend yet.
@@ -201,12 +201,12 @@ export default function SettingsPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <h4 style={{ margin: 0 }}>Active Keys</h4>
               {apiKeys.length === 0 ? (
-                <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius)', color: 'var(--text-secondary)' }}>
+                <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--border-color)', borderRadius: 0, color: 'var(--text-secondary)' }}>
                   No API keys generated yet.
                 </div>
               ) : (
                 apiKeys.map(key => (
-                  <div key={key.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius)', background: 'var(--bg-color)' }}>
+                  <div key={key.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 0, background: 'var(--bg-color)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                       <div>
                         <strong style={{ fontSize: '1.1rem', fontFamily: 'monospace' }}>{key.id}</strong>
@@ -224,7 +224,7 @@ export default function SettingsPage() {
                     </div>
 
                     {key.rawKey && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-color)', padding: '0.5rem 1rem', borderRadius: 'var(--radius)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--surface-color)', padding: '0.5rem 1rem', borderRadius: 0, border: '1px solid var(--border-color)' }}>
                         <code style={{ flex: 1, fontFamily: 'monospace' }}>{key.rawKey}</code>
                         <button onClick={() => handleCopy(key.rawKey!)} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Copy">
                           {copiedKey === key.rawKey ? <CheckCircle size={16} color="var(--success)" /> : <Copy size={16} />}

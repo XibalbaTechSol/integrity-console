@@ -81,7 +81,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
 
   if (error) {
     return (
-      <div className="rounded-lg border border-rose-900/40 bg-rose-950/20 p-4 text-xs font-mono text-rose-300">
+      <div className="border border-rose-900/40 bg-rose-950/20 p-4 text-xs font-mono text-rose-300">
         <div>Failed to render diagram: {error}</div>
         <pre className="mt-2 overflow-x-auto text-[11px] text-slate-400">{source}</pre>
       </div>
@@ -89,7 +89,7 @@ export const MermaidDiagram: React.FC<MermaidDiagramProps> = ({
   }
 
   return (
-    <div className={`overflow-x-auto rounded-lg border border-slate-800/80 bg-slate-950/70 p-5 ${className}`}>
+    <div className={`overflow-x-auto border border-slate-800/80 bg-slate-950/70 p-5 ${className}`}>
       {title && (
         <div className="mb-1 text-sm font-semibold text-white">
           {title}

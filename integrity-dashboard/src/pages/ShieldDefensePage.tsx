@@ -289,7 +289,7 @@ export function ShieldDefensePage() {
       <div style={{
         background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.06) 100%)',
         border: '1px solid rgba(16, 185, 129, 0.25)',
-        borderRadius: '16px',
+        borderRadius: 0,
         padding: '2.25rem',
         display: 'flex',
         flexDirection: 'column',
@@ -304,7 +304,7 @@ export function ShieldDefensePage() {
                 background: 'rgba(16, 185, 129, 0.15)',
                 color: '#34d399',
                 padding: '0.2rem 0.65rem',
-                borderRadius: '4px',
+                borderRadius: 0,
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
@@ -333,7 +333,7 @@ export function ShieldDefensePage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1.1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'linear-gradient(135deg, #10b981, #059669)',
                 color: '#ffffff',
                 fontWeight: 700,
@@ -359,7 +359,7 @@ export function ShieldDefensePage() {
           <div>
             <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Shield Control Plane</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: health?.ok ? '#34d399' : '#f87171' }} />
+              <span style={{ width: '8px', height: '8px', borderRadius: 0, background: health?.ok ? '#34d399' : '#f87171' }} />
               <strong style={{ color: '#f8fafc', fontSize: '0.88rem' }}>127.0.0.1:8435</strong>
             </div>
           </div>
@@ -402,7 +402,7 @@ export function ShieldDefensePage() {
             background: activeTab === 'fleet' ? 'rgba(16, 185, 129, 0.15)' : 'transparent',
             color: activeTab === 'fleet' ? '#34d399' : '#94a3b8',
             border: activeTab === 'fleet' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid transparent',
-            borderRadius: '8px',
+            borderRadius: 0,
             padding: '0.55rem 1rem',
             fontSize: '0.88rem',
             fontWeight: 700,
@@ -421,7 +421,7 @@ export function ShieldDefensePage() {
             background: activeTab === 'policies' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
             color: activeTab === 'policies' ? '#38bdf8' : '#94a3b8',
             border: activeTab === 'policies' ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid transparent',
-            borderRadius: '8px',
+            borderRadius: 0,
             padding: '0.55rem 1rem',
             fontSize: '0.88rem',
             fontWeight: 700,
@@ -440,7 +440,7 @@ export function ShieldDefensePage() {
             background: activeTab === 'telemetry' ? 'rgba(192, 132, 252, 0.15)' : 'transparent',
             color: activeTab === 'telemetry' ? '#c084fc' : '#94a3b8',
             border: activeTab === 'telemetry' ? '1px solid rgba(192, 132, 252, 0.3)' : '1px solid transparent',
-            borderRadius: '8px',
+            borderRadius: 0,
             padding: '0.55rem 1rem',
             fontSize: '0.88rem',
             fontWeight: 700,
@@ -459,7 +459,7 @@ export function ShieldDefensePage() {
             background: activeTab === 'bcc-gate' ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
             color: activeTab === 'bcc-gate' ? '#fbbf24' : '#94a3b8',
             border: activeTab === 'bcc-gate' ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid transparent',
-            borderRadius: '8px',
+            borderRadius: 0,
             padding: '0.55rem 1rem',
             fontSize: '0.88rem',
             fontWeight: 700,
@@ -482,7 +482,7 @@ export function ShieldDefensePage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(16, 185, 129, 0.25)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.75rem',
               display: 'flex',
               flexDirection: 'column',
@@ -493,7 +493,7 @@ export function ShieldDefensePage() {
                   <div style={{
                     width: '44px',
                     height: '44px',
-                    borderRadius: '10px',
+                    borderRadius: 0,
                     background: 'linear-gradient(135deg, #10b981, #059669)',
                     display: 'flex',
                     alignItems: 'center',
@@ -509,7 +509,7 @@ export function ShieldDefensePage() {
                     <div style={{ fontSize: '0.78rem', color: '#34d399' }}>{SHIELD_AGENT0_PAIR.local.harness}</div>
                   </div>
                 </div>
-                <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 0 }}>
                   EDGE DAEMON · TIER 0
                 </span>
               </div>
@@ -518,7 +518,7 @@ export function ShieldDefensePage() {
                 {SHIELD_AGENT0_PAIR.local.role}. Runs directly on the protected host, monitoring kernel eBPF tracepoints and executing immediate <code>freeze_process</code> containment when anomalous execution or socket activity is detected.
               </p>
 
-              <div style={{ background: 'rgba(0, 0, 0, 0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+              <div style={{ background: 'rgba(0, 0, 0, 0.3)', borderRadius: 0, padding: '0.75rem 1rem', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#64748b' }}>Ed25519 DID:</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -550,7 +550,7 @@ export function ShieldDefensePage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(6, 182, 212, 0.25)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.75rem',
               display: 'flex',
               flexDirection: 'column',
@@ -561,7 +561,7 @@ export function ShieldDefensePage() {
                   <div style={{
                     width: '44px',
                     height: '44px',
-                    borderRadius: '10px',
+                    borderRadius: 0,
                     background: 'linear-gradient(135deg, #06b6d4, #0284c7)',
                     display: 'flex',
                     alignItems: 'center',
@@ -577,7 +577,7 @@ export function ShieldDefensePage() {
                     <div style={{ fontSize: '0.78rem', color: '#38bdf8' }}>{SHIELD_AGENT0_PAIR.cloud.harness}</div>
                   </div>
                 </div>
-                <span style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: '4px' }}>
+                <span style={{ background: 'rgba(6, 182, 212, 0.15)', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 0 }}>
                   FLEET COORDINATOR · TIER 1
                 </span>
               </div>
@@ -586,7 +586,7 @@ export function ShieldDefensePage() {
                 {SHIELD_AGENT0_PAIR.cloud.role}. Centralizes cross-endpoint telemetry aggregation, authors and signs OPA canary policy updates, and distributes threat intelligence down to all enrolled edge nodes.
               </p>
 
-              <div style={{ background: 'rgba(0, 0, 0, 0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+              <div style={{ background: 'rgba(0, 0, 0, 0.3)', borderRadius: 0, padding: '0.75rem 1rem', fontSize: '0.78rem', display: 'flex', flexDirection: 'column', gap: '0.45rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#64748b' }}>Ed25519 DID:</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -619,7 +619,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.06) 100%)',
             border: '1px solid rgba(16, 185, 129, 0.25)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.25rem 1.5rem',
             display: 'flex',
             alignItems: 'center',
@@ -631,7 +631,7 @@ export function ShieldDefensePage() {
               <div style={{
                 width: '10px',
                 height: '10px',
-                borderRadius: '50%',
+                borderRadius: 0,
                 background: '#34d399',
                 boxShadow: '0 0 10px #34d399'
               }} />
@@ -646,10 +646,10 @@ export function ShieldDefensePage() {
             </div>
 
             <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.72rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.12)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.72rem', color: '#34d399', background: 'rgba(16, 185, 129, 0.12)', padding: '0.25rem 0.6rem', borderRadius: 0, fontWeight: 700 }}>
                 MUTUAL AUTH: VERIFIED
               </span>
-              <span style={{ fontSize: '0.72rem', color: '#38bdf8', background: 'rgba(6, 182, 212, 0.12)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.72rem', color: '#38bdf8', background: 'rgba(6, 182, 212, 0.12)', padding: '0.25rem 0.6rem', borderRadius: 0, fontWeight: 700 }}>
                 ZERO MASTER KEYS
               </span>
             </div>
@@ -668,7 +668,7 @@ export function ShieldDefensePage() {
                 <RefreshCw size={20} className="spin" />
               </div>
             ) : devices.length === 0 ? (
-              <div style={{ padding: '2.5rem', textAlign: 'center', color: '#64748b', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+              <div style={{ padding: '2.5rem', textAlign: 'center', color: '#64748b', background: 'rgba(15, 23, 42, 0.4)', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 No devices currently enrolled under tenant <code>{tenantId}</code>.
               </div>
             ) : (
@@ -679,7 +679,7 @@ export function ShieldDefensePage() {
                     style={{
                       background: 'rgba(15, 23, 42, 0.6)',
                       border: '1px solid rgba(255, 255, 255, 0.08)',
-                      borderRadius: '12px',
+                      borderRadius: 0,
                       padding: '1.25rem',
                       display: 'flex',
                       flexDirection: 'column',
@@ -699,26 +699,26 @@ export function ShieldDefensePage() {
                         fontSize: '0.72rem',
                         fontWeight: 600,
                         padding: '0.2rem 0.5rem',
-                        borderRadius: '4px'
+                        borderRadius: 0
                       }}>
                         {device.agent_label || 'shield.local'}
                       </span>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.78rem' }}>
-                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '6px' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: 0 }}>
                         <span style={{ color: '#64748b', display: 'block' }}>eBPF Sensors</span>
                         <strong style={{ color: '#38bdf8' }}>execve + connect</strong>
                       </div>
-                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '6px' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: 0 }}>
                         <span style={{ color: '#64748b', display: 'block' }}>OPA Policy Gate</span>
                         <strong style={{ color: '#34d399' }}>Active :8181</strong>
                       </div>
-                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '6px' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: 0 }}>
                         <span style={{ color: '#64748b', display: 'block' }}>Containment Engine</span>
                         <strong style={{ color: '#f8fafc' }}>freeze_process</strong>
                       </div>
-                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: '6px' }}>
+                      <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.5rem', borderRadius: 0 }}>
                         <span style={{ color: '#64748b', display: 'block' }}>Active Policy</span>
                         <strong style={{ color: '#94a3b8' }}>
                           {device.policy_version || 'v1.0.0'}
@@ -740,7 +740,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid rgba(56, 189, 248, 0.25)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',
@@ -767,7 +767,7 @@ export function ShieldDefensePage() {
                   background: 'rgba(56, 189, 248, 0.15)',
                   color: '#38bdf8',
                   padding: '0.25rem 0.65rem',
-                  borderRadius: '4px',
+                  borderRadius: 0,
                   fontSize: '0.75rem',
                   fontWeight: 700
                 }}>
@@ -781,7 +781,7 @@ export function ShieldDefensePage() {
 
             <div style={{
               background: 'rgba(0, 0, 0, 0.3)',
-              borderRadius: '8px',
+              borderRadius: 0,
               padding: '1rem',
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -814,7 +814,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',
@@ -831,14 +831,14 @@ export function ShieldDefensePage() {
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: '6px', padding: '0.15rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.3)', borderRadius: 0, padding: '0.15rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <button
                     onClick={() => setEditorMode('rego')}
                     style={{
                       background: editorMode === 'rego' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
                       color: editorMode === 'rego' ? '#38bdf8' : '#94a3b8',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: 0,
                       padding: '0.3rem 0.6rem',
                       fontSize: '0.78rem',
                       fontWeight: 600,
@@ -853,7 +853,7 @@ export function ShieldDefensePage() {
                       background: editorMode === 'json' ? 'rgba(56, 189, 248, 0.2)' : 'transparent',
                       color: editorMode === 'json' ? '#38bdf8' : '#94a3b8',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: 0,
                       padding: '0.3rem 0.6rem',
                       fontSize: '0.78rem',
                       fontWeight: 600,
@@ -871,7 +871,7 @@ export function ShieldDefensePage() {
                     background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: 0,
                     padding: '0.5rem 1rem',
                     fontSize: '0.82rem',
                     fontWeight: 700,
@@ -892,7 +892,7 @@ export function ShieldDefensePage() {
               <div style={{
                 background: deployFeedback.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
                 border: deployFeedback.type === 'success' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 padding: '0.75rem 1rem',
                 fontSize: '0.85rem',
                 color: deployFeedback.type === 'success' ? '#34d399' : '#f87171',
@@ -916,7 +916,7 @@ export function ShieldDefensePage() {
                   minHeight: '340px',
                   background: 'rgba(5, 10, 20, 0.75)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '8px',
+                  borderRadius: 0,
                   color: '#e2e8f0',
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                   fontSize: '0.85rem',
@@ -933,7 +933,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',
@@ -949,7 +949,7 @@ export function ShieldDefensePage() {
             </div>
 
             {policyHistory.length === 0 ? (
-              <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+              <div style={{ padding: '1.5rem', textAlign: 'center', color: '#64748b', background: 'rgba(0,0,0,0.2)', borderRadius: 0 }}>
                 No earlier revisions recorded yet. Revisions are tracked automatically whenever a policy pack is deployed.
               </div>
             ) : (
@@ -960,7 +960,7 @@ export function ShieldDefensePage() {
                     style={{
                       background: 'rgba(0,0,0,0.25)',
                       border: '1px solid rgba(255,255,255,0.05)',
-                      borderRadius: '8px',
+                      borderRadius: 0,
                       padding: '0.75rem 1rem',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -986,7 +986,7 @@ export function ShieldDefensePage() {
                         background: 'rgba(245, 158, 11, 0.15)',
                         color: '#fbbf24',
                         border: '1px solid rgba(245, 158, 11, 0.3)',
-                        borderRadius: '6px',
+                        borderRadius: 0,
                         padding: '0.35rem 0.75rem',
                         fontSize: '0.75rem',
                         fontWeight: 600,
@@ -1008,7 +1008,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',
@@ -1031,7 +1031,7 @@ export function ShieldDefensePage() {
                     width: '100%',
                     background: 'rgba(0,0,0,0.3)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '6px',
+                    borderRadius: 0,
                     color: '#f8fafc',
                     padding: '0.55rem',
                     fontSize: '0.82rem'
@@ -1054,7 +1054,7 @@ export function ShieldDefensePage() {
                     width: '100%',
                     background: 'rgba(0,0,0,0.3)',
                     border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '6px',
+                    borderRadius: 0,
                     color: '#f8fafc',
                     padding: '0.55rem',
                     fontSize: '0.82rem',
@@ -1074,7 +1074,7 @@ export function ShieldDefensePage() {
                       width: '100%',
                       background: 'rgba(0,0,0,0.3)',
                       border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '6px',
+                      borderRadius: 0,
                       color: '#f8fafc',
                       padding: '0.55rem',
                       fontSize: '0.82rem'
@@ -1091,7 +1091,7 @@ export function ShieldDefensePage() {
                     background: 'linear-gradient(135deg, #10b981, #059669)',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: 0,
                     padding: '0.6rem 1rem',
                     fontSize: '0.82rem',
                     fontWeight: 700,
@@ -1111,7 +1111,7 @@ export function ShieldDefensePage() {
               <div style={{
                 background: dryRunResult.allowed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                 border: dryRunResult.allowed ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '8px',
+                borderRadius: 0,
                 padding: '1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -1138,7 +1138,7 @@ export function ShieldDefensePage() {
                     background: dryRunResult.allowed ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
                     color: dryRunResult.allowed ? '#34d399' : '#f87171',
                     padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
+                    borderRadius: 0,
                     fontSize: '0.75rem',
                     fontWeight: 700,
                     fontFamily: 'monospace'
@@ -1160,7 +1160,7 @@ export function ShieldDefensePage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.5rem',
               display: 'flex',
               flexDirection: 'column',
@@ -1168,7 +1168,7 @@ export function ShieldDefensePage() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <strong style={{ color: '#f8fafc', fontSize: '1rem' }}>sys_enter_execve Sensor</strong>
-                <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                <span style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.5rem', borderRadius: 0 }}>
                   eBPF Hook Attached
                 </span>
               </div>
@@ -1180,7 +1180,7 @@ export function ShieldDefensePage() {
             <div style={{
               background: 'rgba(15, 23, 42, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: '12px',
+              borderRadius: 0,
               padding: '1.5rem',
               display: 'flex',
               flexDirection: 'column',
@@ -1188,7 +1188,7 @@ export function ShieldDefensePage() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <strong style={{ color: '#f8fafc', fontSize: '1rem' }}>sys_enter_connect Sensor</strong>
-                <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                <span style={{ background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.5rem', borderRadius: 0 }}>
                   Socket Egress Guard
                 </span>
               </div>
@@ -1202,7 +1202,7 @@ export function ShieldDefensePage() {
           <div style={{
             background: 'rgba(15, 23, 42, 0.6)',
             border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '12px',
+            borderRadius: 0,
             padding: '1.75rem',
             display: 'flex',
             flexDirection: 'column',
@@ -1216,7 +1216,7 @@ export function ShieldDefensePage() {
             </p>
 
             {enforcements.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b', background: 'rgba(0,0,0,0.2)', borderRadius: 0 }}>
                 No containment violations recorded. All active agent processes are conforming strictly to policy boundaries.
               </div>
             ) : (
@@ -1226,7 +1226,7 @@ export function ShieldDefensePage() {
                     key={idx}
                     style={{
                       background: 'rgba(0,0,0,0.3)',
-                      borderRadius: '8px',
+                      borderRadius: 0,
                       padding: '0.75rem 1rem',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -1245,7 +1245,7 @@ export function ShieldDefensePage() {
                       color: outcome.outcome.completed ? '#34d399' : '#f87171',
                       fontSize: '0.75rem',
                       padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
+                      borderRadius: 0,
                       fontWeight: 600
                     }}>
                       {outcome.outcome.completed ? 'CONTAINED' : 'PENDING'}
@@ -1263,7 +1263,7 @@ export function ShieldDefensePage() {
         <div style={{
           background: 'rgba(15, 23, 42, 0.6)',
           border: '1px solid rgba(255, 255, 255, 0.08)',
-          borderRadius: '12px',
+          borderRadius: 0,
           padding: '1.75rem',
           display: 'flex',
           flexDirection: 'column',
@@ -1278,7 +1278,7 @@ export function ShieldDefensePage() {
                 Autonomous agents authorized to pass boundary cross-check middleware (port 8000).
               </p>
             </div>
-            <span style={{ fontSize: '0.75rem', color: '#fbbf24', background: 'rgba(245, 158, 11, 0.12)', padding: '0.25rem 0.6rem', borderRadius: '4px', fontWeight: 700 }}>
+            <span style={{ fontSize: '0.75rem', color: '#fbbf24', background: 'rgba(245, 158, 11, 0.12)', padding: '0.25rem 0.6rem', borderRadius: 0, fontWeight: 700 }}>
               {allowlist.length} Authorized Entities
             </span>
           </div>
@@ -1296,7 +1296,7 @@ export function ShieldDefensePage() {
                     background: 'rgba(245, 158, 11, 0.12)',
                     color: '#fbbf24',
                     padding: '0.35rem 0.75rem',
-                    borderRadius: '6px',
+                    borderRadius: 0,
                     fontSize: '0.82rem',
                     fontFamily: 'monospace',
                     border: '1px solid rgba(245, 158, 11, 0.25)'

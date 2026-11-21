@@ -187,7 +187,7 @@ export function VerificationPanel() {
                     </div>
 
                     {challenge && (
-                        <div style={{ background: 'var(--bg-primary)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
+                        <div style={{ background: 'var(--bg-primary)', padding: 'var(--space-3)', borderRadius: 0, border: '1px solid var(--glass-border)' }}>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '6px' }}>Nonce</div>
                             <div className="mono" style={{ fontSize: '0.8rem', wordBreak: 'break-all' }}>{challenge.nonce}</div>
                             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '10px 0 6px' }}>Signed message format</div>

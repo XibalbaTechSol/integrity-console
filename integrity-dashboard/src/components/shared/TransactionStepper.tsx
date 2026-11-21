@@ -13,7 +13,7 @@ interface TransactionStepperProps {
 
 export function TransactionStepper({ steps, title }: TransactionStepperProps) {
   return (
-    <div className="flex-col gap-4" style={{ padding: 'var(--space-4)', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--glass-border)' }}>
+    <div className="flex-col gap-4" style={{ padding: 'var(--space-4)', background: 'rgba(0,0,0,0.2)', borderRadius: 0, border: '1px solid var(--glass-border)' }}>
       {title && <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--primary)', marginBottom: 'var(--space-2)' }}>{title}</div>}
       <div className="flex-col gap-3">
         {steps.map((step, i) => (

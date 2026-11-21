@@ -30,7 +30,7 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
   return (
     <section
       aria-label="AIS Closed-Loop Control and Reward Telemetry"
-      className="rounded-xl border border-slate-800 bg-slate-950/90 p-5 text-slate-100 shadow-lg"
+      className="border border-slate-800 bg-slate-950/90 p-5 text-slate-100 shadow-lg"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
@@ -42,39 +42,39 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
           </h3>
         </div>
         <span
-          className={`rounded-full border px-3 py-1 text-xs font-mono font-semibold ${badgeColors[view.zoneSeverity]}`}
+          className={`border px-3 py-1 text-xs font-mono font-semibold ${badgeColors[view.zoneSeverity]}`}
         >
           {view.zoneBadgeLabel}
         </span>
       </div>
 
       {!view.isVerified || !data ? (
-        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-300">
+        <div className="mt-4 border border-slate-800 bg-slate-900/60 p-4 text-sm text-slate-300">
           <p className="font-mono text-xs text-amber-300">{view.equationSummary}</p>
           <p className="mt-1 text-xs text-slate-400">{view.authorityNotice}</p>
         </div>
       ) : (
         <div className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+            <div className="border border-slate-800 bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Entropy (S_E)</div>
               <div className="mt-1 font-mono text-base font-bold text-white">
                 {data.axes.sEntropy.toFixed(0)}
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+            <div className="border border-slate-800 bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Grounding (S_G)</div>
               <div className="mt-1 font-mono text-base font-bold text-white">
                 {data.axes.sGrounding.toFixed(0)}
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+            <div className="border border-slate-800 bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Contribution (S_S)</div>
               <div className="mt-1 font-mono text-base font-bold text-white">
                 {data.axes.sContribution.toFixed(0)}
               </div>
             </div>
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+            <div className="border border-slate-800 bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Compliance (S_C)</div>
               <div className="mt-1 font-mono text-base font-bold text-white">
                 {data.axes.sCompliance.toFixed(0)}
@@ -82,7 +82,7 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-800 bg-slate-900/80 p-3">
+          <div className="border border-slate-800 bg-slate-900/80 p-3">
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>Oracle-Verified Step Reward Decomposition</span>
               <span className="font-mono text-emerald-400">AIS: {view.displayScore}</span>
@@ -91,7 +91,7 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
               {view.equationSummary}
             </div>
             {data.latestStepReward.gatedByCompliance && (
-              <div className="mt-2 rounded bg-rose-950/70 px-2.5 py-1 text-xs font-mono text-rose-300">
+              <div className="mt-2 bg-rose-950/70 px-2.5 py-1 text-xs font-mono text-rose-300">
                 Task Reward Gated to 0.00 (Policy Pack DENY / Compliance Annihilation)
               </div>
             )}
@@ -103,7 +103,7 @@ export const AISClosedLoopRewardCard: React.FC<AISClosedLoopRewardCardProps> = (
               {data.allowedActions.map((act) => (
                 <span
                   key={act}
-                  className="rounded bg-slate-850 px-2 py-0.5 font-mono text-[11px] text-cyan-300 border border-slate-700/60"
+                  className="bg-slate-850 px-2 py-0.5 font-mono text-[11px] text-cyan-300 border border-slate-700/60"
                 >
                   {act}
                 </span>

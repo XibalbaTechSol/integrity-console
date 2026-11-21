@@ -155,7 +155,7 @@ export function Agent0Explorer() {
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexWrap: 'wrap', gap: '1rem', background: 'var(--surface-color, #121316)',
-        padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border-color, #272a31)'
+        padding: '1.25rem', borderRadius: 0, border: '1px solid var(--border-color, #272a31)'
       }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
@@ -173,7 +173,7 @@ export function Agent0Explorer() {
           className="primary-button"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            padding: '0.65rem 1.15rem', borderRadius: '6px', fontWeight: 600
+            padding: '0.65rem 1.15rem', borderRadius: 0, fontWeight: 600
           }}
         >
           <Plus size={16} />
@@ -201,7 +201,7 @@ export function Agent0Explorer() {
               type="button"
               onClick={() => setSelectedChain(c.id)}
               style={{
-                padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem',
+                padding: '0.35rem 0.75rem', borderRadius: 0, fontSize: '0.78rem',
                 border: selectedChain === c.id ? '1px solid var(--accent-color, #00e5ff)' : '1px solid var(--border-color, #272a31)',
                 background: selectedChain === c.id ? 'rgba(0, 229, 255, 0.12)' : 'var(--surface-color, #121316)',
                 color: selectedChain === c.id ? 'var(--accent-color, #00e5ff)' : 'var(--text-secondary, #888)',
@@ -228,7 +228,7 @@ export function Agent0Explorer() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by agent name, token ID, DID, or wallet..."
               style={{
-                width: '100%', padding: '0.65rem 0.85rem 0.65rem 2.4rem', borderRadius: '6px',
+                width: '100%', padding: '0.65rem 0.85rem 0.65rem 2.4rem', borderRadius: 0,
                 background: 'var(--surface-color, #121316)', border: '1px solid var(--border-color, #2a2d35)',
                 color: '#fff', fontSize: '0.88rem'
               }}
@@ -250,7 +250,7 @@ export function Agent0Explorer() {
                 type="button"
                 onClick={() => setFilter(key)}
                 style={{
-                  padding: '0.45rem 0.85rem', borderRadius: '6px', fontSize: '0.8rem',
+                  padding: '0.45rem 0.85rem', borderRadius: 0, fontSize: '0.8rem',
                   border: filter === key ? '1px solid var(--accent-color, #00e5ff)' : '1px solid var(--border-color, #333)',
                   background: filter === key ? 'rgba(0, 229, 255, 0.1)' : 'var(--surface-color, #121316)',
                   color: filter === key ? 'var(--accent-color, #00e5ff)' : 'var(--text-secondary, #aaa)',
@@ -269,7 +269,7 @@ export function Agent0Explorer() {
         {filteredAgents.length === 0 ? (
           <div style={{
             padding: '3rem 1rem', textAlign: 'center', background: 'var(--surface-color, #121316)',
-            borderRadius: '12px', border: '1px dashed var(--border-color, #333)', color: 'var(--text-secondary, #888)'
+            borderRadius: 0, border: '1px dashed var(--border-color, #333)', color: 'var(--text-secondary, #888)'
           }}>
             <p>No matching Agent0 identities found on selected chain.</p>
             <button

@@ -95,7 +95,7 @@ export function CortexMemoryPage() {
       <div style={{
         background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08) 0%, rgba(99, 102, 241, 0.06) 100%)',
         border: '1px solid rgba(168, 85, 247, 0.25)',
-        borderRadius: '16px',
+        borderRadius: 0,
         padding: '2.25rem',
         display: 'flex',
         flexDirection: 'column',
@@ -110,7 +110,7 @@ export function CortexMemoryPage() {
                 background: 'rgba(168, 85, 247, 0.15)',
                 color: '#c084fc',
                 padding: '0.2rem 0.65rem',
-                borderRadius: '4px',
+                borderRadius: 0,
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 letterSpacing: '0.08em',
@@ -140,7 +140,7 @@ export function CortexMemoryPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1.1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'linear-gradient(135deg, #a855f7, #6366f1)',
                 color: '#ffffff',
                 fontWeight: 700,
@@ -159,7 +159,7 @@ export function CortexMemoryPage() {
                 alignItems: 'center',
                 gap: '0.5rem',
                 padding: '0.65rem 1rem',
-                borderRadius: '8px',
+                borderRadius: 0,
                 background: 'rgba(255, 255, 255, 0.05)',
                 color: '#f8fafc',
                 fontWeight: 600,
@@ -184,7 +184,7 @@ export function CortexMemoryPage() {
           <div>
             <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Service Endpoint</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
-              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: (status?.status === 'ok' || !error) ? '#34d399' : '#f87171' }} />
+              <span style={{ width: '8px', height: '8px', borderRadius: 0, background: (status?.status === 'ok' || !error) ? '#34d399' : '#f87171' }} />
               <strong style={{ color: '#f8fafc', fontSize: '0.88rem' }}>{cortexStudioEndpoint}</strong>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function CortexMemoryPage() {
               Select an isolated agent scope or the shared global knowledge enclave.
             </p>
           </div>
-          <span style={{ fontSize: '0.8rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.1)', padding: '0.25rem 0.6rem', borderRadius: '4px' }}>
+          <span style={{ fontSize: '0.8rem', color: '#a855f7', background: 'rgba(168, 85, 247, 0.1)', padding: '0.25rem 0.6rem', borderRadius: 0 }}>
             {SCOPES.length} Scopes Configured
           </span>
         </div>
@@ -237,7 +237,7 @@ export function CortexMemoryPage() {
                 style={{
                   background: isSelected ? 'rgba(168, 85, 247, 0.12)' : 'rgba(15, 23, 42, 0.6)',
                   border: isSelected ? '1px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '10px',
+                  borderRadius: 0,
                   padding: '1rem',
                   display: 'flex',
                   flexDirection: 'column',
@@ -278,7 +278,7 @@ export function CortexMemoryPage() {
             style={{
               width: '100%',
               padding: '0.75rem 1rem 0.75rem 2.8rem',
-              borderRadius: '8px',
+              borderRadius: 0,
               border: '1px solid rgba(255, 255, 255, 0.12)',
               background: 'rgba(15, 23, 42, 0.8)',
               color: '#f8fafc',
@@ -292,7 +292,7 @@ export function CortexMemoryPage() {
           type="submit"
           style={{
             padding: '0.75rem 1.4rem',
-            borderRadius: '8px',
+            borderRadius: 0,
             background: 'linear-gradient(135deg, #a855f7, #6366f1)',
             color: '#fff',
             fontWeight: 700,
@@ -317,12 +317,12 @@ export function CortexMemoryPage() {
         </div>
 
         {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8', background: 'rgba(15, 23, 42, 0.4)', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <RefreshCw size={24} className="spin" style={{ marginBottom: '0.75rem', color: '#c084fc' }} />
             <p style={{ margin: 0, fontSize: '0.9rem' }}>Retrieving anchored memories from Super-Cortex…</p>
           </div>
         ) : error ? (
-          <div style={{ padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '10px', color: '#fca5a5', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ padding: '1.5rem', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 0, color: '#fca5a5', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <AlertCircle size={20} />
             <div>
               <strong>Super-Cortex Connection:</strong> {error}
@@ -332,7 +332,7 @@ export function CortexMemoryPage() {
             </div>
           </div>
         ) : memories.length === 0 ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b', background: 'rgba(15, 23, 42, 0.4)', borderRadius: 0, border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <Brain size={32} style={{ opacity: 0.4, marginBottom: '0.5rem' }} />
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>No memory propositions matched the active scope filter.</p>
             <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
@@ -353,7 +353,7 @@ export function CortexMemoryPage() {
                   style={{
                     background: 'rgba(15, 23, 42, 0.6)',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '12px',
+                    borderRadius: 0,
                     padding: '1.25rem',
                     display: 'flex',
                     flexDirection: 'column',
@@ -377,7 +377,7 @@ export function CortexMemoryPage() {
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         padding: '0.15rem 0.5rem',
-                        borderRadius: '4px',
+                        borderRadius: 0,
                         letterSpacing: '0.04em'
                       }}>
                         {epistemicClass}
@@ -386,7 +386,7 @@ export function CortexMemoryPage() {
                         {mem.id}
                       </code>
                       {memScope && (
-                        <span style={{ fontSize: '0.72rem', color: '#94a3b8', background: 'rgba(255, 255, 255, 0.05)', padding: '0.1rem 0.4rem', borderRadius: '3px' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#94a3b8', background: 'rgba(255, 255, 255, 0.05)', padding: '0.1rem 0.4rem', borderRadius: 0 }}>
                           {memScope}
                         </span>
                       )}

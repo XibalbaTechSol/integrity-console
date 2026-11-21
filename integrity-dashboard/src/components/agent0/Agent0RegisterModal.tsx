@@ -75,7 +75,7 @@ export function Agent0RegisterModal({
       <div className="modal-content" style={{
         background: 'var(--surface-color, #121316)',
         border: '1px solid var(--border-color, #2a2d35)',
-        borderRadius: '12px', width: '100%', maxWidth: '640px',
+        borderRadius: 0, width: '100%', maxWidth: '640px',
         maxHeight: '90vh', overflowY: 'auto', padding: '2rem',
         color: 'var(--text-primary, #fff)', position: 'relative'
       }}>
@@ -94,7 +94,7 @@ export function Agent0RegisterModal({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
           <div style={{
-            padding: '0.6rem', borderRadius: '8px',
+            padding: '0.6rem', borderRadius: 0,
             background: 'rgba(0, 229, 255, 0.1)', color: 'var(--accent-color, #00e5ff)'
           }}>
             <Globe size={24} />
@@ -122,7 +122,7 @@ export function Agent0RegisterModal({
                 className="secondary-button"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                  padding: '0.6rem 1.2rem', borderRadius: '6px', textDecoration: 'none'
+                  padding: '0.6rem 1.2rem', borderRadius: 0, textDecoration: 'none'
                 }}
               >
                 <span>View on BaseScan</span> <ExternalLink size={14} />
@@ -131,7 +131,7 @@ export function Agent0RegisterModal({
                 type="button"
                 className="primary-button"
                 onClick={onClose}
-                style={{ padding: '0.6rem 1.2rem', borderRadius: '6px' }}
+                style={{ padding: '0.6rem 1.2rem', borderRadius: 0 }}
               >
                 Done
               </button>
@@ -150,7 +150,7 @@ export function Agent0RegisterModal({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Quantitative Market Maker #1"
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -167,7 +167,7 @@ export function Agent0RegisterModal({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                  width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                   background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                   color: '#fff', fontSize: '0.9rem'
                 }}
@@ -185,7 +185,7 @@ export function Agent0RegisterModal({
                   onChange={(e) => setDid(e.target.value)}
                   placeholder="did:integrity:..."
                   style={{
-                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                     background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                     color: '#fff', fontSize: '0.85rem', fontFamily: 'monospace'
                   }}
@@ -202,7 +202,7 @@ export function Agent0RegisterModal({
                   onChange={(e) => setAgentWallet(e.target.value)}
                   placeholder="0x... (actor address)"
                   style={{
-                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                     background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                     color: '#fff', fontSize: '0.85rem', fontFamily: 'monospace'
                   }}
@@ -221,7 +221,7 @@ export function Agent0RegisterModal({
                   onChange={(e) => setMcpEndpoint(e.target.value)}
                   placeholder="https://..."
                   style={{
-                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                     background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                     color: '#fff', fontSize: '0.85rem'
                   }}
@@ -238,7 +238,7 @@ export function Agent0RegisterModal({
                   onChange={(e) => setA2aEndpoint(e.target.value)}
                   placeholder="https://..."
                   style={{
-                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: '6px',
+                    width: '100%', padding: '0.65rem 0.85rem', borderRadius: 0,
                     background: 'var(--bg-color, #0a0b0d)', border: '1px solid var(--border-color, #333)',
                     color: '#fff', fontSize: '0.85rem'
                   }}
@@ -249,7 +249,7 @@ export function Agent0RegisterModal({
             <div style={{
               display: 'flex', alignItems: 'center', gap: '0.75rem',
               padding: '0.85rem', background: 'rgba(255,255,255,0.03)',
-              borderRadius: '6px', border: '1px solid var(--border-color, #333)'
+              borderRadius: 0, border: '1px solid var(--border-color, #333)'
             }}>
               <input
                 type="checkbox"
@@ -269,7 +269,7 @@ export function Agent0RegisterModal({
             {error && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)',
+                padding: '0.75rem', borderRadius: 0, background: 'rgba(239, 68, 68, 0.1)',
                 color: '#ef4444', fontSize: '0.85rem'
               }}>
                 <AlertTriangle size={16} />
@@ -280,7 +280,7 @@ export function Agent0RegisterModal({
             {statusMessage && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem', borderRadius: '6px', background: 'rgba(0, 229, 255, 0.08)',
+                padding: '0.75rem', borderRadius: 0, background: 'rgba(0, 229, 255, 0.08)',
                 color: 'var(--accent-color, #00e5ff)', fontSize: '0.85rem'
               }}>
                 <Loader2 size={16} className="animate-spin" />
@@ -294,7 +294,7 @@ export function Agent0RegisterModal({
                 className="secondary-button"
                 onClick={onClose}
                 disabled={loading}
-                style={{ padding: '0.65rem 1.25rem', borderRadius: '6px' }}
+                style={{ padding: '0.65rem 1.25rem', borderRadius: 0 }}
               >
                 Cancel
               </button>
@@ -303,7 +303,7 @@ export function Agent0RegisterModal({
                 className="primary-button"
                 disabled={loading}
                 style={{
-                  padding: '0.65rem 1.25rem', borderRadius: '6px',
+                  padding: '0.65rem 1.25rem', borderRadius: 0,
                   display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}
               >

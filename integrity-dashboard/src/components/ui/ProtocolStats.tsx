@@ -66,7 +66,7 @@ const StatCard = ({ label, value, icon: Icon, color, trend, subLabel, loading, i
     }}>
         <div className="flex-between mb-4">
             <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>{label}</span>
-            <div style={{ padding: '8px', background: `${color}15`, color: color, borderRadius: 'var(--r-xs)' }}>
+            <div style={{ padding: '8px', background: `${color}15`, color: color, borderRadius: 0 }}>
                 <Icon size={16} />
             </div>
         </div>
