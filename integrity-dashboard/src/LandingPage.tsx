@@ -1094,13 +1094,12 @@ export default function LandingPage() {
             <a href="https://github.com/XibalbaTechSol/integrity-core/blob/main/docs/SPEC.md" target="_blank" rel="noopener noreferrer" className="secondary-button" style={{ padding: '0.9rem 1.4rem', textDecoration: 'none' }}>
               Read {DOCUMENT_AUTHORITY.normative.name}
             </a>
-            <a href="/integrity-protocol-specification-v0.3.pdf" target="_blank" rel="noopener noreferrer" className="secondary-button" style={{ padding: '0.9rem 1.4rem', textDecoration: 'none' }}>
-              Archived {DOCUMENT_AUTHORITY.archivedPdf.version} PDF
+            <a href={DOCUMENT_AUTHORITY.specificationPdf.path} target="_blank" rel="noopener noreferrer" className="secondary-button" style={{ padding: '0.9rem 1.4rem', textDecoration: 'none' }}>
+              Protocol Specification {DOCUMENT_AUTHORITY.specificationPdf.version} (PDF)
             </a>
           </div>
           <p style={{ margin: '1.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-            {DOCUMENT_AUTHORITY.normative.version} is normative · the {DOCUMENT_AUTHORITY.archivedPdf.version} PDF is a
-            superseded archive, kept for reference only
+            {DOCUMENT_AUTHORITY.normative.name} {DOCUMENT_AUTHORITY.normative.version} is normative · {DOCUMENT_AUTHORITY.specificationPdf.name} ({DOCUMENT_AUTHORITY.specificationPdf.version}) matches the canonical specification
           </p>
         </motion.div>
       </section>
